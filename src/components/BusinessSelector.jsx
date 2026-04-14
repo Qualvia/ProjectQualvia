@@ -12,7 +12,7 @@ import { Building2, ChevronDown, Check, Plus } from "lucide-react";
 import CreateBusinessDialog from "./CreateBusinessDialog";
 
 export default function BusinessSelector() {
-  const { businesses, currentBusiness, switchBusiness } = useBusiness();
+  const { businesses, currentBusiness, setCurrentBusiness } = useBusiness();
   const [showCreate, setShowCreate] = useState(false);
 
   if (!currentBusiness) return null;
@@ -31,7 +31,7 @@ export default function BusinessSelector() {
           {businesses.map((biz) => (
             <DropdownMenuItem
               key={biz.id}
-              onClick={() => switchBusiness(biz)}
+              onClick={() => setCurrentBusiness(biz)}
               className="gap-2"
             >
               <Check

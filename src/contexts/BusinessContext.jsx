@@ -6,30 +6,33 @@ const BusinessContext = createContext(null);
 const STORAGE_KEY = "qualvia_active_business_id";
 
 export function BusinessProvider({ children }) {
-  const [businesses, setBusinesses] = useState([]);
-  const [currentBusiness, setCurrentBusiness] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [businesses, setBusinesses] = useState([]);
+  const [currentBusiness, setCurrentBusinessState] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadBusinesses = useCallback(async () => {
     setIsLoading(true);
+
     const me = await base44.auth.me();
     setUser(me);
 
-    const list = await base44.entities.Business.filter({ user_id: me.email });
+    // Cargar solo los negocios donde user_id == ID real del usuario
+    const list = await base44.entities.Business.filter({ user_id: me.id });
     setBusinesses(list);
 
-    // Resolve active business
+    // Resolver negocio activo desde localStorage, validando contra lista real
     const savedId = localStorage.getItem(STORAGE_KEY);
-    const saved = list.find((b) => b.id === savedId);
+    const match = list.find((b) => b.id === savedId);
 
-    if (saved) {
-      setCurrentBusiness(saved);
+    if (match) {
+      setCurrentBusinessState(match);
     } else if (list.length > 0) {
-      setCurrentBusiness(list[0]);
+      // Si el guardado no coincide con ningún negocio del usuario, usar el primero
+      setCurrentBusinessState(list[0]);
       localStorage.setItem(STORAGE_KEY, list[0].id);
     } else {
-      setCurrentBusiness(null);
+      setCurrentBusinessState(null);
       localStorage.removeItem(STORAGE_KEY);
     }
 
@@ -40,21 +43,25 @@ export function BusinessProvider({ children }) {
     loadBusinesses();
   }, [loadBusinesses]);
 
-  const switchBusiness = useCallback((business) => {
-    setCurrentBusiness(business);
-    localStorage.setItem(STORAGE_KEY, business.id);
-  }, []);
+  // Cambiar negocio activo — siempre validado contra la lista del usuario
+  const setCurrentBusiness = useCallback((business) => {
+    const owned = businesses.find((b) => b.id === business.id);
+    if (!owned) return; // ignorar si no pertenece al usuario
+    setCurrentBusinessState(owned);
+    localStorage.setItem(STORAGE_KEY, owned.id);
+  }, [businesses]);
 
   const createBusiness = useCallback(async (name) => {
     const newBiz = await base44.entities.Business.create({
       name,
-      user_id: user.email,
+      user_id: user.id,
     });
     const updated = [...businesses, newBiz];
     setBusinesses(updated);
-    switchBusiness(newBiz);
+    setCurrentBusinessState(newBiz);
+    localStorage.setItem(STORAGE_KEY, newBiz.id);
     return newBiz;
-  }, [user, businesses, switchBusiness]);
+  }, [user, businesses]);
 
   return (
     <BusinessContext.Provider
@@ -62,8 +69,8 @@ export function BusinessProvider({ children }) {
         user,
         businesses,
         currentBusiness,
+        setCurrentBusiness,
         isLoading,
-        switchBusiness,
         createBusiness,
         reloadBusinesses: loadBusinesses,
       }}
@@ -75,8 +82,6 @@ export function BusinessProvider({ children }) {
 
 export function useBusiness() {
   const ctx = useContext(BusinessContext);
-  if (!ctx) {
-    throw new Error("useBusiness must be used within BusinessProvider");
-  }
+  if (!ctx) throw new Error("useBusiness must be used within BusinessProvider");
   return ctx;
 }
