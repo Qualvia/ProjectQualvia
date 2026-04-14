@@ -72,17 +72,42 @@ export default function Onboarding() {
   async function handleFinish() {
     setSaving(true);
     const user = await base44.auth.me();
-    const payload = {
-      ...form,
+
+    // 1. Crear Business con solo los campos mínimos
+    const business = await base44.entities.Business.create({
+      name: form.name,
       user_id: user.id,
       onboarding_completed: true,
+    });
+
+    // 2. Crear BusinessProfile con todos los datos del onboarding
+    await base44.entities.BusinessProfile.create({
+      business_id: business.id,
+      razon_social: form.razon_social,
+      tipo_negocio: form.tipo_negocio,
+      actividad_principal: form.actividad_principal,
+      productos_principales: form.productos_principales,
+      direccion: form.direccion,
+      codigo_postal: form.codigo_postal,
+      ciudad: form.ciudad,
+      comunidad_autonoma: form.comunidad_autonoma,
       num_empleados: form.num_empleados ? Number(form.num_empleados) : undefined,
       superficie: form.superficie ? Number(form.superficie) : undefined,
       capacidad_clientes: form.capacidad_clientes ? Number(form.capacidad_clientes) : undefined,
-    };
-    const created = await base44.entities.Business.create(payload);
-    setBusinesses((prev) => [...prev, created]);
-    setCurrentBusiness(created);
+      cif_nif: form.cif_nif,
+      rgseaa: form.rgseaa,
+      telefono: form.telefono,
+      email_contacto: form.email_contacto,
+      horario_inicio: form.horario_inicio,
+      horario_fin: form.horario_fin,
+      dias_apertura: form.dias_apertura,
+      web: form.web,
+      instagram: form.instagram,
+      facebook: form.facebook,
+    });
+
+    setBusinesses((prev) => [...prev, business]);
+    setCurrentBusiness(business);
     setSaving(false);
     navigate("/");
   }

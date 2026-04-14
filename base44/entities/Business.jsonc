@@ -13,76 +13,51 @@
     "onboarding_completed": {
       "type": "boolean",
       "default": false
-    },
-    "razon_social": {
-      "type": "string"
-    },
-    "tipo_negocio": {
-      "type": "string"
-    },
-    "actividad_principal": {
-      "type": "string"
-    },
-    "productos_principales": {
-      "type": "string"
-    },
-    "direccion": {
-      "type": "string"
-    },
-    "codigo_postal": {
-      "type": "string"
-    },
-    "ciudad": {
-      "type": "string"
-    },
-    "comunidad_autonoma": {
-      "type": "string"
-    },
-    "num_empleados": {
-      "type": "number"
-    },
-    "superficie": {
-      "type": "number"
-    },
-    "capacidad_clientes": {
-      "type": "number"
-    },
-    "cif_nif": {
-      "type": "string"
-    },
-    "rgseaa": {
-      "type": "string"
-    },
-    "telefono": {
-      "type": "string"
-    },
-    "email_contacto": {
-      "type": "string"
-    },
-    "horario_inicio": {
-      "type": "string"
-    },
-    "horario_fin": {
-      "type": "string"
-    },
-    "dias_apertura": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "web": {
-      "type": "string"
-    },
-    "instagram": {
-      "type": "string"
-    },
-    "facebook": {
-      "type": "string"
     }
   },
   "required": [
     "name",
     "user_id"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }
