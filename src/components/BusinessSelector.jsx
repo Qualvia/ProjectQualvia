@@ -19,13 +19,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Building2, ChevronDown, Check, Plus, Trash2 } from "lucide-react";
-import CreateBusinessDialog from "./CreateBusinessDialog";
+import { useNavigate } from "react-router-dom";
 
 export default function BusinessSelector() {
   const { businesses, currentBusiness, setCurrentBusiness, deleteBusiness } = useBusiness();
-  const [showCreate, setShowCreate] = useState(false);
   const [bizToDelete, setBizToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const navigate = useNavigate();
 
   if (!currentBusiness) return null;
 
@@ -77,7 +77,7 @@ export default function BusinessSelector() {
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => setShowCreate(true)}
+            onClick={() => navigate("/onboarding")}
             className="gap-2 text-[#0A3E47] font-medium"
           >
             <Plus className="w-4 h-4" />
@@ -85,8 +85,6 @@ export default function BusinessSelector() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <CreateBusinessDialog open={showCreate} onOpenChange={setShowCreate} />
 
       <AlertDialog open={!!bizToDelete} onOpenChange={(o) => !o && setBizToDelete(null)}>
         <AlertDialogContent>
