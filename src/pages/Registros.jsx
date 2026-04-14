@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import GestionarEquiposDialog from "@/components/GestionarEquiposDialog";
 import {
   Thermometer,
   Droplets,
@@ -34,6 +35,7 @@ const REGISTROS = [
 
 export default function Registros() {
   const [active, setActive] = useState("temperatura");
+  const [showGestionar, setShowGestionar] = useState(false);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
   const ActiveIcon = activeRegistro?.icon;
@@ -49,7 +51,7 @@ export default function Registros() {
           </p>
         </div>
         <div className="flex flex-col gap-2 shrink-0">
-          <Button className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2">
+          <Button className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2" onClick={() => setShowGestionar(true)}>
             <Plus className="w-4 h-4" />
             Gestionar equipos/zonas
           </Button>
@@ -102,6 +104,7 @@ export default function Registros() {
           </div>
         </div>
       )}
+      <GestionarEquiposDialog open={showGestionar} onOpenChange={setShowGestionar} />
     </div>
   );
 }
