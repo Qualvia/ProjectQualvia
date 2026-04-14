@@ -125,7 +125,7 @@ export default function Registros() {
 
           {/* Lista de registros guardados */}
           {active === "temperatura" && (
-            <ListaRegistrosTemperatura key={registroKey} />
+            <ListaRegistrosTemperatura refreshKey={registroKey} />
           )}
         </div>
       )}

@@ -40,6 +40,8 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
           equipo_nombre: e.nombre,
           temperatura: Number(values[e.id].temperatura),
           observaciones: values[e.id].observaciones,
+          temp_min: e.temp_min,
+          temp_max: e.temp_max,
           fecha: new Date().toISOString(),
         })
       )

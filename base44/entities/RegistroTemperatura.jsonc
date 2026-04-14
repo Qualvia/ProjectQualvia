@@ -14,6 +14,12 @@
     "temperatura": {
       "type": "number"
     },
+    "temp_min": {
+      "type": "number"
+    },
+    "temp_max": {
+      "type": "number"
+    },
     "observaciones": {
       "type": "string"
     },
