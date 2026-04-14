@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import GestionarEquiposDialog from "@/components/GestionarEquiposDialog";
+import NuevoRegistroTemperatura from "@/components/NuevoRegistroTemperatura";
+import ListaRegistrosTemperatura from "@/components/ListaRegistrosTemperatura";
 import {
   Thermometer,
   Droplets,
@@ -36,6 +38,8 @@ const REGISTROS = [
 export default function Registros() {
   const [active, setActive] = useState("temperatura");
   const [showGestionar, setShowGestionar] = useState(false);
+  const [showNuevoRegistro, setShowNuevoRegistro] = useState(false);
+  const [registroKey, setRegistroKey] = useState(0);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
   const ActiveIcon = activeRegistro?.icon;
@@ -85,23 +89,44 @@ export default function Registros() {
 
       {/* Panel del registro activo */}
       {activeRegistro && (
-        <div className="bg-secondary rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {ActiveIcon && <ActiveIcon className="w-5 h-5 text-[#0A3E47]" strokeWidth={1.5} />}
-            <span className="font-semibold text-[#0A3E47]">
-              Control de {activeRegistro.label}
-              {active === "temperatura" ? " (°C)" : ""}
-            </span>
+        <div className="space-y-4">
+          <div className="bg-secondary rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              {ActiveIcon && <ActiveIcon className="w-5 h-5 text-[#0A3E47]" strokeWidth={1.5} />}
+              <span className="font-semibold text-[#0A3E47]">
+                Control de {activeRegistro.label}
+                {active === "temperatura" ? " (°C)" : ""}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" className="bg-white">
+                <Settings className="w-4 h-4 text-muted-foreground" />
+              </Button>
+              <Button
+                className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2"
+                onClick={() => setShowNuevoRegistro((v) => !v)}
+              >
+                <Plus className="w-4 h-4" />
+                Nuevo registro
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" className="bg-white">
-              <Settings className="w-4 h-4 text-muted-foreground" />
-            </Button>
-            <Button className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2">
-              <Plus className="w-4 h-4" />
-              Nuevo registro
-            </Button>
-          </div>
+
+          {/* Formulario inline de nuevo registro (solo temperatura por ahora) */}
+          {showNuevoRegistro && active === "temperatura" && (
+            <NuevoRegistroTemperatura
+              onCancel={() => setShowNuevoRegistro(false)}
+              onSaved={() => {
+                setShowNuevoRegistro(false);
+                setRegistroKey((k) => k + 1);
+              }}
+            />
+          )}
+
+          {/* Lista de registros guardados */}
+          {active === "temperatura" && (
+            <ListaRegistrosTemperatura key={registroKey} />
+          )}
         </div>
       )}
       <GestionarEquiposDialog open={showGestionar} onOpenChange={setShowGestionar} />

@@ -1,0 +1,30 @@
+{
+  "name": "RegistroTemperatura",
+  "type": "object",
+  "properties": {
+    "business_id": {
+      "type": "string"
+    },
+    "equipo_id": {
+      "type": "string"
+    },
+    "equipo_nombre": {
+      "type": "string"
+    },
+    "temperatura": {
+      "type": "number"
+    },
+    "observaciones": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "business_id",
+    "equipo_id",
+    "temperatura"
+  ]
+}
