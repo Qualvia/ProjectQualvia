@@ -8,7 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { BusinessProvider } from './contexts/BusinessContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import Registros from './pages/Registros';
+import Registros from './pages/Registros.jsx';
 import Documentos from './pages/Documentos';
 import Checklist from './pages/Checklist';
 import Asistente from './pages/Asistente';
