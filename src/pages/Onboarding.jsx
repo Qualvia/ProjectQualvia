@@ -83,6 +83,7 @@ export default function Onboarding() {
     // 2. Crear BusinessProfile con todos los datos del onboarding
     await base44.entities.BusinessProfile.create({
       business_id: business.id,
+      user_id: user.id,
       razon_social: form.razon_social,
       tipo_negocio: form.tipo_negocio,
       actividad_principal: form.actividad_principal,
