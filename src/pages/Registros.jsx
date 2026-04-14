@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import GestionarEquiposDialog from "@/components/GestionarEquiposDialog";
+import GestionarProveedoresDialog from "@/components/GestionarProveedoresDialog";
 import NuevoRegistroTemperatura from "@/components/NuevoRegistroTemperatura";
 import ListaRegistrosTemperatura from "@/components/ListaRegistrosTemperatura";
 import {
@@ -38,6 +39,7 @@ const REGISTROS = [
 export default function Registros() {
   const [active, setActive] = useState("temperatura");
   const [showGestionar, setShowGestionar] = useState(false);
+  const [showProveedores, setShowProveedores] = useState(false);
   const [showNuevoRegistro, setShowNuevoRegistro] = useState(false);
   const [registroKey, setRegistroKey] = useState(0);
 
@@ -59,7 +61,7 @@ export default function Registros() {
             <Plus className="w-4 h-4" />
             Gestionar equipos/zonas
           </Button>
-          <Button variant="outline" className="border-[#6BB68A] text-[#6BB68A] hover:bg-[#6BB68A]/10 gap-2">
+          <Button variant="outline" className="border-[#6BB68A] text-[#6BB68A] hover:bg-[#6BB68A]/10 gap-2" onClick={() => setShowProveedores(true)}>
             <Plus className="w-4 h-4" />
             Gestionar proveedores
           </Button>
@@ -130,6 +132,7 @@ export default function Registros() {
         </div>
       )}
       <GestionarEquiposDialog open={showGestionar} onOpenChange={setShowGestionar} />
+      <GestionarProveedoresDialog open={showProveedores} onOpenChange={setShowProveedores} />
     </div>
   );
 }

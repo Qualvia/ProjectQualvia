@@ -1,0 +1,43 @@
+{
+  "name": "Proveedor",
+  "type": "object",
+  "properties": {
+    "business_id": {
+      "type": "string"
+    },
+    "nombre": {
+      "type": "string"
+    },
+    "cif_nif": {
+      "type": "string"
+    },
+    "contacto": {
+      "type": "string"
+    },
+    "telefono": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "direccion": {
+      "type": "string"
+    },
+    "productos": {
+      "type": "string"
+    },
+    "registro_sanitario": {
+      "type": "string"
+    },
+    "certificaciones": {
+      "type": "string"
+    },
+    "observaciones": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "business_id",
+    "nombre"
+  ]
+}
