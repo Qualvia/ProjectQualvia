@@ -5,8 +5,14 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import Home from './pages/Home';
 import { BusinessProvider } from './contexts/BusinessContext';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import Registros from './pages/Registros';
+import Documentos from './pages/Documentos';
+import Checklist from './pages/Checklist';
+import Asistente from './pages/Asistente';
+import Ajustes from './pages/Ajustes';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -35,7 +41,14 @@ const AuthenticatedApp = () => {
   return (
     <BusinessProvider>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route element={<Layout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/registros" element={<Registros />} />
+          <Route path="/documentos" element={<Documentos />} />
+          <Route path="/checklist" element={<Checklist />} />
+          <Route path="/asistente" element={<Asistente />} />
+          <Route path="/ajustes" element={<Ajustes />} />
+        </Route>
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </BusinessProvider>
