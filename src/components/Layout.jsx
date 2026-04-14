@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { base44 } from "@/api/base44Client";
 import BusinessSelector from "@/components/BusinessSelector";
-import CreateBusinessDialog from "@/components/CreateBusinessDialog";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -11,8 +10,6 @@ import {
   CheckSquare,
   Bot,
   Settings,
-  Building2,
-  Plus,
   Menu,
   X,
   LogOut,
@@ -30,9 +27,16 @@ const NAV_ITEMS = [
 ];
 
 export default function Layout() {
-  const { user, businesses, isLoading } = useBusiness();
+  const { user, businesses, currentBusiness, isLoading } = useBusiness();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showCreate, setShowCreate] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (businesses.length === 0 || !currentBusiness?.onboarding_completed) {
+      navigate("/onboarding");
+    }
+  }, [isLoading, businesses, currentBusiness]);
 
   if (isLoading) {
     return (
@@ -42,28 +46,7 @@ export default function Layout() {
     );
   }
 
-  if (businesses.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
-        <div className="max-w-sm w-full text-center space-y-6">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center">
-            <Building2 className="w-7 h-7 text-primary" />
-          </div>
-          <div className="space-y-1">
-            <h1 className="text-xl font-semibold text-foreground">Bienvenido a Qualvia</h1>
-            <p className="text-sm text-muted-foreground">
-              Crea tu primer negocio para comenzar.
-            </p>
-          </div>
-          <Button onClick={() => setShowCreate(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Crear negocio
-          </Button>
-          <CreateBusinessDialog open={showCreate} onOpenChange={setShowCreate} />
-        </div>
-      </div>
-    );
-  }
+  if (!currentBusiness?.onboarding_completed) return null;
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

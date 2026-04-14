@@ -43,13 +43,11 @@ export function BusinessProvider({ children }) {
     loadBusinesses();
   }, [loadBusinesses]);
 
-  // Cambiar negocio activo — siempre validado contra la lista del usuario
+  // Cambiar negocio activo — permite pasar uno recién creado (no validado contra lista)
   const setCurrentBusiness = useCallback((business) => {
-    const owned = businesses.find((b) => b.id === business.id);
-    if (!owned) return; // ignorar si no pertenece al usuario
-    setCurrentBusinessState(owned);
-    localStorage.setItem(STORAGE_KEY, owned.id);
-  }, [businesses]);
+    setCurrentBusinessState(business);
+    localStorage.setItem(STORAGE_KEY, business.id);
+  }, []);
 
   const createBusiness = useCallback(async (name) => {
     const newBiz = await base44.entities.Business.create({
@@ -68,6 +66,7 @@ export function BusinessProvider({ children }) {
       value={{
         user,
         businesses,
+        setBusinesses,
         currentBusiness,
         setCurrentBusiness,
         isLoading,

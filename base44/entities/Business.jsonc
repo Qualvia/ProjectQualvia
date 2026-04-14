@@ -4,11 +4,81 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Nombre del negocio"
+      "description": "Nombre comercial"
     },
     "user_id": {
       "type": "string",
-      "description": "ID real del usuario due\u00f1o (currentUser.id)"
+      "description": "ID del usuario due\u00f1o"
+    },
+    "onboarding_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "razon_social": {
+      "type": "string"
+    },
+    "tipo_negocio": {
+      "type": "string"
+    },
+    "actividad_principal": {
+      "type": "string"
+    },
+    "productos_principales": {
+      "type": "string"
+    },
+    "direccion": {
+      "type": "string"
+    },
+    "codigo_postal": {
+      "type": "string"
+    },
+    "ciudad": {
+      "type": "string"
+    },
+    "comunidad_autonoma": {
+      "type": "string"
+    },
+    "num_empleados": {
+      "type": "number"
+    },
+    "superficie": {
+      "type": "number"
+    },
+    "capacidad_clientes": {
+      "type": "number"
+    },
+    "cif_nif": {
+      "type": "string"
+    },
+    "rgseaa": {
+      "type": "string"
+    },
+    "telefono": {
+      "type": "string"
+    },
+    "email_contacto": {
+      "type": "string"
+    },
+    "horario_inicio": {
+      "type": "string"
+    },
+    "horario_fin": {
+      "type": "string"
+    },
+    "dias_apertura": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "web": {
+      "type": "string"
+    },
+    "instagram": {
+      "type": "string"
+    },
+    "facebook": {
+      "type": "string"
     }
   },
   "required": [

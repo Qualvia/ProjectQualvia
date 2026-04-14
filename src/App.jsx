@@ -13,6 +13,7 @@ import Documentos from './pages/Documentos';
 import Checklist from './pages/Checklist';
 import Asistente from './pages/Asistente';
 import Ajustes from './pages/Ajustes';
+import Onboarding from './pages/Onboarding';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -41,6 +42,7 @@ const AuthenticatedApp = () => {
   return (
     <BusinessProvider>
       <Routes>
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/registros" element={<Registros />} />
