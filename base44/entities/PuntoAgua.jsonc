@@ -1,0 +1,19 @@
+{
+  "name": "PuntoAgua",
+  "type": "object",
+  "properties": {
+    "business_id": {
+      "type": "string"
+    },
+    "nombre": {
+      "type": "string"
+    },
+    "ubicacion": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "business_id",
+    "nombre"
+  ]
+}
