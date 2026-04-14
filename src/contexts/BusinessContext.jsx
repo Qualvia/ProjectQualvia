@@ -61,6 +61,18 @@ export function BusinessProvider({ children }) {
     return newBiz;
   }, [user, businesses]);
 
+  const deleteBusiness = useCallback(async (id) => {
+    await base44.entities.Business.delete(id);
+    const updated = businesses.filter((b) => b.id !== id);
+    setBusinesses(updated);
+    if (currentBusiness?.id === id) {
+      const next = updated[0] || null;
+      setCurrentBusinessState(next);
+      if (next) localStorage.setItem(STORAGE_KEY, next.id);
+      else localStorage.removeItem(STORAGE_KEY);
+    }
+  }, [businesses, currentBusiness]);
+
   return (
     <BusinessContext.Provider
       value={{
@@ -71,6 +83,7 @@ export function BusinessProvider({ children }) {
         setCurrentBusiness,
         isLoading,
         createBusiness,
+        deleteBusiness,
         reloadBusinesses: loadBusinesses,
       }}
     >

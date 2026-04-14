@@ -8,14 +8,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Building2, ChevronDown, Check, Plus } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Building2, ChevronDown, Check, Plus, Trash2 } from "lucide-react";
 import CreateBusinessDialog from "./CreateBusinessDialog";
 
 export default function BusinessSelector() {
-  const { businesses, currentBusiness, setCurrentBusiness } = useBusiness();
+  const { businesses, currentBusiness, setCurrentBusiness, deleteBusiness } = useBusiness();
   const [showCreate, setShowCreate] = useState(false);
+  const [bizToDelete, setBizToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   if (!currentBusiness) return null;
+
+  async function handleConfirmDelete() {
+    setDeleting(true);
+    await deleteBusiness(bizToDelete.id);
+    setBizToDelete(null);
+    setDeleting(false);
+  }
 
   return (
     <>
@@ -37,14 +56,23 @@ export default function BusinessSelector() {
             <DropdownMenuItem
               key={biz.id}
               onClick={() => setCurrentBusiness(biz)}
-              className="gap-2"
+              className="gap-2 group"
             >
               <Check
-                className={`w-4 h-4 text-[#6BB68A] ${
+                className={`w-4 h-4 text-[#6BB68A] shrink-0 ${
                   biz.id === currentBusiness.id ? "opacity-100" : "opacity-0"
                 }`}
               />
-              <span className="truncate">{biz.name}</span>
+              <span className="truncate flex-1">{biz.name}</span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setBizToDelete(biz);
+                }}
+                className="opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive/80 transition-opacity ml-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
@@ -59,6 +87,27 @@ export default function BusinessSelector() {
       </DropdownMenu>
 
       <CreateBusinessDialog open={showCreate} onOpenChange={setShowCreate} />
+
+      <AlertDialog open={!!bizToDelete} onOpenChange={(o) => !o && setBizToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Seguro que desea eliminar el negocio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminará <strong>{bizToDelete?.name}</strong> y todos sus datos asociados. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
