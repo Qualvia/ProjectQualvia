@@ -171,20 +171,70 @@ export default function GestionarProveedoresDialog({ open, onOpenChange }) {
           ) : (
             <div className="space-y-2">
               {proveedores.map((p) => (
-                <div key={p.id} className="bg-white rounded-xl border border-border px-4 py-3 flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-sm text-foreground">{p.nombre}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {[p.cif_nif, p.contacto, p.telefono].filter(Boolean).join(" · ") || "Sin datos de contacto"}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
+                <div key={p.id} className="bg-white rounded-xl border border-border px-5 py-4 relative">
+                  {/* Actions */}
+                  <div className="absolute top-4 right-4 flex gap-3">
                     <button onClick={() => handleEdit(p)} className="text-[#6BB68A] hover:opacity-70 transition-opacity">
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button onClick={() => handleDelete(p.id)} className="text-destructive hover:opacity-70 transition-opacity">
                       <Trash2 className="w-4 h-4" />
                     </button>
+                  </div>
+
+                  {/* Name */}
+                  <p className="font-bold text-[#0A3E47] mb-2 pr-16">{p.nombre}</p>
+
+                  {/* Details */}
+                  <div className="space-y-1 text-sm text-foreground">
+                    {p.contacto && (
+                      <div className="flex items-center gap-2">
+                        <span>👤</span>
+                        <span>{p.contacto}</span>
+                      </div>
+                    )}
+                    {p.telefono && (
+                      <div className="flex items-center gap-2">
+                        <span>📞</span>
+                        <span>{p.telefono}</span>
+                      </div>
+                    )}
+                    {p.email && (
+                      <div className="flex items-center gap-2">
+                        <span>✉️</span>
+                        <span>{p.email}</span>
+                      </div>
+                    )}
+                    {p.direccion && (
+                      <div className="flex items-center gap-2">
+                        <span>📍</span>
+                        <span>{p.direccion}</span>
+                      </div>
+                    )}
+                    {p.cif_nif && (
+                      <div className="flex items-center gap-2">
+                        <span>🪪</span>
+                        <span>{p.cif_nif}</span>
+                      </div>
+                    )}
+                    {p.productos && (
+                      <div className="flex items-center gap-2">
+                        <span>📦</span>
+                        <span className="text-[#6BB68A] italic">{p.productos}</span>
+                      </div>
+                    )}
+                    {p.registro_sanitario && (
+                      <div className="flex items-center gap-2">
+                        <span>🏛️</span>
+                        <span>RGSEAA: {p.registro_sanitario}</span>
+                      </div>
+                    )}
+                    {p.certificaciones && (
+                      <div className="flex items-center gap-2">
+                        <span>🏅</span>
+                        <span>{p.certificaciones}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
