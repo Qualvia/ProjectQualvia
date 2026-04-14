@@ -8,74 +8,57 @@
   :root {
     --font-inter: 'Inter', sans-serif;
 
-    --background: 210 20% 98%;
-    --foreground: 220 20% 10%;
+    /* #FAFAF7 — blanco roto */
+    --background: 60 20% 98%;
+    /* #1B1B1B — antracita */
+    --foreground: 0 0% 11%;
+
+    /* Cards: blanco puro para elevar sobre fondo */
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 0 0% 11%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
-    --primary: 230 65% 55%;
+    --popover-foreground: 0 0% 11%;
+
+    /* #0A3E47 — azul petróleo */
+    --primary: 189 73% 16%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 94%;
-    --secondary-foreground: 220 20% 20%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 46%;
-    --accent: 230 65% 96%;
-    --accent-foreground: 230 65% 40%;
+
+    /* #EDE6DA — arena cálida */
+    --secondary: 38 28% 88%;
+    --secondary-foreground: 0 0% 11%;
+
+    --muted: 38 20% 93%;
+    --muted-foreground: 0 0% 42%;
+
+    /* #6BB68A — verde salvia (accent = acciones activas) */
+    --accent: 145 31% 56%;
+    --accent-foreground: 0 0% 100%;
+
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 230 65% 55%;
-    --chart-1: 230 65% 55%;
-    --chart-2: 160 55% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 60% 55%;
-    --chart-5: 340 70% 55%;
-    --radius: 0.625rem;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 20% 20%;
-    --sidebar-primary: 230 65% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 65% 96%;
-    --sidebar-accent-foreground: 230 65% 40%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 230 65% 55%;
-  }
 
-  .dark {
-    --background: 224 20% 7%;
-    --foreground: 210 20% 96%;
-    --card: 224 18% 10%;
-    --card-foreground: 210 20% 96%;
-    --popover: 224 18% 10%;
-    --popover-foreground: 210 20% 96%;
-    --primary: 230 65% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 224 14% 16%;
-    --secondary-foreground: 210 20% 90%;
-    --muted: 224 14% 14%;
-    --muted-foreground: 220 10% 55%;
-    --accent: 230 40% 18%;
-    --accent-foreground: 230 65% 75%;
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 224 14% 18%;
-    --input: 224 14% 18%;
-    --ring: 230 65% 60%;
-    --chart-1: 230 65% 60%;
-    --chart-2: 160 55% 50%;
-    --chart-3: 30 80% 60%;
-    --chart-4: 280 60% 60%;
-    --chart-5: 340 70% 60%;
-    --sidebar-background: 224 18% 10%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 230 65% 60%;
+    --border: 38 20% 88%;
+    --input: 38 20% 88%;
+    --ring: 189 73% 16%;
+
+    --chart-1: 189 73% 16%;
+    --chart-2: 145 31% 56%;
+    --chart-3: 38 28% 70%;
+    --chart-4: 189 40% 35%;
+    --chart-5: 145 20% 40%;
+
+    --radius: 0.625rem;
+
+    /* Sidebar usa azul petróleo */
+    --sidebar-background: 189 73% 16%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 145 31% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 40% 18%;
-    --sidebar-accent-foreground: 230 65% 75%;
-    --sidebar-border: 224 14% 18%;
-    --sidebar-ring: 230 65% 60%;
+    --sidebar-accent: 189 60% 22%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 189 50% 20%;
+    --sidebar-ring: 145 31% 56%;
   }
 }
 

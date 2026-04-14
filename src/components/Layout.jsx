@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
 import { useBusiness } from "@/contexts/BusinessContext";
 import BusinessSelector from "@/components/BusinessSelector";
 import CreateBusinessDialog from "@/components/CreateBusinessDialog";
@@ -34,22 +34,21 @@ export default function Layout() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
-  // Onboarding — sin negocios
   if (businesses.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
         <div className="max-w-sm w-full text-center space-y-6">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center">
             <Building2 className="w-7 h-7 text-primary" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-xl font-semibold">Bienvenido a Qualvia</h1>
+            <h1 className="text-xl font-semibold text-foreground">Bienvenido a Qualvia</h1>
             <p className="text-sm text-muted-foreground">
               Crea tu primer negocio para comenzar.
             </p>
@@ -69,7 +68,7 @@ export default function Layout() {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 bg-foreground/20 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-20 bg-black/30 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -77,17 +76,18 @@ export default function Layout() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-30 w-60 flex flex-col border-r bg-card transition-transform duration-200",
+          "fixed lg:static inset-y-0 left-0 z-30 w-60 flex flex-col transition-transform duration-200",
+          "bg-[#0A3E47]",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center px-5 border-b shrink-0">
-          <span className="text-lg font-semibold tracking-tight text-primary">Qualvia</span>
+        <div className="h-16 flex items-center px-5 shrink-0 border-b border-white/10">
+          <span className="text-lg font-semibold tracking-tight text-white">Qualvia</span>
         </div>
 
         {/* Business selector */}
-        <div className="px-3 py-3 border-b shrink-0">
+        <div className="px-3 py-3 border-b border-white/10 shrink-0">
           <BusinessSelector />
         </div>
 
@@ -103,8 +103,8 @@ export default function Layout() {
                 cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-[#6BB68A] text-white"
+                    : "text-white/70 hover:bg-white/10 hover:text-white"
                 )
               }
             >
@@ -115,8 +115,8 @@ export default function Layout() {
         </nav>
 
         {/* User */}
-        <div className="px-4 py-4 border-t shrink-0">
-          <p className="text-xs text-muted-foreground truncate">
+        <div className="px-4 py-4 border-t border-white/10 shrink-0">
+          <p className="text-xs text-white/50 truncate">
             {user?.full_name || user?.email}
           </p>
         </div>
@@ -125,18 +125,19 @@ export default function Layout() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile topbar */}
-        <header className="h-16 border-b bg-card flex items-center px-4 gap-3 lg:hidden shrink-0">
+        <header className="h-16 border-b bg-[#0A3E47] flex items-center px-4 gap-3 lg:hidden shrink-0">
           <Button
             variant="ghost"
             size="icon"
+            className="text-white hover:bg-white/10"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
-          <span className="text-base font-semibold text-primary">Qualvia</span>
+          <span className="text-base font-semibold text-white">Qualvia</span>
         </header>
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-background">
           <Outlet />
         </main>
       </div>
