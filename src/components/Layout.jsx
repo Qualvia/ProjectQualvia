@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { base44 } from "@/api/base44Client";
 import BusinessSelector from "@/components/BusinessSelector";
 import CreateBusinessDialog from "@/components/CreateBusinessDialog";
 import {
@@ -14,6 +15,7 @@ import {
   Plus,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -114,11 +116,18 @@ export default function Layout() {
           ))}
         </nav>
 
-        {/* User */}
-        <div className="px-4 py-4 border-t border-white/10 shrink-0">
-          <p className="text-xs text-white/50 truncate">
-            {user?.full_name || user?.email}
+        {/* User + Logout */}
+        <div className="px-3 py-4 border-t border-white/10 shrink-0 space-y-1">
+          <p className="text-xs text-white/50 truncate px-3">
+            {user?.email}
           </p>
+          <button
+            onClick={() => base44.auth.logout()}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            Cerrar sesión
+          </button>
         </div>
       </aside>
 
