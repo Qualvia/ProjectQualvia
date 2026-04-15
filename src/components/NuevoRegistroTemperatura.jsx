@@ -14,7 +14,10 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!currentBusiness) return;
+    if (!currentBusiness) {
+      setLoading(false);
+      return;
+    }
     base44.entities.EquipoTemperatura.filter({ business_id: currentBusiness.id }).then((data) => {
       setEquipos(data);
       const init = {};

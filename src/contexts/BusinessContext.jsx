@@ -78,16 +78,22 @@ export function BusinessProvider({ children, authenticatedUser }) {
   }, [user, businesses]);
 
   const deleteBusiness = useCallback(async (id) => {
-    await base44.functions.invoke('deleteBusinessAndChildren', { business_id: id });
-    const updated = businesses.filter((b) => b.id !== id);
-    setBusinesses(updated);
-    if (currentBusiness?.id === id) {
-      const next = updated[0] || null;
-      setCurrentBusinessState(next);
-      if (next) localStorage.setItem(STORAGE_KEY, next.id);
-      else localStorage.removeItem(STORAGE_KEY);
+    try {
+      await base44.functions.invoke('deleteBusinessAndChildren', { business_id: id });
+      const updated = businesses.filter((b) => b.id !== id);
+      setBusinesses(updated);
+      if (currentBusiness?.id === id) {
+        const next = updated[0] || null;
+        setCurrentBusinessState(next);
+        if (next) localStorage.setItem(STORAGE_KEY, next.id);
+        else localStorage.removeItem(STORAGE_KEY);
+      }
+    } catch (error) {
+      // Si falla, recargar lista desde servidor para mantener sincronización
+      await loadBusinesses(user);
+      throw error;
     }
-  }, [businesses, currentBusiness]);
+  }, [businesses, currentBusiness, user, loadBusinesses]);
 
   return (
     <BusinessContext.Provider

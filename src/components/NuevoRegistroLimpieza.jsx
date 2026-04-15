@@ -133,7 +133,10 @@ export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!currentBusiness) return;
+    if (!currentBusiness) {
+      setLoadingData(false);
+      return;
+    }
     Promise.all([
       base44.entities.ZonaLimpieza.filter({ business_id: currentBusiness.id }),
       base44.entities.ProductoLimpieza.filter({ business_id: currentBusiness.id }),

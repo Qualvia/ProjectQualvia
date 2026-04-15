@@ -38,7 +38,10 @@ export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
   const [estadoEnvase, setEstadoEnvase] = useState("");
 
   useEffect(() => {
-    if (!currentBusiness) return;
+    if (!currentBusiness) {
+      setLoadingData(false);
+      return;
+    }
     base44.entities.Proveedor.filter({ business_id: currentBusiness.id }).then((data) => {
       setProveedores(data);
       if (data.length === 0) setModoManual(true);
