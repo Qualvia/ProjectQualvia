@@ -96,16 +96,14 @@ function ZonaRow({ zona, estado, onChange }) {
               />
             </div>
           )}
-          {(isSatisfactorio || isNoAplica) && (
-            <button
-              onClick={() => { const next = isNoAplica ? "satisfactorio" : "no_aplica"; setEstado(next); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-colors
-                ${isNoAplica ? "bg-muted border-border text-muted-foreground" : "bg-white border-border text-muted-foreground hover:bg-muted"}`}
-            >
-              <Ban className="w-3.5 h-3.5" />
-              No aplica hoy
-            </button>
-          )}
+          <button
+            onClick={() => setEstado("no_aplica")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-colors
+              ${isNoAplica ? "bg-muted border-border text-muted-foreground" : "bg-white border-border text-muted-foreground hover:bg-muted"}`}
+          >
+            <Ban className="w-3.5 h-3.5" />
+            No aplica hoy
+          </button>
           <input
             type="text"
             placeholder="Añadir comentario o nota para esta zona..."
