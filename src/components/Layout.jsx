@@ -71,7 +71,7 @@ export default function Layout() {
           <img
             src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
             alt="Qualvia"
-            className="h-10 w-auto object-contain"
+            className="h-12 w-full object-contain object-left"
           />
         </div>
 
