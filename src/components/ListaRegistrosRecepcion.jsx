@@ -98,7 +98,7 @@ export default function ListaRegistrosRecepcion({ refreshKey }) {
           <p className="text-sm text-muted-foreground text-center py-4">No hay registros con los filtros aplicados.</p>
         )}
         {visibles.map((r) => (
-          <div key={r.id} className="bg-white rounded-xl border border-border px-5 py-4">
+          <div key={r.id} className={`rounded-xl border px-5 py-4 ${r.resultado === "rechazado" ? "bg-red-50 border-red-200" : "bg-white border-border"}`}>
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
