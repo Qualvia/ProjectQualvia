@@ -96,14 +96,12 @@ export default function Layout() {
               {label}
             </NavLink>
           ))}
-        </nav>
 
-        {/* Business selector */}
-        <div className="px-3 pb-2 shrink-0">
-          <div className="bg-[#EDE6DA] rounded-xl px-3 py-2">
+          {/* Business selector — debajo de Ajustes */}
+          <div className="mt-3 bg-[#EDE6DA] rounded-xl px-3 py-2">
             <BusinessSelector />
           </div>
-        </div>
+        </nav>
 
         {/* Bottom: User + Logout */}
         <div className="px-3 py-4 border-t border-white/10 shrink-0 space-y-3">
