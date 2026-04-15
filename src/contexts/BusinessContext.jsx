@@ -1,21 +1,22 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
+// user viene como prop desde AuthContext — no se llama a base44.auth.me() aquí
 
 const BusinessContext = createContext(null);
 
 const STORAGE_KEY = "qualvia_active_business_id";
 
-export function BusinessProvider({ children }) {
-  const [user, setUser] = useState(null);
+export function BusinessProvider({ children, authenticatedUser }) {
+  const [user, setUser] = useState(authenticatedUser || null);
   const [businesses, setBusinesses] = useState([]);
   const [currentBusiness, setCurrentBusinessState] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadBusinesses = useCallback(async (retries = 3) => {
-    setIsLoading(true);
+  const loadBusinesses = useCallback(async (currentUser) => {
+    const me = currentUser || user;
+    if (!me) return;
 
-    const me = await base44.auth.me();
-    setUser(me);
+    setIsLoading(true);
 
     // Cargar solo los negocios donde user_id == ID real del usuario
     let list = await base44.entities.Business.filter({ user_id: me.id });
@@ -23,7 +24,7 @@ export function BusinessProvider({ children }) {
     // Retry si la lista está vacía pero hay un savedId en localStorage
     // (puede pasar por timing justo después del onboarding)
     const savedId = localStorage.getItem(STORAGE_KEY);
-    if (list.length === 0 && savedId && retries > 0) {
+    if (list.length === 0 && savedId) {
       await new Promise((r) => setTimeout(r, 800));
       list = await base44.entities.Business.filter({ user_id: me.id });
     }
@@ -36,7 +37,6 @@ export function BusinessProvider({ children }) {
     if (match) {
       setCurrentBusinessState(match);
     } else if (list.length > 0) {
-      // Si el guardado no coincide con ningún negocio del usuario, usar el primero
       setCurrentBusinessState(list[0]);
       localStorage.setItem(STORAGE_KEY, list[0].id);
     } else {
@@ -45,11 +45,14 @@ export function BusinessProvider({ children }) {
     }
 
     setIsLoading(false);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    loadBusinesses();
-  }, [loadBusinesses]);
+    if (authenticatedUser) {
+      setUser(authenticatedUser);
+      loadBusinesses(authenticatedUser);
+    }
+  }, [authenticatedUser]);
 
   // Cambiar negocio activo — permite pasar uno recién creado (no validado contra lista)
   const setCurrentBusiness = useCallback((business) => {

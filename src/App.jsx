@@ -16,7 +16,7 @@ import Ajustes from './pages/Ajustes';
 import Onboarding from './pages/Onboarding';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { user, isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -40,7 +40,7 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <BusinessProvider>
+    <BusinessProvider authenticatedUser={user}>
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
         <Route element={<Layout />}>
