@@ -10,9 +10,6 @@ import { Plus, Download, Pencil, Trash2, Loader2, Building2 } from "lucide-react
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 
-const React = require('react');
-const { useState, useEffect } = React;
-
 const EMPTY = {
   nombre: "", cif_nif: "", contacto: "", telefono: "",
   email: "", direccion: "", productos: "",
