@@ -110,6 +110,8 @@ export default function Onboarding() {
     setBusinesses((prev) => [...prev, business]);
     setCurrentBusiness(business);
     setSaving(false);
+    // Pequeña pausa para que el backend indexe el Business antes de navegar
+    await new Promise((r) => setTimeout(r, 500));
     navigate("/");
   }
 

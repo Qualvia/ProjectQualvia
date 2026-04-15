@@ -11,18 +11,26 @@ export function BusinessProvider({ children }) {
   const [currentBusiness, setCurrentBusinessState] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadBusinesses = useCallback(async () => {
+  const loadBusinesses = useCallback(async (retries = 3) => {
     setIsLoading(true);
 
     const me = await base44.auth.me();
     setUser(me);
 
     // Cargar solo los negocios donde user_id == ID real del usuario
-    const list = await base44.entities.Business.filter({ user_id: me.id });
+    let list = await base44.entities.Business.filter({ user_id: me.id });
+
+    // Retry si la lista está vacía pero hay un savedId en localStorage
+    // (puede pasar por timing justo después del onboarding)
+    const savedId = localStorage.getItem(STORAGE_KEY);
+    if (list.length === 0 && savedId && retries > 0) {
+      await new Promise((r) => setTimeout(r, 800));
+      list = await base44.entities.Business.filter({ user_id: me.id });
+    }
+
     setBusinesses(list);
 
     // Resolver negocio activo desde localStorage, validando contra lista real
-    const savedId = localStorage.getItem(STORAGE_KEY);
     const match = list.find((b) => b.id === savedId);
 
     if (match) {
