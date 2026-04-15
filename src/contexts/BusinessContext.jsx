@@ -14,7 +14,10 @@ export function BusinessProvider({ children, authenticatedUser }) {
 
   const loadBusinesses = useCallback(async (currentUser) => {
     const me = currentUser || user;
-    if (!me) return;
+    if (!me) {
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
 
@@ -45,12 +48,14 @@ export function BusinessProvider({ children, authenticatedUser }) {
     }
 
     setIsLoading(false);
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     if (authenticatedUser) {
       setUser(authenticatedUser);
       loadBusinesses(authenticatedUser);
+    } else {
+      setIsLoading(false);
     }
   }, [authenticatedUser]);
 

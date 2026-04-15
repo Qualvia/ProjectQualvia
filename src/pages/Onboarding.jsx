@@ -45,7 +45,7 @@ export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
-  const { setCurrentBusiness, setBusinesses } = useBusiness();
+  const { user, setCurrentBusiness, setBusinesses } = useBusiness();
   const navigate = useNavigate();
 
   function set(field, val) {
@@ -70,8 +70,8 @@ export default function Onboarding() {
   }
 
   async function handleFinish() {
+    if (!user) return;
     setSaving(true);
-    const user = await base44.auth.me();
 
     // 1. Crear Business con solo los campos mínimos
     const business = await base44.entities.Business.create({
