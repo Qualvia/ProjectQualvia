@@ -98,13 +98,15 @@ export default function Layout() {
           ))}
         </nav>
 
-        {/* Bottom: Business selector + User + Logout */}
-        <div className="px-3 py-4 border-t border-white/10 shrink-0 space-y-3">
-          {/* Business selector */}
+        {/* Business selector */}
+        <div className="px-3 pb-2 shrink-0">
           <div className="bg-[#EDE6DA] rounded-xl px-3 py-2">
             <BusinessSelector />
           </div>
+        </div>
 
+        {/* Bottom: User + Logout */}
+        <div className="px-3 py-4 border-t border-white/10 shrink-0 space-y-3">
           {/* User info */}
           <div className="flex items-center gap-3 px-1">
             <div className="w-9 h-9 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
