@@ -5,10 +5,22 @@
     "business_id": {
       "type": "string"
     },
+    "tipo_elemento": {
+      "type": "string",
+      "enum": [
+        "Trampa",
+        "L\u00e1mpara UV",
+        "Cebo",
+        "Otro"
+      ]
+    },
     "nombre": {
       "type": "string"
     },
     "ubicacion": {
+      "type": "string"
+    },
+    "descripcion": {
       "type": "string"
     }
   },

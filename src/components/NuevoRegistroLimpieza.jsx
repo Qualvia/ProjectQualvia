@@ -245,7 +245,7 @@ export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
 
       {/* Acciones */}
       <div className="flex gap-3">
-        <Button variant="outline" onClick={onCancel} className="flex-1">
+        <Button variant="outline" onClick={onCancel} className="flex-1 bg-white">
           Cancelar
         </Button>
         <Button

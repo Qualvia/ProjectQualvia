@@ -54,6 +54,7 @@ function emptyForm(tab) {
   if (tab === "zonas") return { nombre: "", ubicacion: "", descripcion: "", foto_url: "" };
   if (tab === "productos") return { nombre: "", marca: "", tipo: "Desinfectante", ubicacion: "" };
   if (tab === "agua") return { nombre: "", ubicacion: "", descripcion: "" };
+  if (tab === "plagas") return { tipo_elemento: "Trampa", nombre: "", ubicacion: "", descripcion: "" };
   return { nombre: "", ubicacion: "" };
 }
 
@@ -146,6 +147,7 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
   const isZonas = activeTab === "zonas";
   const isProductos = activeTab === "productos";
   const isAgua = activeTab === "agua";
+  const isPlagas = activeTab === "plagas";
 
   async function handleFotoUpload(e) {
     const file = e.target.files?.[0];
@@ -270,6 +272,33 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
                 className="bg-white resize-none h-20"
               />
             </div>
+          )}
+
+          {isPlagas && (
+            <>
+              <div>
+                <Label className="mb-1.5 block">Tipo de elemento *</Label>
+                <Select value={form.tipo_elemento || "Trampa"} onValueChange={(v) => setForm({ ...form, tipo_elemento: v })}>
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="Selecciona un tipo..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Trampa", "Lámpara UV", "Cebo", "Otro"].map((t) => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="mb-1.5 block">Descripción</Label>
+                <Textarea
+                  placeholder="Descripción adicional..."
+                  value={form.descripcion || ""}
+                  onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                  className="bg-white resize-none h-20"
+                />
+              </div>
+            </>
           )}
 
           {isEquipos && (
