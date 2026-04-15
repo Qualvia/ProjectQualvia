@@ -182,9 +182,14 @@ export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
 
     if (registros.length === 0) return;
     setSaving(true);
-    await base44.entities.RegistroLimpieza.bulkCreate(registros);
-    setSaving(false);
-    onSaved();
+    try {
+      await base44.entities.RegistroLimpieza.bulkCreate(registros);
+      onSaved();
+    } catch (err) {
+      console.error("Error guardando registros de limpieza:", err);
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loadingData) {

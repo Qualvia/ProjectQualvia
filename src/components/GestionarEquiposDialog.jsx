@@ -127,16 +127,21 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
   async function handleSave() {
     if (!form.nombre?.trim()) return;
     setSaving(true);
-    const payload = { ...form, business_id: currentBusiness.id };
-    if (editingId) {
-      await base44.entities[entityName].update(editingId, payload);
-    } else {
-      await base44.entities[entityName].create(payload);
+    try {
+      const payload = { ...form, business_id: currentBusiness.id };
+      if (editingId) {
+        await base44.entities[entityName].update(editingId, payload);
+      } else {
+        await base44.entities[entityName].create(payload);
+      }
+      setForm(emptyForm(activeTab));
+      setEditingId(null);
+      await loadItems();
+    } catch (err) {
+      console.error(`Error guardando ${entityName}:`, err);
+    } finally {
+      setSaving(false);
     }
-    setForm(emptyForm(activeTab));
-    setEditingId(null);
-    await loadItems();
-    setSaving(false);
   }
 
   function handleEdit(item) {
@@ -145,8 +150,13 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
   }
 
   async function handleDelete(id) {
-    await base44.entities[entityName].delete(id);
-    setItems((prev) => prev.filter((i) => i.id !== id));
+    try {
+      await base44.entities[entityName].delete(id);
+      setItems((prev) => prev.filter((i) => i.id !== id));
+    } catch (err) {
+      console.error(`Error borrando ${entityName}:`, err);
+      await loadItems();
+    }
   }
 
   const isEquipos = activeTab === "equipos";

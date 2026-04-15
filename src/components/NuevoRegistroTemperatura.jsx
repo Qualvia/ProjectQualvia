@@ -42,22 +42,27 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
     const filled = equipos.filter((e) => values[e.id]?.temperatura !== "");
     if (filled.length === 0) return;
     setSaving(true);
-    await Promise.all(
-      filled.map((e) =>
-        base44.entities.RegistroTemperatura.create({
-          business_id: currentBusiness.id,
-          equipo_id: e.id,
-          equipo_nombre: e.nombre,
-          temperatura: Number(values[e.id].temperatura),
-          observaciones: values[e.id].observaciones,
-          temp_min: e.temp_min,
-          temp_max: e.temp_max,
-          fecha: new Date().toISOString(),
-        })
-      )
-    );
-    setSaving(false);
-    onSaved();
+    try {
+      await Promise.all(
+        filled.map((e) =>
+          base44.entities.RegistroTemperatura.create({
+            business_id: currentBusiness.id,
+            equipo_id: e.id,
+            equipo_nombre: e.nombre,
+            temperatura: Number(values[e.id].temperatura),
+            observaciones: values[e.id].observaciones,
+            temp_min: e.temp_min,
+            temp_max: e.temp_max,
+            fecha: new Date().toISOString(),
+          })
+        )
+      );
+      onSaved();
+    } catch (err) {
+      console.error("Error guardando registros de temperatura:", err);
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loading) {

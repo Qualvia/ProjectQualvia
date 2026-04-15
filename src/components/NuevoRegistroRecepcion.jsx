@@ -73,22 +73,27 @@ export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
   async function handleGuardar() {
     if (!canSave) return;
     setSaving(true);
-    await base44.entities.RegistroRecepcion.create({
-      business_id: currentBusiness.id,
-      producto: producto.trim(),
-      proveedor: proveedorFinal.trim(),
-      resultado,
-      contiene_alergenos: contieneAlergenos,
-      alergenos: contieneAlergenos ? alergenos : [],
-      lote: lote || undefined,
-      fecha_caducidad: fechaCaducidad || undefined,
-      temperatura: temperatura !== "" ? Number(temperatura) : undefined,
-      estado_envase: estadoEnvase || undefined,
-      observaciones: resultado === "rechazado" ? motivoRechazo : undefined,
-      fecha: new Date().toISOString(),
-    });
-    setSaving(false);
-    onSaved();
+    try {
+      await base44.entities.RegistroRecepcion.create({
+        business_id: currentBusiness.id,
+        producto: producto.trim(),
+        proveedor: proveedorFinal.trim(),
+        resultado,
+        contiene_alergenos: contieneAlergenos,
+        alergenos: contieneAlergenos ? alergenos : [],
+        lote: lote || undefined,
+        fecha_caducidad: fechaCaducidad || undefined,
+        temperatura: temperatura !== "" ? Number(temperatura) : undefined,
+        estado_envase: estadoEnvase || undefined,
+        observaciones: resultado === "rechazado" ? motivoRechazo : undefined,
+        fecha: new Date().toISOString(),
+      });
+      onSaved();
+    } catch (err) {
+      console.error("Error guardando recepción:", err);
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loadingData) {
