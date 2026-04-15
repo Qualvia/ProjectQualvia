@@ -22,8 +22,13 @@ const TABS = [
 ];
 
 const TIPOS_EQUIPO = [
-  "Cámara frigorífica", "Nevera", "Congelador", "Vitrina refrigerada",
-  "Arcón congelador", "Abatidor", "Otro",
+  { nombre: "Cámara frigorífica", temp_min: 0, temp_max: 5 },
+  { nombre: "Nevera", temp_min: 0, temp_max: 8 },
+  { nombre: "Congelador", temp_min: -18, temp_max: -15 },
+  { nombre: "Vitrina refrigerada", temp_min: 0, temp_max: 8 },
+  { nombre: "Arcón congelador", temp_min: -18, temp_max: -12 },
+  { nombre: "Abatidor", temp_min: -18, temp_max: 3 },
+  { nombre: "Otro", temp_min: 0, temp_max: 5 },
 ];
 
 const ENTITY_MAP = {
@@ -134,7 +139,7 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Gestionar Equipos, Zonas y Productos</DialogTitle>
         </DialogHeader>
@@ -159,13 +164,16 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
           {isEquipos && (
             <div>
               <Label className="mb-1.5 block">Tipo de equipo</Label>
-              <Select value={form.tipo} onValueChange={(v) => setForm({ ...form, tipo: v })}>
+              <Select value={form.tipo} onValueChange={(v) => {
+                const preset = TIPOS_EQUIPO.find((t) => t.nombre === v);
+                setForm({ ...form, tipo: v, temp_min: preset?.temp_min ?? form.temp_min, temp_max: preset?.temp_max ?? form.temp_max });
+              }}>
                 <SelectTrigger className="bg-white">
                   <SelectValue placeholder="Selecciona un tipo de equipo..." />
                 </SelectTrigger>
                 <SelectContent>
                   {TIPOS_EQUIPO.map((t) => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                    <SelectItem key={t.nombre} value={t.nombre}>{t.nombre}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
