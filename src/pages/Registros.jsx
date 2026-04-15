@@ -36,12 +36,15 @@ const REGISTROS = [
   { id: "incidencias", label: "Incidencias", icon: AlertTriangle, color: "" },
 ];
 
+const INCIDENCIA_ALERT_COLOR = "bg-red-100 border-red-300 text-red-700";
+
 export default function Registros() {
   const [active, setActive] = useState("temperatura");
   const [showGestionar, setShowGestionar] = useState(false);
   const [showProveedores, setShowProveedores] = useState(false);
   const [showNuevoRegistro, setShowNuevoRegistro] = useState(false);
   const [registroKey, setRegistroKey] = useState(0);
+  const [hayFueraDeRango, setHayFueraDeRango] = useState(false);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
   const ActiveIcon = activeRegistro?.icon;
@@ -51,8 +54,8 @@ export default function Registros() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#0A3E47]">Registros</h1>
-          <p className="text-sm text-[#6BB68A] font-medium mt-0.5">
+          <h1 className="text-3xl font-bold text-[#0A3E47]">Registros</h1>
+          <p className="text-base text-[#6BB68A] font-medium mt-0.5">
             Gestiona todos tus controles diarios
           </p>
         </div>
@@ -72,20 +75,26 @@ export default function Registros() {
       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-6 gap-2">
         {REGISTROS.map(({ id, label, icon: Icon, color }) => {
           const isActive = active === id;
+          const isIncidencia = id === "incidencias";
+          const incidenciaAlert = isIncidencia && hayFueraDeRango;
           return (
             <button
               key={id}
               onClick={() => setActive(id)}
-              className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border transition-all aspect-square
+              className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-all aspect-square
                 ${isActive
                   ? color
                     ? `${color} shadow-md`
-                    : "bg-slate-200 border-slate-300 text-foreground shadow-md"
-                  : "bg-white border-border text-foreground hover:border-[#6BB68A] hover:shadow-sm"
+                    : incidenciaAlert
+                      ? `${INCIDENCIA_ALERT_COLOR} shadow-md`
+                      : "bg-slate-200 border-slate-300 text-foreground shadow-md"
+                  : incidenciaAlert && !isActive
+                    ? `${INCIDENCIA_ALERT_COLOR}`
+                    : "bg-white border-border text-foreground hover:border-[#6BB68A] hover:shadow-sm"
                 }`}
             >
-              <Icon className="w-6 h-6" strokeWidth={2} />
-              <span className="text-[11px] font-semibold leading-tight text-center">{label}</span>
+              <Icon className="w-5 h-5" strokeWidth={2.5} />
+              <span className="text-[10px] font-semibold leading-tight text-center">{label}</span>
             </button>
           );
         })}
@@ -103,7 +112,7 @@ export default function Registros() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" className="bg-white">
+              <Button variant="outline" size="icon" className="bg-white" onClick={() => setShowGestionar(true)}>
                 <Settings className="w-4 h-4 text-muted-foreground" />
               </Button>
               <Button
@@ -129,7 +138,7 @@ export default function Registros() {
 
           {/* Lista de registros guardados */}
           {active === "temperatura" && (
-            <ListaRegistrosTemperatura refreshKey={registroKey} />
+            <ListaRegistrosTemperatura refreshKey={registroKey} onFueraDeRangoChange={setHayFueraDeRango} />
           )}
         </div>
       )}

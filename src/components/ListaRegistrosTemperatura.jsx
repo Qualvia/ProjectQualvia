@@ -1,29 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { Loader2, Trash2, Filter, CalendarDays, User } from "lucide-react";
+import { Loader2, Trash2, Filter, CalendarDays, User, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 function getStatus(registro) {
   const { temperatura, temp_min, temp_max } = registro;
   if (temp_min === undefined || temp_max === undefined) return "correcto";
-  const diff = Math.max(temp_min - temperatura, temperatura - temp_max);
   if (temperatura >= temp_min && temperatura <= temp_max) return "correcto";
+  const diff = Math.max(temp_min - temperatura, temperatura - temp_max);
   if (diff <= 3) return "aviso";
   return "critico";
 }
 
 const STATUS_STYLES = {
-  correcto: { badge: "bg-[#e6f5ed] text-[#2d8a5e] font-medium", card: "bg-white", temp: "text-[#2d8a5e]" },
-  aviso:    { badge: "bg-orange-50 text-orange-600 font-medium", card: "bg-white", temp: "text-orange-500" },
-  critico:  { badge: "bg-red-50 text-red-500 font-medium", card: "bg-white", temp: "text-red-500" },
+  correcto: { badge: "bg-[#e6f5ed] text-[#2d8a5e] font-medium", card: "bg-white border-border", temp: "text-[#2d8a5e]" },
+  aviso:    { badge: "bg-orange-50 text-orange-600 font-medium", card: "bg-red-50 border-red-200", temp: "text-orange-500" },
+  critico:  { badge: "bg-red-50 text-red-500 font-medium",       card: "bg-red-50 border-red-200", temp: "text-red-500" },
 };
 
-export default function ListaRegistrosTemperatura({ refreshKey }) {
+export default function ListaRegistrosTemperatura({ refreshKey, onFueraDeRangoChange }) {
   const { currentBusiness } = useBusiness();
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [verTodos, setVerTodos] = useState(false);
+
+  const LIMITE = 5;
 
   useEffect(() => {
     if (!currentBusiness) return;
@@ -33,21 +36,29 @@ export default function ListaRegistrosTemperatura({ refreshKey }) {
     ).then((data) => {
       setRegistros(data);
       setLoading(false);
+      const hayFuera = data.some((r) => getStatus(r) !== "correcto");
+      onFueraDeRangoChange?.(hayFuera);
     });
   }, [currentBusiness, refreshKey]);
 
   async function handleDelete(id) {
     await base44.entities.RegistroTemperatura.delete(id);
-    setRegistros((prev) => prev.filter((r) => r.id !== id));
+    const updated = registros.filter((r) => r.id !== id);
+    setRegistros(updated);
+    const hayFuera = updated.some((r) => getStatus(r) !== "correcto");
+    onFueraDeRangoChange?.(hayFuera);
   }
 
   if (loading) return <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
   if (registros.length === 0) return null;
 
+  const visibles = verTodos ? registros : registros.slice(0, LIMITE);
+  const hayMas = registros.length > LIMITE;
+
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-border">
-      {/* Header */}
-      <div className="px-5 py-4 flex items-center justify-between border-b border-border/40">
+      {/* Header — mismo color que el panel de "Control de temperatura" */}
+      <div className="px-5 py-4 flex items-center justify-between bg-secondary border-b border-border/40">
         <p className="font-semibold text-[#0A3E47]">Registros de temperatura</p>
         <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-border text-muted-foreground hover:text-foreground transition-colors">
           <Filter className="w-4 h-4" />
@@ -56,11 +67,11 @@ export default function ListaRegistrosTemperatura({ refreshKey }) {
 
       {/* Cards */}
       <div className="p-4 space-y-3">
-        {registros.map((r) => {
+        {visibles.map((r) => {
           const status = getStatus(r);
           const styles = STATUS_STYLES[status];
           return (
-            <div key={r.id} className={`${styles.card} rounded-xl border border-border px-5 py-4 relative`}>
+            <div key={r.id} className={`${styles.card} rounded-xl border px-5 py-4 relative`}>
               {/* Delete */}
               <button
                 onClick={() => handleDelete(r.id)}
@@ -105,6 +116,17 @@ export default function ListaRegistrosTemperatura({ refreshKey }) {
             </div>
           );
         })}
+
+        {/* Ver más */}
+        {hayMas && !verTodos && (
+          <button
+            onClick={() => setVerTodos(true)}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-secondary text-sm font-medium text-[#0A3E47] hover:bg-secondary/70 transition-colors"
+          >
+            <ChevronDown className="w-4 h-4" />
+            Ver más ({registros.length - LIMITE} restantes)
+          </button>
+        )}
       </div>
     </div>
   );
