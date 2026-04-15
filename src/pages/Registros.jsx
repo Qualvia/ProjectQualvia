@@ -82,8 +82,8 @@ export default function Registros() {
                   : "bg-white border-border text-foreground hover:border-[#6BB68A] hover:shadow-sm"
                 }`}
             >
-              <Icon className="w-7 h-7" strokeWidth={1.5} />
-              <span className="text-xs font-medium leading-tight text-center">{label}</span>
+              <Icon className="w-7 h-7" strokeWidth={2} />
+              <span className="text-xs font-semibold leading-tight text-center">{label}</span>
             </button>
           );
         })}
