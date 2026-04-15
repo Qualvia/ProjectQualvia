@@ -24,9 +24,9 @@ const TABS = [
 const TIPOS_EQUIPO = [
   { nombre: "Cámara frigorífica", temp_min: 0, temp_max: 4 },
   { nombre: "Nevera", temp_min: 0, temp_max: 5 },
-  { nombre: "Congelador", temp_min: -20, temp_max: -18 },
+  { nombre: "Congelador", temp_min: -18, temp_max: -15 },
   { nombre: "Vitrina refrigerada", temp_min: 1, temp_max: 8 },
-  { nombre: "Arcón congelador", temp_min: -20, temp_max: -18 },
+  { nombre: "Arcón congelador", temp_min: -18, temp_max: -15 },
   { nombre: "Abatidor", temp_min: -18, temp_max: 3 },
   { nombre: "Otro", temp_min: 0, temp_max: 5 },
 ];
@@ -49,6 +49,7 @@ const TAB_LABELS = {
 
 function emptyForm(tab) {
   if (tab === "equipos") return { tipo: "", nombre: "", ubicacion: "", descripcion: "", temp_min: 0, temp_max: 5 };
+  if (tab === "zonas") return { nombre: "", ubicacion: "", descripcion: "", foto_url: "" };
   return { nombre: "", ubicacion: "" };
 }
 
@@ -136,6 +137,14 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
   }
 
   const isEquipos = activeTab === "equipos";
+  const isZonas = activeTab === "zonas";
+
+  async function handleFotoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm((prev) => ({ ...prev, foto_url: file_url }));
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -200,6 +209,32 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
               />
             </div>
           </div>
+
+          {isZonas && (
+            <>
+              <div>
+                <Label className="mb-1.5 block">Descripción</Label>
+                <Textarea
+                  placeholder="Descripción adicional..."
+                  value={form.descripcion || ""}
+                  onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                  className="bg-white resize-none h-20"
+                />
+              </div>
+              <div>
+                <Label className="mb-1.5 block">Foto del lugar</Label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFotoUpload}
+                  className="block text-sm text-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#6BB68A] file:text-white hover:file:bg-[#5aa377] cursor-pointer"
+                />
+                {form.foto_url && (
+                  <img src={form.foto_url} alt="Vista previa" className="mt-2 h-24 rounded-lg object-cover border border-border" />
+                )}
+              </div>
+            </>
+          )}
 
           {isEquipos && (
             <>
