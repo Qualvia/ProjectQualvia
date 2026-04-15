@@ -10,6 +10,9 @@
     },
     "ubicacion": {
       "type": "string"
+    },
+    "descripcion": {
+      "type": "string"
     }
   },
   "required": [
