@@ -5,6 +5,8 @@ import NuevoRegistroTemperatura from "@/components/NuevoRegistroTemperatura";
 import ListaRegistrosTemperatura from "@/components/ListaRegistrosTemperatura";
 import NuevoRegistroLimpieza from "@/components/NuevoRegistroLimpieza";
 import ListaRegistrosLimpieza from "@/components/ListaRegistrosLimpieza";
+import NuevoRegistroRecepcion from "@/components/NuevoRegistroRecepcion";
+import ListaRegistrosRecepcion from "@/components/ListaRegistrosRecepcion";
 import {
   Thermometer,
   Droplets,
@@ -47,6 +49,7 @@ export default function Registros() {
   const [showNuevoRegistro, setShowNuevoRegistro] = useState(false);
   const [registroKey, setRegistroKey] = useState(0);
   const [limpiezaKey, setLimpiezaKey] = useState(0);
+  const [recepcionKey, setRecepcionKey] = useState(0);
   const [hayFueraDeRango, setHayFueraDeRango] = useState(false);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
@@ -147,6 +150,15 @@ export default function Registros() {
               }}
             />
           )}
+          {showNuevoRegistro && active === "recepcion" && (
+            <NuevoRegistroRecepcion
+              onCancel={() => setShowNuevoRegistro(false)}
+              onSaved={() => {
+                setShowNuevoRegistro(false);
+                setRecepcionKey((k) => k + 1);
+              }}
+            />
+          )}
 
           {/* Lista de registros guardados */}
           {active === "temperatura" && (
@@ -154,6 +166,9 @@ export default function Registros() {
           )}
           {active === "limpieza" && (
             <ListaRegistrosLimpieza refreshKey={limpiezaKey} />
+          )}
+          {active === "recepcion" && (
+            <ListaRegistrosRecepcion refreshKey={recepcionKey} />
           )}
         </div>
       )}
