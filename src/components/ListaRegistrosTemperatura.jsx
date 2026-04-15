@@ -16,8 +16,8 @@ function getStatus(registro) {
 
 const STATUS_STYLES = {
   correcto: { badge: "bg-[#e6f5ed] text-[#2d8a5e] font-medium", card: "bg-white", temp: "text-[#2d8a5e]" },
-  aviso:    { badge: "bg-orange-50 text-orange-600 font-medium", card: "bg-orange-50/40", temp: "text-orange-500" },
-  critico:  { badge: "bg-red-50 text-red-500 font-medium", card: "bg-red-50/40", temp: "text-red-500" },
+  aviso:    { badge: "bg-orange-50 text-orange-600 font-medium", card: "bg-white", temp: "text-orange-500" },
+  critico:  { badge: "bg-red-50 text-red-500 font-medium", card: "bg-white", temp: "text-red-500" },
 };
 
 export default function ListaRegistrosTemperatura({ refreshKey }) {
@@ -45,7 +45,7 @@ export default function ListaRegistrosTemperatura({ refreshKey }) {
   if (registros.length === 0) return null;
 
   return (
-    <div className="bg-secondary rounded-2xl overflow-hidden">
+    <div className="bg-white rounded-2xl overflow-hidden border border-border">
       {/* Header */}
       <div className="px-5 py-4 flex items-center justify-between border-b border-border/40">
         <p className="font-semibold text-[#0A3E47]">Registros de temperatura</p>

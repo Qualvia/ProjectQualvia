@@ -69,14 +69,14 @@ export default function Registros() {
       </div>
 
       {/* Grid de registros */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-6 gap-2">
         {REGISTROS.map(({ id, label, icon: Icon, color }) => {
           const isActive = active === id;
           return (
             <button
               key={id}
               onClick={() => setActive(id)}
-              className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all aspect-square
+              className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border transition-all aspect-square
                 ${isActive
                   ? color
                     ? `${color} shadow-md`
@@ -84,8 +84,8 @@ export default function Registros() {
                   : "bg-white border-border text-foreground hover:border-[#6BB68A] hover:shadow-sm"
                 }`}
             >
-              <Icon className="w-7 h-7" strokeWidth={2} />
-              <span className="text-xs font-semibold leading-tight text-center">{label}</span>
+              <Icon className="w-6 h-6" strokeWidth={2} />
+              <span className="text-[11px] font-semibold leading-tight text-center">{label}</span>
             </button>
           );
         })}
