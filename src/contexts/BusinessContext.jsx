@@ -62,7 +62,7 @@ export function BusinessProvider({ children }) {
   }, [user, businesses]);
 
   const deleteBusiness = useCallback(async (id) => {
-    await base44.entities.Business.delete(id);
+    await base44.functions.invoke('deleteBusinessAndChildren', { business_id: id });
     const updated = businesses.filter((b) => b.id !== id);
     setBusinesses(updated);
     if (currentBusiness?.id === id) {
