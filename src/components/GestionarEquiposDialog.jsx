@@ -22,11 +22,11 @@ const TABS = [
 ];
 
 const TIPOS_EQUIPO = [
-  { nombre: "Cámara frigorífica", temp_min: 0, temp_max: 5 },
-  { nombre: "Nevera", temp_min: 0, temp_max: 8 },
-  { nombre: "Congelador", temp_min: -18, temp_max: -15 },
-  { nombre: "Vitrina refrigerada", temp_min: 0, temp_max: 8 },
-  { nombre: "Arcón congelador", temp_min: -18, temp_max: -12 },
+  { nombre: "Cámara frigorífica", temp_min: 0, temp_max: 4 },
+  { nombre: "Nevera", temp_min: 0, temp_max: 5 },
+  { nombre: "Congelador", temp_min: -20, temp_max: -18 },
+  { nombre: "Vitrina refrigerada", temp_min: 1, temp_max: 8 },
+  { nombre: "Arcón congelador", temp_min: -20, temp_max: -18 },
   { nombre: "Abatidor", temp_min: -18, temp_max: 3 },
   { nombre: "Otro", temp_min: 0, temp_max: 5 },
 ];
@@ -139,7 +139,7 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Gestionar Equipos, Zonas y Productos</DialogTitle>
         </DialogHeader>
