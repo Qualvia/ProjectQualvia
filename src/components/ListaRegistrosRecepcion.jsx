@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 const EMPTY_FILTERS = { resultado: "todos" };
+const LIMITE = 5;
 
 export default function ListaRegistrosRecepcion({ refreshKey }) {
   const { currentBusiness } = useBusiness();
@@ -14,8 +15,6 @@ export default function ListaRegistrosRecepcion({ refreshKey }) {
   const [verTodos, setVerTodos] = useState(false);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [filtros, setFiltros] = useState(EMPTY_FILTERS);
-
-  const LIMITE = 5;
 
   useEffect(() => {
     if (!currentBusiness) return;
@@ -123,14 +122,24 @@ export default function ListaRegistrosRecepcion({ refreshKey }) {
                 )}
                 {r.fecha_caducidad && (
                   <p className="text-sm text-foreground mb-0.5">
-                    <span className="font-semibold">Fecha de caducidad: </span>
+                    <span className="font-semibold">Caducidad: </span>
                     {format(new Date(r.fecha_caducidad), "d MMM yyyy", { locale: es })}
+                  </p>
+                )}
+                {r.temperatura !== undefined && r.temperatura !== null && (
+                  <p className="text-sm text-foreground mb-0.5">
+                    <span className="font-semibold">Temperatura: </span>{r.temperatura}°C
+                  </p>
+                )}
+                {r.estado_envase && (
+                  <p className="text-sm text-foreground mb-0.5">
+                    <span className="font-semibold">Envase: </span>{r.estado_envase}
                   </p>
                 )}
 
                 {r.alergenos?.length > 0 && (
-                  <div className="mb-1">
-                    <p className="text-sm font-semibold text-foreground">Alérgenos identificados:</p>
+                  <div className="mb-1 mt-1">
+                    <p className="text-sm font-semibold text-foreground">Alérgenos:</p>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {r.alergenos.map((a) => (
                         <span key={a} className="text-xs px-2 py-0.5 rounded-full border border-yellow-400 bg-yellow-50 text-yellow-700 font-medium">
@@ -141,10 +150,8 @@ export default function ListaRegistrosRecepcion({ refreshKey }) {
                   </div>
                 )}
 
-                {r.estado_envase && (
-                  <p className="text-sm text-foreground mb-0.5">
-                    <span className="font-semibold">Estado Envase: </span>{r.estado_envase.toLowerCase()}
-                  </p>
+                {r.observaciones && (
+                  <p className="text-xs text-muted-foreground italic mt-1">{r.observaciones}</p>
                 )}
 
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
