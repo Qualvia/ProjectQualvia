@@ -15,13 +15,13 @@ function ZonaRow({ zona, estado, onChange }) {
   function setEstado(val) {
     const next = estado === val ? null : val;
     onChange({ estado: next, motivo: "", comentario, foto });
-    if (next === "satisfactorio" || next === "no_aplica") {
+    // Solo abrir automáticamente si es "no_limpiado" (para mostrar el campo de motivo)
+    if (next === "no_limpiado") {
       setExpanded(true);
-    } else if (next === "no_limpiado") {
-      setExpanded(true);
-    } else {
+    } else if (next === null) {
       setExpanded(false);
     }
+    // satisfactorio y no_aplica NO abren el panel automáticamente
   }
 
   function handleMotivo(val) {
