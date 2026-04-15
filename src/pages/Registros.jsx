@@ -22,18 +22,18 @@ import {
 import { Button } from "@/components/ui/button";
 
 const REGISTROS = [
-  { id: "temperatura", label: "Temperatura", icon: Thermometer },
-  { id: "limpieza", label: "Limpieza", icon: Droplets },
-  { id: "recepcion", label: "Recepción", icon: ClipboardCheck },
-  { id: "agua", label: "Agua", icon: Waves },
-  { id: "plagas", label: "Plagas", icon: Bug },
-  { id: "mantenimiento", label: "Mantenimiento", icon: Wrench },
-  { id: "formacion", label: "Formación", icon: GraduationCap },
-  { id: "alergenos", label: "Alérgenos", icon: Apple },
-  { id: "lotes", label: "Lotes", icon: Package },
-  { id: "congelacion", label: "Congelación", icon: Snowflake },
-  { id: "residuos", label: "Residuos", icon: Trash2 },
-  { id: "incidencias", label: "Incidencias", icon: AlertTriangle },
+  { id: "temperatura", label: "Temperatura", icon: Thermometer, color: "bg-red-500 border-red-500 text-white" },
+  { id: "limpieza", label: "Limpieza", icon: Droplets, color: "bg-cyan-500 border-cyan-500 text-white" },
+  { id: "recepcion", label: "Recepción", icon: ClipboardCheck, color: "bg-orange-400 border-orange-400 text-white" },
+  { id: "agua", label: "Agua", icon: Waves, color: "bg-blue-500 border-blue-500 text-white" },
+  { id: "plagas", label: "Plagas", icon: Bug, color: "bg-amber-700 border-amber-700 text-white" },
+  { id: "mantenimiento", label: "Mantenimiento", icon: Wrench, color: "bg-slate-500 border-slate-500 text-white" },
+  { id: "formacion", label: "Formación", icon: GraduationCap, color: "bg-purple-500 border-purple-500 text-white" },
+  { id: "alergenos", label: "Alérgenos", icon: Apple, color: "bg-yellow-500 border-yellow-500 text-white" },
+  { id: "lotes", label: "Lotes", icon: Package, color: "bg-teal-500 border-teal-500 text-white" },
+  { id: "congelacion", label: "Congelación", icon: Snowflake, color: "bg-sky-400 border-sky-400 text-white" },
+  { id: "residuos", label: "Residuos", icon: Trash2, color: "bg-green-600 border-green-600 text-white" },
+  { id: "incidencias", label: "Incidencias", icon: AlertTriangle, color: "" },
 ];
 
 export default function Registros() {
@@ -70,7 +70,7 @@ export default function Registros() {
 
       {/* Grid de registros */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-        {REGISTROS.map(({ id, label, icon: Icon }) => {
+        {REGISTROS.map(({ id, label, icon: Icon, color }) => {
           const isActive = active === id;
           return (
             <button
@@ -78,7 +78,9 @@ export default function Registros() {
               onClick={() => setActive(id)}
               className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all aspect-square
                 ${isActive
-                  ? "bg-[#E05252] border-[#E05252] text-white shadow-md"
+                  ? color
+                    ? `${color} shadow-md`
+                    : "bg-slate-200 border-slate-300 text-foreground shadow-md"
                   : "bg-white border-border text-foreground hover:border-[#6BB68A] hover:shadow-sm"
                 }`}
             >
