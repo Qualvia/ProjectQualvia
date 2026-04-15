@@ -4,7 +4,7 @@ import GestionarProveedoresDialog from "@/components/GestionarProveedoresDialog"
 import NuevoRegistroTemperatura from "@/components/NuevoRegistroTemperatura";
 import ListaRegistrosTemperatura from "@/components/ListaRegistrosTemperatura";
 import NuevoRegistroLimpieza from "@/components/NuevoRegistroLimpieza";
-import ListaRegistrosLimpieza from "@/components/ListaRegistrosLimpieza.jsx";
+import ListaRegistrosLimpieza from "@/components/ListaRegistrosLimpieza";
 import {
   Thermometer,
   Droplets,
