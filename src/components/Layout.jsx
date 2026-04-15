@@ -67,7 +67,7 @@ export default function Layout() {
         )}>
         
         {/* Logo */}
-        <div className="h-16 flex items-center px-5 shrink-0 border-b border-white/10">
+        <div className="px-5 h-16 flex items-center shrink-0 border-b border-white/10">
           <img
             src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
             alt="Qualvia" className="mx-8 h-12 w-full object-contain object-left" />
