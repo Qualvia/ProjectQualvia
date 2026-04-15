@@ -5,8 +5,8 @@ import NuevoRegistroTemperatura from "@/components/NuevoRegistroTemperatura";
 import ListaRegistrosTemperatura from "@/components/ListaRegistrosTemperatura";
 import NuevoRegistroLimpieza from "@/components/NuevoRegistroLimpieza";
 import ListaRegistrosLimpieza from "@/components/ListaRegistrosLimpieza";
-import NuevoRegistroRecepcion from "@/components/NuevoRegistroRecepcion";
-import ListaRegistrosRecepcion from "@/components/ListaRegistrosRecepcion";
+import NuevoRegistroRecepcion from "@/components/NuevoRegistroRecepcion.jsx";
+import ListaRegistrosRecepcion from "@/components/ListaRegistrosRecepcion.jsx";
 import {
   Thermometer,
   Droplets,
