@@ -68,7 +68,11 @@ export default function Layout() {
       >
         {/* Logo */}
         <div className="h-16 flex items-center px-5 shrink-0 border-b border-white/10">
-          <span className="text-lg font-semibold tracking-tight text-white">Qualvia</span>
+          <img
+            src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
+            alt="Qualvia"
+            className="h-10 w-auto object-contain"
+          />
         </div>
 
         {/* Business selector */}
