@@ -42,13 +42,13 @@ export default function BusinessSelector() {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full justify-between gap-2 font-medium text-white/90 hover:bg-white/10 hover:text-white px-3"
+            className="w-full justify-between gap-2 font-semibold text-[#0A3E47] hover:bg-[#0A3E47]/10 px-2"
           >
             <div className="flex items-center gap-2 min-w-0">
               <Building2 className="w-4 h-4 shrink-0 text-[#6BB68A]" />
               <span className="truncate text-sm">{currentBusiness.name}</span>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 shrink-0 text-white/50" />
+            <ChevronDown className="w-3.5 h-3.5 shrink-0 text-[#0A3E47]/50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">

@@ -75,11 +75,6 @@ export default function Layout() {
           />
         </div>
 
-        {/* Business selector */}
-        <div className="px-3 py-3 border-b border-white/10 shrink-0">
-          <BusinessSelector />
-        </div>
-
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
@@ -103,14 +98,28 @@ export default function Layout() {
           ))}
         </nav>
 
-        {/* User + Logout */}
-        <div className="px-3 py-4 border-t border-white/10 shrink-0 space-y-1">
-          <p className="text-xs text-white/50 truncate px-3">
-            {user?.email}
-          </p>
+        {/* Bottom: Business selector + User + Logout */}
+        <div className="px-3 py-4 border-t border-white/10 shrink-0 space-y-3">
+          {/* Business selector */}
+          <div className="bg-[#EDE6DA] rounded-xl px-3 py-2">
+            <BusinessSelector />
+          </div>
+
+          {/* User info */}
+          <div className="flex items-center gap-3 px-1">
+            <div className="w-9 h-9 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
+              {user?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-white truncate">{user?.full_name || "—"}</p>
+              <p className="text-xs text-[#6BB68A] truncate">{user?.email}</p>
+            </div>
+          </div>
+
+          {/* Logout */}
           <button
             onClick={() => base44.auth.logout()}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/20 text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
           >
             <LogOut className="w-4 h-4 shrink-0" />
             Cerrar sesión
