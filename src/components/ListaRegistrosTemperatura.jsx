@@ -51,7 +51,7 @@ function FiltrosPanel({ registros, filtros, setFiltros, onClose }) {
   ];
 
   return (
-    <div className="border border-border rounded-2xl bg-secondary p-5 space-y-5">
+    <div className="bg-white p-5 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="font-semibold text-[#0A3E47]">Filtrado rápido</p>
@@ -251,6 +251,18 @@ export default function ListaRegistrosTemperatura({ refreshKey, onFueraDeRangoCh
           </button>
         </div>
 
+        {/* Panel de filtros — justo debajo del header */}
+        {mostrarFiltros && (
+          <div className="border-b border-border/40">
+            <FiltrosPanel
+              registros={registros}
+              filtros={filtros}
+              setFiltros={(f) => { setFiltros(f); setVerTodos(false); }}
+              onClose={() => setMostrarFiltros(false)}
+            />
+          </div>
+        )}
+
         {/* Cards */}
         <div className="p-4 space-y-3">
           {visibles.length === 0 && (
@@ -306,16 +318,6 @@ export default function ListaRegistrosTemperatura({ refreshKey, onFueraDeRangoCh
           )}
         </div>
       </div>
-
-      {/* Panel de filtros — fuera de la card, debajo */}
-      {mostrarFiltros && (
-        <FiltrosPanel
-          registros={registros}
-          filtros={filtros}
-          setFiltros={(f) => { setFiltros(f); setVerTodos(false); }}
-          onClose={() => setMostrarFiltros(false)}
-        />
-      )}
     </div>
   );
 }
