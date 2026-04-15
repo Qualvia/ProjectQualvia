@@ -21,10 +21,16 @@ export default function ListaRegistrosRecepcion({ refreshKey }) {
     setLoading(true);
     base44.entities.RegistroRecepcion.filter(
       { business_id: currentBusiness.id }, "-fecha", 200
-    ).then((data) => {
-      setRegistros(data);
-      setLoading(false);
-    });
+    )
+      .then((data) => {
+        setRegistros(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error cargando registros de recepción:", err);
+        setRegistros([]);
+        setLoading(false);
+      });
   }, [currentBusiness, refreshKey]);
 
   async function handleDelete(id) {

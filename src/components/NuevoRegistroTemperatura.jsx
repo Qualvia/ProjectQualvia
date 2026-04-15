@@ -18,13 +18,20 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
       setLoading(false);
       return;
     }
-    base44.entities.EquipoTemperatura.filter({ business_id: currentBusiness.id }).then((data) => {
-      setEquipos(data);
-      const init = {};
-      data.forEach((e) => { init[e.id] = { temperatura: "", observaciones: "" }; });
-      setValues(init);
-      setLoading(false);
-    });
+    base44.entities.EquipoTemperatura.filter({ business_id: currentBusiness.id })
+      .then((data) => {
+        setEquipos(data);
+        const init = {};
+        data.forEach((e) => { init[e.id] = { temperatura: "", observaciones: "" }; });
+        setValues(init);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error cargando equipos:", err);
+        setEquipos([]);
+        setValues({});
+        setLoading(false);
+      });
   }, [currentBusiness]);
 
   function setField(equipoId, field, val) {
@@ -61,13 +68,15 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
     );
   }
 
-  if (equipos.length === 0) {
+  if (!loading && equipos.length === 0) {
     return (
       <div className="bg-secondary rounded-2xl p-6 text-center text-sm text-muted-foreground">
         No hay equipos configurados. Usa "Gestionar equipos/zonas" para añadirlos.
       </div>
     );
   }
+
+
 
   return (
     <div className="bg-secondary rounded-2xl p-5 space-y-4">

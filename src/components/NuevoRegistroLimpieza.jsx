@@ -140,11 +140,18 @@ export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
     Promise.all([
       base44.entities.ZonaLimpieza.filter({ business_id: currentBusiness.id }),
       base44.entities.ProductoLimpieza.filter({ business_id: currentBusiness.id }),
-    ]).then(([z, p]) => {
-      setZonas(z);
-      setProductos(p);
-      setLoadingData(false);
-    });
+    ])
+      .then(([z, p]) => {
+        setZonas(z);
+        setProductos(p);
+        setLoadingData(false);
+      })
+      .catch((err) => {
+        console.error("Error cargando zonas/productos:", err);
+        setZonas([]);
+        setProductos([]);
+        setLoadingData(false);
+      });
   }, [currentBusiness]);
 
   function handleZonaChange(zonaId, data) {

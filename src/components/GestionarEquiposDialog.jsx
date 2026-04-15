@@ -113,9 +113,15 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
 
   async function loadItems() {
     setLoading(true);
-    const data = await base44.entities[entityName].filter({ business_id: currentBusiness.id });
-    setItems(data);
-    setLoading(false);
+    try {
+      const data = await base44.entities[entityName].filter({ business_id: currentBusiness.id });
+      setItems(data);
+    } catch (err) {
+      console.error(`Error cargando ${entityName}:`, err);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleSave() {

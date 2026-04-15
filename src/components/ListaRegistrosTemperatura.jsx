@@ -198,12 +198,19 @@ export default function ListaRegistrosTemperatura({ refreshKey, onFueraDeRangoCh
     setLoading(true);
     base44.entities.RegistroTemperatura.filter(
       { business_id: currentBusiness.id }, "-fecha", 100
-    ).then((data) => {
-      setRegistros(data);
-      setLoading(false);
-      const hayFuera = data.some((r) => getStatus(r) !== "correcto");
-      onFueraDeRangoChange?.(hayFuera);
-    });
+    )
+      .then((data) => {
+        setRegistros(data);
+        setLoading(false);
+        const hayFuera = data.some((r) => getStatus(r) !== "correcto");
+        onFueraDeRangoChange?.(hayFuera);
+      })
+      .catch((err) => {
+        console.error("Error cargando registros de temperatura:", err);
+        setRegistros([]);
+        setLoading(false);
+        onFueraDeRangoChange?.(false);
+      });
   }, [currentBusiness, refreshKey]);
 
   async function handleDelete(id) {

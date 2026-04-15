@@ -160,10 +160,16 @@ export default function ListaRegistrosLimpieza({ refreshKey }) {
     setLoading(true);
     base44.entities.RegistroLimpieza.filter(
       { business_id: currentBusiness.id }, "-fecha", 200
-    ).then((data) => {
-      setRegistros(data);
-      setLoading(false);
-    });
+    )
+      .then((data) => {
+        setRegistros(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error cargando registros de limpieza:", err);
+        setRegistros([]);
+        setLoading(false);
+      });
   }, [currentBusiness, refreshKey]);
 
   async function handleDelete(id) {

@@ -42,11 +42,18 @@ export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
       setLoadingData(false);
       return;
     }
-    base44.entities.Proveedor.filter({ business_id: currentBusiness.id }).then((data) => {
-      setProveedores(data);
-      if (data.length === 0) setModoManual(true);
-      setLoadingData(false);
-    });
+    base44.entities.Proveedor.filter({ business_id: currentBusiness.id })
+      .then((data) => {
+        setProveedores(data);
+        if (data.length === 0) setModoManual(true);
+        setLoadingData(false);
+      })
+      .catch((err) => {
+        console.error("Error cargando proveedores:", err);
+        setProveedores([]);
+        setModoManual(true);
+        setLoadingData(false);
+      });
   }, [currentBusiness]);
 
   function toggleAlergeno(a) {
