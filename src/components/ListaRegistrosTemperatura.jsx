@@ -51,7 +51,7 @@ function FiltrosPanel({ registros, filtros, setFiltros, onClose }) {
   ];
 
   return (
-    <div className="bg-white p-5 space-y-5">
+    <div className="bg-secondary p-5 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="font-semibold text-[#0A3E47]">Filtrado rápido</p>
