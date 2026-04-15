@@ -1,5 +1,5 @@
 {
-  "name": "ProductoLimpieza",
+  "name": "RegistroRecepcion",
   "type": "object",
   "properties": {
     "user_id": {
@@ -9,30 +9,63 @@
     "business_id": {
       "type": "string"
     },
-    "nombre": {
+    "producto": {
       "type": "string"
     },
-    "marca": {
+    "proveedor": {
       "type": "string"
     },
-    "tipo": {
+    "resultado": {
       "type": "string",
       "enum": [
-        "Desinfectante",
-        "Desengrasante",
-        "Detergente",
-        "Sanitizante",
-        "Otro"
+        "aceptado",
+        "rechazado"
       ]
     },
-    "ubicacion": {
+    "contiene_alergenos": {
+      "type": "boolean",
+      "default": false
+    },
+    "alergenos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lote": {
       "type": "string"
+    },
+    "fecha_caducidad": {
+      "type": "string"
+    },
+    "temperatura": {
+      "type": "number"
+    },
+    "estado_envase": {
+      "type": "string",
+      "enum": [
+        "Correcto",
+        "Da\u00f1ado",
+        "Deteriorado"
+      ]
+    },
+    "documento_url": {
+      "type": "string"
+    },
+    "observaciones": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
     "user_id",
     "business_id",
-    "nombre"
+    "producto",
+    "proveedor",
+    "resultado"
   ],
   "rls": {
     "create": {

@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 
 export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
-  const { currentBusiness } = useBusiness();
+  const { currentBusiness, user } = useBusiness();
   const [equipos, setEquipos] = useState([]);
   const [values, setValues] = useState({}); // { equipo_id: { temperatura, observaciones } }
   const [loading, setLoading] = useState(true);
@@ -46,6 +46,7 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
       await Promise.all(
         filled.map((e) =>
           base44.entities.RegistroTemperatura.create({
+            user_id: user.id,
             business_id: currentBusiness.id,
             equipo_id: e.id,
             equipo_nombre: e.nombre,

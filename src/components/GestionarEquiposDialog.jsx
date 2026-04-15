@@ -89,7 +89,7 @@ function ItemList({ items, onEdit, onDelete, tab }) {
 }
 
 export default function GestionarEquiposDialog({ open, onOpenChange }) {
-  const { currentBusiness } = useBusiness();
+  const { currentBusiness, user } = useBusiness();
   const [activeTab, setActiveTab] = useState("equipos");
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(emptyForm("equipos"));
@@ -128,7 +128,7 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
     if (!form.nombre?.trim()) return;
     setSaving(true);
     try {
-      const payload = { ...form, business_id: currentBusiness.id };
+      const payload = { ...form, user_id: user.id, business_id: currentBusiness.id };
       if (editingId) {
         await base44.entities[entityName].update(editingId, payload);
       } else {

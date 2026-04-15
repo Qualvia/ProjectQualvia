@@ -16,7 +16,7 @@ const ALERGENOS = [
 const ESTADOS_ENVASE = ["Correcto", "Dañado", "Deteriorado"];
 
 export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
-  const { currentBusiness } = useBusiness();
+  const { currentBusiness, user } = useBusiness();
   const [proveedores, setProveedores] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -75,6 +75,7 @@ export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
     setSaving(true);
     try {
       await base44.entities.RegistroRecepcion.create({
+        user_id: user.id,
         business_id: currentBusiness.id,
         producto: producto.trim(),
         proveedor: proveedorFinal.trim(),

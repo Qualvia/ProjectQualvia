@@ -2,6 +2,10 @@
   "name": "Proveedor",
   "type": "object",
   "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID del usuario propietario"
+    },
     "business_id": {
       "type": "string"
     },
@@ -37,6 +41,7 @@
     }
   },
   "required": [
+    "user_id",
     "business_id",
     "nombre"
   ],
@@ -44,17 +49,7 @@
     "create": {
       "$or": [
         {
-          "data.business_id": {
-            "$in": {
-              "$query": {
-                "entity": "Business",
-                "field": "id",
-                "where": {
-                  "user_id": "{{user.id}}"
-                }
-              }
-            }
-          }
+          "data.user_id": "{{user.id}}"
         },
         {
           "user_condition": {
@@ -66,17 +61,7 @@
     "read": {
       "$or": [
         {
-          "data.business_id": {
-            "$in": {
-              "$query": {
-                "entity": "Business",
-                "field": "id",
-                "where": {
-                  "user_id": "{{user.id}}"
-                }
-              }
-            }
-          }
+          "data.user_id": "{{user.id}}"
         },
         {
           "user_condition": {
@@ -88,17 +73,7 @@
     "update": {
       "$or": [
         {
-          "data.business_id": {
-            "$in": {
-              "$query": {
-                "entity": "Business",
-                "field": "id",
-                "where": {
-                  "user_id": "{{user.id}}"
-                }
-              }
-            }
-          }
+          "data.user_id": "{{user.id}}"
         },
         {
           "user_condition": {
@@ -110,17 +85,7 @@
     "delete": {
       "$or": [
         {
-          "data.business_id": {
-            "$in": {
-              "$query": {
-                "entity": "Business",
-                "field": "id",
-                "where": {
-                  "user_id": "{{user.id}}"
-                }
-              }
-            }
-          }
+          "data.user_id": "{{user.id}}"
         },
         {
           "user_condition": {

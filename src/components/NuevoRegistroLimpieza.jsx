@@ -123,7 +123,7 @@ function ZonaRow({ zona, estado, onChange }) {
 }
 
 export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
-  const { currentBusiness } = useBusiness();
+  const { currentBusiness, user } = useBusiness();
   const [zonas, setZonas] = useState([]);
   const [productos, setProductos] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -168,6 +168,7 @@ export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
     const registros = zonas
       .filter((z) => zonasEstado[z.id]?.estado)
       .map((z) => ({
+        user_id: user.id,
         business_id: currentBusiness.id,
         zona_id: z.id,
         zona_nombre: z.nombre,
