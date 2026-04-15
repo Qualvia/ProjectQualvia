@@ -56,7 +56,7 @@ function emptyForm(tab) {
   return { nombre: "", ubicacion: "" };
 }
 
-function ItemList({ items, onEdit, onDelete }) {
+function ItemList({ items, onEdit, onDelete, tab }) {
   if (items.length === 0) return null;
   return (
     <div className="space-y-2">
@@ -65,9 +65,11 @@ function ItemList({ items, onEdit, onDelete }) {
           <div>
             <p className="font-medium text-sm text-foreground">{item.nombre}</p>
             <p className="text-xs text-muted-foreground">
-              {item.temp_min !== undefined
-                ? `Rango: ${item.temp_min}°C – ${item.temp_max}°C`
-                : item.ubicacion || "—"}
+              {tab === "productos"
+                ? [item.marca, item.tipo].filter(Boolean).join(" · ") || "—"
+                : item.temp_min !== undefined
+                  ? `Rango: ${item.temp_min}°C – ${item.temp_max}°C`
+                  : item.ubicacion || "—"}
             </p>
           </div>
           <div className="flex gap-2">
@@ -316,7 +318,7 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
               <p className="text-sm font-semibold text-[#0A3E47]">
                 {TAB_LABELS[activeTab]} registrados ({items.length})
               </p>
-              <ItemList items={items} onEdit={handleEdit} onDelete={handleDelete} />
+              <ItemList items={items} onEdit={handleEdit} onDelete={handleDelete} tab={activeTab} />
             </>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-2">No hay elementos registrados aún.</p>
