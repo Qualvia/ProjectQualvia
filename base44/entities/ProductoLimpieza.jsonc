@@ -8,6 +8,19 @@
     "nombre": {
       "type": "string"
     },
+    "marca": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Desinfectante",
+        "Desengrasante",
+        "Detergente",
+        "Sanitizante",
+        "Otro"
+      ]
+    },
     "ubicacion": {
       "type": "string"
     }

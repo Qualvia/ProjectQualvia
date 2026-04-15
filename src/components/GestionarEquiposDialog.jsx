@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+
+const TIPOS_PRODUCTO = ["Desinfectante", "Desengrasante", "Detergente", "Sanitizante", "Otro"];
 import { Droplets, Waves, Bug, Sparkles, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -50,6 +52,7 @@ const TAB_LABELS = {
 function emptyForm(tab) {
   if (tab === "equipos") return { tipo: "", nombre: "", ubicacion: "", descripcion: "", temp_min: 0, temp_max: 5 };
   if (tab === "zonas") return { nombre: "", ubicacion: "", descripcion: "", foto_url: "" };
+  if (tab === "productos") return { nombre: "", marca: "", tipo: "Desinfectante", ubicacion: "" };
   return { nombre: "", ubicacion: "" };
 }
 
@@ -138,6 +141,7 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
 
   const isEquipos = activeTab === "equipos";
   const isZonas = activeTab === "zonas";
+  const isProductos = activeTab === "productos";
 
   async function handleFotoUpload(e) {
     const file = e.target.files?.[0];
@@ -191,24 +195,54 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="mb-1.5 block">Nombre *</Label>
+              <Label className="mb-1.5 block">
+                {isProductos ? "Nombre del producto *" : "Nombre *"}
+              </Label>
               <Input
-                placeholder={isEquipos ? "Ej: Nevera 1" : "Nombre"}
+                placeholder={isEquipos ? "Ej: Nevera 1" : isProductos ? "Ej: Desinfectante X-100" : "Nombre"}
                 value={form.nombre}
                 onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                 className="bg-white"
               />
             </div>
-            <div>
-              <Label className="mb-1.5 block">Ubicación</Label>
-              <Input
-                placeholder="Ubicación física"
-                value={form.ubicacion}
-                onChange={(e) => setForm({ ...form, ubicacion: e.target.value })}
-                className="bg-white"
-              />
-            </div>
+            {isProductos ? (
+              <div>
+                <Label className="mb-1.5 block">Marca</Label>
+                <Input
+                  placeholder="Marca del producto"
+                  value={form.marca || ""}
+                  onChange={(e) => setForm({ ...form, marca: e.target.value })}
+                  className="bg-white"
+                />
+              </div>
+            ) : (
+              <div>
+                <Label className="mb-1.5 block">Ubicación</Label>
+                <Input
+                  placeholder="Ubicación física"
+                  value={form.ubicacion}
+                  onChange={(e) => setForm({ ...form, ubicacion: e.target.value })}
+                  className="bg-white"
+                />
+              </div>
+            )}
           </div>
+
+          {isProductos && (
+            <div className="w-1/2">
+              <Label className="mb-1.5 block">Tipo</Label>
+              <Select value={form.tipo || "Desinfectante"} onValueChange={(v) => setForm({ ...form, tipo: v })}>
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Selecciona un tipo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIPOS_PRODUCTO.map((t) => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {isZonas && (
             <>
