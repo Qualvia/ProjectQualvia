@@ -10,6 +10,9 @@ import { Plus, Download, Pencil, Trash2, Loader2, Building2 } from "lucide-react
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 
+const React = require('react');
+const { useState, useEffect } = React;
+
 const EMPTY = {
   nombre: "", cif_nif: "", contacto: "", telefono: "",
   email: "", direccion: "", productos: "",
@@ -17,7 +20,7 @@ const EMPTY = {
 };
 
 export default function GestionarProveedoresDialog({ open, onOpenChange }) {
-  const { currentBusiness } = useBusiness();
+  const { currentBusiness, user } = useBusiness();
   const [proveedores, setProveedores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -44,7 +47,7 @@ export default function GestionarProveedoresDialog({ open, onOpenChange }) {
   async function handleSave() {
     if (!form.nombre.trim()) return;
     setSaving(true);
-    const payload = { ...form, business_id: currentBusiness.id };
+    const payload = { ...form, user_id: user.id, business_id: currentBusiness.id };
     if (editingId) {
       await base44.entities.Proveedor.update(editingId, payload);
     } else {
