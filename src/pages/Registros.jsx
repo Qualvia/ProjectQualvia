@@ -3,6 +3,8 @@ import GestionarEquiposDialog from "@/components/GestionarEquiposDialog";
 import GestionarProveedoresDialog from "@/components/GestionarProveedoresDialog";
 import NuevoRegistroTemperatura from "@/components/NuevoRegistroTemperatura";
 import ListaRegistrosTemperatura from "@/components/ListaRegistrosTemperatura";
+import NuevoRegistroLimpieza from "@/components/NuevoRegistroLimpieza";
+import ListaRegistrosLimpieza from "@/components/ListaRegistrosLimpieza";
 import {
   Thermometer,
   Droplets,
@@ -44,6 +46,7 @@ export default function Registros() {
   const [showProveedores, setShowProveedores] = useState(false);
   const [showNuevoRegistro, setShowNuevoRegistro] = useState(false);
   const [registroKey, setRegistroKey] = useState(0);
+  const [limpiezaKey, setLimpiezaKey] = useState(0);
   const [hayFueraDeRango, setHayFueraDeRango] = useState(false);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
@@ -125,7 +128,7 @@ export default function Registros() {
             </div>
           </div>
 
-          {/* Formulario inline de nuevo registro (solo temperatura por ahora) */}
+          {/* Formulario inline de nuevo registro */}
           {showNuevoRegistro && active === "temperatura" && (
             <NuevoRegistroTemperatura
               onCancel={() => setShowNuevoRegistro(false)}
@@ -135,10 +138,22 @@ export default function Registros() {
               }}
             />
           )}
+          {showNuevoRegistro && active === "limpieza" && (
+            <NuevoRegistroLimpieza
+              onCancel={() => setShowNuevoRegistro(false)}
+              onSaved={() => {
+                setShowNuevoRegistro(false);
+                setLimpiezaKey((k) => k + 1);
+              }}
+            />
+          )}
 
           {/* Lista de registros guardados */}
           {active === "temperatura" && (
             <ListaRegistrosTemperatura refreshKey={registroKey} onFueraDeRangoChange={setHayFueraDeRango} />
+          )}
+          {active === "limpieza" && (
+            <ListaRegistrosLimpieza refreshKey={limpiezaKey} />
           )}
         </div>
       )}
