@@ -5,10 +5,21 @@ const CHILD_ENTITIES = [
   "EquipoTemperatura",
   "RegistroTemperatura",
   "ZonaLimpieza",
+  "RegistroLimpieza",
   "PuntoAgua",
+  "RegistroAgua",
+  "SuministroAgua",
   "PuntoPlaga",
+  "RegistroPlaga",
+  "GestorPlagas",
   "ProductoLimpieza",
   "Proveedor",
+  "RegistroRecepcion",
+  "RegistroMantenimiento",
+  "EmpresaMantenimiento",
+  "RegistroFormacion",
+  "RegistroAlergeno",
+  "RegistroLote",
 ];
 
 Deno.serve(async (req) => {
