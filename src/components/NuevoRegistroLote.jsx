@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, Trash2, Upload, Lightbulb, Link2 } from "lucide-react";
+import { Loader2, Plus, Trash2, Upload, Link2, Info } from "lucide-react";
 import { format } from "date-fns";
 
 function generarCodigoLote(contador = 1) {
@@ -24,6 +24,7 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
   const [recepciones, setRecepciones] = useState([]);
   const [equipos, setEquipos] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [showInfo, setShowInfo] = useState(false);
 
   // Form fields
   const today = format(new Date(), "yyyy-MM-dd");
@@ -129,31 +130,38 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
 
   return (
     <div className="space-y-4">
-      {/* Info box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 space-y-3 text-sm">
-        <p className="flex items-center gap-2 font-semibold text-blue-800"><Lightbulb className="w-4 h-4" /> ¿Cómo crear el código de lote?</p>
-        <p className="text-blue-700">El código de lote es único y permite identificar y rastrear cada producción. Te recomendamos usar este formato:</p>
-        <p className="font-mono text-[#6BB68A] bg-white border border-blue-200 rounded-lg px-3 py-2">LT–AAAAMMDD–XXX</p>
-        <ul className="text-blue-700 space-y-0.5">
-          <li>• <strong>LT:</strong> Prefijo (Lote)</li>
-          <li>• <strong>AAAAMMDD:</strong> Fecha de elaboración (ej: 20250124)</li>
-          <li>• <strong>XXX:</strong> Número secuencial del día (001, 002...)</li>
-        </ul>
-        <p className="text-blue-700"><strong>Ejemplo:</strong> LT-20250124-001 (primer lote del 24 de enero de 2025)</p>
-
-        <div className="border-t border-blue-200 pt-3">
-          <p className="flex items-center gap-2 font-semibold text-blue-800"><Link2 className="w-4 h-4" /> Lotes de origen (Trazabilidad)</p>
-          <p className="text-blue-700 mt-1">Los <strong>lotes de origen</strong> son las materias primas que utilizas para elaborar este producto (ej: harina, huevos, carne...). Vincularlos aquí te permite saber exactamente qué ingredientes lleva cada lote final.</p>
-          <p className="text-blue-700 mt-1">Usa el buscador de abajo para encontrar las recepciones de materia prima por fecha y añadirlas automáticamente.</p>
-        </div>
-      </div>
-
       {/* Form principal */}
       <div className="bg-secondary rounded-2xl p-6 space-y-5">
         {/* Código + Producto */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label className="mb-1.5 block">Código de lote *</Label>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Label>Código de lote *</Label>
+              <button
+                type="button"
+                onClick={() => setShowInfo((v) => !v)}
+                className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${showInfo ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-500 hover:bg-blue-200"}`}
+                title="¿Cómo crear el código de lote?"
+              >
+                <Info className="w-3 h-3" />
+              </button>
+            </div>
+            {showInfo && (
+              <div className="mb-2 bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2 text-sm">
+                <p className="text-blue-700">El código de lote es único y permite identificar y rastrear cada producción. Te recomendamos usar este formato:</p>
+                <p className="font-mono text-[#6BB68A] bg-white border border-blue-200 rounded-lg px-3 py-1.5 text-xs">LT–AAAAMMDD–XXX</p>
+                <ul className="text-blue-700 space-y-0.5 text-xs">
+                  <li>• <strong>LT:</strong> Prefijo (Lote)</li>
+                  <li>• <strong>AAAAMMDD:</strong> Fecha de elaboración (ej: 20250124)</li>
+                  <li>• <strong>XXX:</strong> Número secuencial del día (001, 002...)</li>
+                </ul>
+                <p className="text-blue-700 text-xs"><strong>Ejemplo:</strong> LT-20250124-001</p>
+                <div className="border-t border-blue-200 pt-2">
+                  <p className="flex items-center gap-1.5 font-semibold text-blue-800 text-xs"><Link2 className="w-3 h-3" /> Lotes de origen (Trazabilidad)</p>
+                  <p className="text-blue-700 text-xs mt-1">Los <strong>lotes de origen</strong> son las materias primas utilizadas (harina, huevos, carne...). Vincúlalos abajo para saber exactamente qué ingredientes lleva cada lote final.</p>
+                </div>
+              </div>
+            )}
             <Input
               placeholder="Ej: LT20250101-001"
               value={codigoLote}
