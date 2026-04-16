@@ -5,7 +5,7 @@ import { Loader2, Trash2, Filter, CalendarDays, User, ChevronDown, ExternalLink 
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 
-const LIMITE = 5;
+const PAGE_SIZE = 30;
 const EMPTY_FILTERS = { periodo: "todos", desde: "", hasta: "" };
 
 function FiltrosPanel({ filtros, setFiltros, onClose }) {
@@ -79,17 +79,31 @@ export default function ListaRegistrosFormacion({ refreshKey }) {
   const { currentBusiness } = useBusiness();
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [verTodos, setVerTodos] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [skip, setSkip] = useState(0);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [filtros, setFiltros] = useState(EMPTY_FILTERS);
+  const hayFiltrosActivos = JSON.stringify(filtros) !== JSON.stringify(EMPTY_FILTERS);
+
+  async function fetchPage(skipVal, replace = false) {
+    if (!currentBusiness) return;
+    const data = await base44.entities.RegistroFormacion.filter({ business_id: currentBusiness.id }, "-fecha", PAGE_SIZE + 1, skipVal);
+    const hasMoreData = data.length > PAGE_SIZE;
+    const slice = hasMoreData ? data.slice(0, PAGE_SIZE) : data;
+    setRegistros((prev) => replace ? slice : [...prev, ...slice]);
+    setHasMore(hasMoreData);
+    setSkip(skipVal + slice.length);
+  }
 
   useEffect(() => {
     if (!currentBusiness) return;
     setLoading(true);
-    base44.entities.RegistroFormacion.filter({ business_id: currentBusiness.id }, "-fecha", 200)
-      .then((data) => { setRegistros(data); setLoading(false); })
-      .catch(() => { setRegistros([]); setLoading(false); });
+    setSkip(0);
+    fetchPage(0, true).finally(() => setLoading(false));
   }, [currentBusiness, refreshKey]);
+
+  async function handleLoadMore() { setLoadingMore(true); await fetchPage(skip, false); setLoadingMore(false); }
 
   async function handleDelete(id) {
     await base44.entities.RegistroFormacion.delete(id);
@@ -97,13 +111,9 @@ export default function ListaRegistrosFormacion({ refreshKey }) {
   }
 
   const filtrados = useMemo(() => aplicarFiltros(registros, filtros), [registros, filtros]);
-  const hayFiltrosActivos = JSON.stringify(filtros) !== JSON.stringify(EMPTY_FILTERS);
 
   if (loading) return <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
   if (registros.length === 0) return null;
-
-  const visibles = verTodos ? filtrados : filtrados.slice(0, LIMITE);
-  const hayMas = filtrados.length > LIMITE;
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-border">
@@ -125,16 +135,16 @@ export default function ListaRegistrosFormacion({ refreshKey }) {
       {mostrarFiltros && (
         <FiltrosPanel
           filtros={filtros}
-          setFiltros={(f) => { setFiltros(f); setVerTodos(false); }}
+          setFiltros={(f) => { setFiltros(f); }}
           onClose={() => setMostrarFiltros(false)}
         />
       )}
 
       <div className="p-4 space-y-3">
-        {visibles.length === 0 && (
+        {filtrados.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-4">No hay registros con los filtros aplicados.</p>
         )}
-        {visibles.map((r) => (
+        {filtrados.map((r) => (
           <div key={r.id} className="bg-white rounded-xl border border-border px-5 py-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -172,7 +182,7 @@ export default function ListaRegistrosFormacion({ refreshKey }) {
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
                   <span className="flex items-center gap-1">
                     <CalendarDays className="w-3.5 h-3.5" />
-                    Registrado: {r.created_date ? format(new Date(r.created_date), "d MMM yyyy", { locale: es }) : "—"}
+                    Registrado: {r.fecha ? format(new Date(r.fecha), "d MMM yyyy", { locale: es }) : "—"}
                   </span>
                   <span>·</span>
                   <span className="flex items-center gap-1">
@@ -196,11 +206,11 @@ export default function ListaRegistrosFormacion({ refreshKey }) {
           </div>
         ))}
 
-        {hayMas && !verTodos && (
-          <button onClick={() => setVerTodos(true)}
+        {hasMore && !hayFiltrosActivos && (
+          <button onClick={handleLoadMore} disabled={loadingMore}
             className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-secondary text-sm font-medium text-[#0A3E47] hover:bg-secondary/70 transition-colors">
-            <ChevronDown className="w-4 h-4" />
-            Ver más ({filtrados.length - LIMITE} restantes)
+            {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronDown className="w-4 h-4" />}
+            Cargar más
           </button>
         )}
       </div>

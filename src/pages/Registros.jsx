@@ -1,6 +1,6 @@
 import React, { useState, lazy, Suspense } from "react";
-import GestionarEquiposDialog from "@/components/GestionarEquiposDialog";
-import GestionarProveedoresDialog from "@/components/GestionarProveedoresDialog";
+const GestionarEquiposDialog = lazy(() => import("@/components/GestionarEquiposDialog"));
+const GestionarProveedoresDialog = lazy(() => import("@/components/GestionarProveedoresDialog"));
 import {
   Thermometer, Droplets, ClipboardCheck, Waves, Bug, Wrench,
   GraduationCap, Apple, Package, Snowflake, Trash2, AlertTriangle,
@@ -290,8 +290,16 @@ export default function Registros() {
         </div>
       )}
 
-      <GestionarEquiposDialog open={showGestionar} onOpenChange={setShowGestionar} initialTab={gestionarTab} />
-      <GestionarProveedoresDialog open={showProveedores} onOpenChange={setShowProveedores} />
+      {showGestionar && (
+        <Suspense fallback={null}>
+          <GestionarEquiposDialog open={showGestionar} onOpenChange={setShowGestionar} initialTab={gestionarTab} />
+        </Suspense>
+      )}
+      {showProveedores && (
+        <Suspense fallback={null}>
+          <GestionarProveedoresDialog open={showProveedores} onOpenChange={setShowProveedores} />
+        </Suspense>
+      )}
       {showSuministroAgua && (
         <Suspense fallback={null}>
           <SuministroAguaDialog open={showSuministroAgua} onOpenChange={setShowSuministroAgua} />

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { Loader2, Trash2, Filter, CalendarDays, User, ChevronDown, Printer, GitBranch } from "lucide-react";
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isPast, isToday } from "date-fns";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isPast, isToday, isWithinInterval } from "date-fns";
 import { es } from "date-fns/locale";
 
 const PAGE_SIZE = 20;
@@ -57,23 +57,24 @@ function FiltrosPanel({ filtros, setFiltros, onClose }) {
   );
 }
 
-function buildQuery(filtros, businessId) {
-  const q = { business_id: businessId };
+// El SDK solo soporta filtro exacto por campo. El filtro de fecha se hace en cliente
+// sobre la página cargada. buildQuery solo filtra por business_id.
+function buildQuery(businessId) {
+  return { business_id: businessId };
+}
+
+function pasaFiltroFecha(r, filtros) {
+  const fecha = r.fecha ? new Date(r.fecha) : null;
+  if (!fecha) return true;
   const now = new Date();
-  if (filtros.periodo === "hoy") {
-    q.fecha__gte = startOfDay(now).toISOString();
-    q.fecha__lte = endOfDay(now).toISOString();
-  } else if (filtros.periodo === "semana") {
-    q.fecha__gte = startOfWeek(now, { weekStartsOn: 1 }).toISOString();
-    q.fecha__lte = endOfWeek(now, { weekStartsOn: 1 }).toISOString();
-  } else if (filtros.periodo === "mes") {
-    q.fecha__gte = startOfMonth(now).toISOString();
-    q.fecha__lte = endOfMonth(now).toISOString();
-  } else if (filtros.periodo === "personalizado") {
-    if (filtros.desde) q.fecha__gte = startOfDay(new Date(filtros.desde)).toISOString();
-    if (filtros.hasta) q.fecha__lte = endOfDay(new Date(filtros.hasta)).toISOString();
+  if (filtros.periodo === "hoy") return isWithinInterval(fecha, { start: startOfDay(now), end: endOfDay(now) });
+  if (filtros.periodo === "semana") return isWithinInterval(fecha, { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) });
+  if (filtros.periodo === "mes") return isWithinInterval(fecha, { start: startOfMonth(now), end: endOfMonth(now) });
+  if (filtros.periodo === "personalizado") {
+    if (filtros.desde && fecha < startOfDay(new Date(filtros.desde))) return false;
+    if (filtros.hasta && fecha > endOfDay(new Date(filtros.hasta))) return false;
   }
-  return q;
+  return true;
 }
 
 function CaducidadBadge({ fecha }) {
@@ -98,9 +99,9 @@ export default function ListaRegistrosLotes({ refreshKey }) {
 
   const hayFiltrosActivos = JSON.stringify(filtros) !== JSON.stringify(EMPTY_FILTERS);
 
-  async function fetchPage(skipVal, currentFiltros, replace = false) {
+  async function fetchPage(skipVal, replace = false) {
     if (!currentBusiness) return;
-    const q = buildQuery(currentFiltros, currentBusiness.id);
+    const q = buildQuery(currentBusiness.id);
     const data = await base44.entities.RegistroLote.filter(q, "-fecha", PAGE_SIZE + 1, skipVal);
     const hasMoreData = data.length > PAGE_SIZE;
     const slice = hasMoreData ? data.slice(0, PAGE_SIZE) : data;
@@ -113,12 +114,12 @@ export default function ListaRegistrosLotes({ refreshKey }) {
     if (!currentBusiness) return;
     setLoading(true);
     setSkip(0);
-    fetchPage(0, filtros, true).finally(() => setLoading(false));
-  }, [currentBusiness, refreshKey, filtros]);
+    fetchPage(0, true).finally(() => setLoading(false));
+  }, [currentBusiness, refreshKey]);
 
   async function handleLoadMore() {
     setLoadingMore(true);
-    await fetchPage(skip, filtros, false);
+    await fetchPage(skip, false);
     setLoadingMore(false);
   }
 
@@ -126,6 +127,8 @@ export default function ListaRegistrosLotes({ refreshKey }) {
     await base44.entities.RegistroLote.delete(id);
     setRegistros((prev) => prev.filter((r) => r.id !== id));
   }
+
+  const visibles = registros.filter((r) => pasaFiltroFecha(r, filtros));
 
   if (loading) return <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
   if (registros.length === 0 && !hayFiltrosActivos) return null;
@@ -135,7 +138,7 @@ export default function ListaRegistrosLotes({ refreshKey }) {
       <div className="px-5 py-4 flex items-center justify-between bg-secondary border-b border-border/40">
         <p className="font-semibold text-[#0A3E47]">
           Lotes registrados
-          {hayFiltrosActivos && <span className="ml-2 text-xs font-normal text-[#6BB68A]">({registros.length} cargados)</span>}
+          {hayFiltrosActivos && <span className="ml-2 text-xs font-normal text-[#6BB68A]">({visibles.length} resultados)</span>}
         </p>
         <button
           onClick={() => setMostrarFiltros((v) => !v)}
@@ -152,10 +155,10 @@ export default function ListaRegistrosLotes({ refreshKey }) {
       )}
 
       <div className="p-4 space-y-3">
-        {registros.length === 0 && (
+        {visibles.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-4">No hay registros con los filtros aplicados.</p>
         )}
-        {registros.map((r) => (
+        {visibles.map((r) => (
           <div key={r.id} className="bg-white rounded-xl border border-border px-5 py-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
