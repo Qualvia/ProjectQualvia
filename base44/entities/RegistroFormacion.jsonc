@@ -1,0 +1,92 @@
+{
+  "name": "RegistroFormacion",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "business_id": {
+      "type": "string"
+    },
+    "tema": {
+      "type": "string"
+    },
+    "fecha_formacion": {
+      "type": "string"
+    },
+    "duracion_horas": {
+      "type": "number"
+    },
+    "formador": {
+      "type": "string"
+    },
+    "contenido": {
+      "type": "string"
+    },
+    "empleados_asistentes": {
+      "type": "string"
+    },
+    "evidencia_url": {
+      "type": "string"
+    },
+    "observaciones": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "tema",
+    "fecha_formacion"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
