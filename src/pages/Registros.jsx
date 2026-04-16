@@ -60,8 +60,8 @@ export default function Registros() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#0A3E47]">Registros</h1>
-          <p className="text-base text-[#6BB68A] font-medium mt-0.5">
+          <h1 className="text-4xl font-bold text-[#0A3E47]">Registros</h1>
+          <p className="text-lg text-[#6BB68A] font-medium mt-0.5">
             Gestiona todos tus controles diarios
           </p>
         </div>

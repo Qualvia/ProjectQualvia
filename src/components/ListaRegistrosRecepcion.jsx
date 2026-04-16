@@ -2,11 +2,129 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { Loader2, Trash2, Filter, CalendarDays, User, ChevronDown, Printer } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 
-const EMPTY_FILTERS = { resultado: "todos" };
+const EMPTY_FILTERS = { periodo: "todos", desde: "", hasta: "", resultado: "todos", proveedor: "todos" };
 const LIMITE = 5;
+
+function FiltrosPanel({ registros, filtros, setFiltros, onClose }) {
+  const [local, setLocal] = useState(filtros);
+
+  const proveedores = useMemo(() => [...new Set(registros.map((r) => r.proveedor).filter(Boolean))], [registros]);
+
+  function set(field, val) { setLocal((prev) => ({ ...prev, [field]: val })); }
+
+  function handleAplicar() { setFiltros(local); onClose(); }
+  function handleLimpiar() { setLocal(EMPTY_FILTERS); setFiltros(EMPTY_FILTERS); onClose(); }
+
+  const periodos = [
+    { id: "hoy", label: "Hoy" },
+    { id: "semana", label: "Esta semana" },
+    { id: "mes", label: "Este mes" },
+    { id: "todos", label: "Todos" },
+  ];
+
+  return (
+    <div className="bg-secondary p-5 space-y-5 border-b border-border/40">
+      <p className="font-semibold text-[#0A3E47]">Período rápido</p>
+
+      <div className="flex gap-2 flex-wrap">
+        {periodos.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => set("periodo", p.id)}
+            className={`px-4 py-1.5 rounded-lg border text-sm font-medium transition-colors
+              ${local.periodo === p.id
+                ? "bg-[#6BB68A] border-[#6BB68A] text-white"
+                : "bg-white border-border text-foreground hover:border-[#6BB68A]"}`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1.5">Desde (personalizado)</label>
+          <input
+            type="date"
+            value={local.desde}
+            onChange={(e) => { set("desde", e.target.value); set("periodo", "personalizado"); }}
+            className="w-full h-9 rounded-lg border border-input bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1.5">Hasta (personalizado)</label>
+          <input
+            type="date"
+            value={local.hasta}
+            onChange={(e) => { set("hasta", e.target.value); set("periodo", "personalizado"); }}
+            className="w-full h-9 rounded-lg border border-input bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1.5">Resultado</label>
+          <select
+            value={local.resultado}
+            onChange={(e) => set("resultado", e.target.value)}
+            className="w-full h-9 rounded-lg border border-input bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="todos">Todos</option>
+            <option value="aceptado">Aceptado</option>
+            <option value="rechazado">Rechazado</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1.5">Proveedor</label>
+          <select
+            value={local.proveedor}
+            onChange={(e) => set("proveedor", e.target.value)}
+            className="w-full h-9 rounded-lg border border-input bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="todos">Todos los proveedores</option>
+            {proveedores.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          onClick={handleAplicar}
+          className="py-2.5 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white font-semibold text-sm transition-colors"
+        >
+          Aplicar filtros
+        </button>
+        <button
+          onClick={handleLimpiar}
+          className="py-2.5 rounded-xl bg-white border border-border text-foreground font-semibold text-sm hover:bg-secondary transition-colors"
+        >
+          Limpiar filtros
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function aplicarFiltros(registros, filtros) {
+  return registros.filter((r) => {
+    if (filtros.periodo !== "todos" && filtros.periodo !== "personalizado") {
+      const fecha = new Date(r.fecha);
+      const now = new Date();
+      if (filtros.periodo === "hoy" && (fecha < startOfDay(now) || fecha > endOfDay(now))) return false;
+      if (filtros.periodo === "semana" && (fecha < startOfWeek(now, { weekStartsOn: 1 }) || fecha > endOfWeek(now, { weekStartsOn: 1 }))) return false;
+      if (filtros.periodo === "mes" && (fecha < startOfMonth(now) || fecha > endOfMonth(now))) return false;
+    }
+    if (filtros.desde && new Date(r.fecha) < startOfDay(new Date(filtros.desde))) return false;
+    if (filtros.hasta && new Date(r.fecha) > endOfDay(new Date(filtros.hasta))) return false;
+    if (filtros.resultado !== "todos" && r.resultado !== filtros.resultado) return false;
+    if (filtros.proveedor !== "todos" && r.proveedor !== filtros.proveedor) return false;
+    return true;
+  });
+}
 
 export default function ListaRegistrosRecepcion({ refreshKey }) {
   const { currentBusiness } = useBusiness();
@@ -22,10 +140,7 @@ export default function ListaRegistrosRecepcion({ refreshKey }) {
     base44.entities.RegistroRecepcion.filter(
       { business_id: currentBusiness.id }, "-fecha", 200
     )
-      .then((data) => {
-        setRegistros(data);
-        setLoading(false);
-      })
+      .then((data) => { setRegistros(data); setLoading(false); })
       .catch((err) => {
         console.error("Error cargando registros de recepción:", err);
         setRegistros([]);
@@ -38,13 +153,7 @@ export default function ListaRegistrosRecepcion({ refreshKey }) {
     setRegistros((prev) => prev.filter((r) => r.id !== id));
   }
 
-  const filtrados = useMemo(() => {
-    return registros.filter((r) => {
-      if (filtros.resultado !== "todos" && r.resultado !== filtros.resultado) return false;
-      return true;
-    });
-  }, [registros, filtros]);
-
+  const filtrados = useMemo(() => aplicarFiltros(registros, filtros), [registros, filtros]);
   const hayFiltrosActivos = JSON.stringify(filtros) !== JSON.stringify(EMPTY_FILTERS);
 
   if (loading) return <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
@@ -76,26 +185,12 @@ export default function ListaRegistrosRecepcion({ refreshKey }) {
 
       {/* Filtros */}
       {mostrarFiltros && (
-        <div className="bg-secondary p-5 border-b border-border/40 flex gap-4 items-end">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">Resultado</label>
-            <select
-              value={filtros.resultado}
-              onChange={(e) => { setFiltros({ resultado: e.target.value }); setVerTodos(false); }}
-              className="h-9 rounded-lg border border-input bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-            >
-              <option value="todos">Todos</option>
-              <option value="aceptado">Aceptado</option>
-              <option value="rechazado">Rechazado</option>
-            </select>
-          </div>
-          <button
-            onClick={() => { setFiltros(EMPTY_FILTERS); setMostrarFiltros(false); }}
-            className="h-9 px-4 rounded-lg border border-border bg-white text-sm text-foreground hover:bg-secondary transition-colors"
-          >
-            Limpiar
-          </button>
-        </div>
+        <FiltrosPanel
+          registros={registros}
+          filtros={filtros}
+          setFiltros={(f) => { setFiltros(f); setVerTodos(false); }}
+          onClose={() => setMostrarFiltros(false)}
+        />
       )}
 
       {/* Cards */}
