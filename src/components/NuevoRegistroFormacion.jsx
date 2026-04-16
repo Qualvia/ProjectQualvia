@@ -32,6 +32,7 @@ export default function NuevoRegistroFormacion({ onCancel, onSaved }) {
       duracion_horas: form.duracion_horas ? Number(form.duracion_horas) : undefined,
       user_id: user.id,
       business_id: currentBusiness.id,
+      fecha: new Date().toISOString(),
     });
     setSaving(false);
     onSaved();

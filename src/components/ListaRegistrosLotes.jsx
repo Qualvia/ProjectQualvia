@@ -59,7 +59,7 @@ function FiltrosPanel({ filtros, setFiltros, onClose }) {
 
 function aplicarFiltros(registros, filtros) {
   return registros.filter((r) => {
-    const fecha = r.created_date ? new Date(r.created_date) : null;
+    const fecha = r.fecha ? new Date(r.fecha) : null;
     if (!fecha) return true;
     const now = new Date();
     if (filtros.periodo !== "todos" && filtros.periodo !== "personalizado") {
@@ -94,7 +94,7 @@ export default function ListaRegistrosLotes({ refreshKey }) {
   useEffect(() => {
     if (!currentBusiness) return;
     setLoading(true);
-    base44.entities.RegistroLote.filter({ business_id: currentBusiness.id }, "-created_date", 200)
+    base44.entities.RegistroLote.filter({ business_id: currentBusiness.id }, "-fecha", 200)
       .then((data) => { setRegistros(data); setLoading(false); })
       .catch(() => { setRegistros([]); setLoading(false); });
   }, [currentBusiness, refreshKey]);
@@ -204,7 +204,7 @@ export default function ListaRegistrosLotes({ refreshKey }) {
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
                   <span className="flex items-center gap-1">
                     <CalendarDays className="w-3.5 h-3.5" />
-                    Creado: {r.created_date ? format(new Date(r.created_date), "d MMM yyyy HH:mm", { locale: es }) : "—"}
+                    Creado: {r.fecha ? format(new Date(r.fecha), "d MMM yyyy HH:mm", { locale: es }) : "—"}
                   </span>
                   <span>·</span>
                   <span className="flex items-center gap-1">

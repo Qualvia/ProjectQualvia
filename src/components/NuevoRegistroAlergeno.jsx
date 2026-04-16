@@ -68,6 +68,7 @@ export default function NuevoRegistroAlergeno({ onCancel, onSaved }) {
       medidas_preventivas: form.medidas_preventivas || undefined,
       observaciones: form.observaciones || undefined,
       origen: "manual",
+      fecha: new Date().toISOString(),
     });
     setSaving(false);
     onSaved();

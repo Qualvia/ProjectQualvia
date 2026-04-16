@@ -34,6 +34,7 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
   const [fechaCaducidad, setFechaCaducidad] = useState(today);
   const [cantidad, setCantidad] = useState("");
   const [zonaAlmacenamiento, setZonaAlmacenamiento] = useState("");
+  const [zonaManual, setZonaManual] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [documentoUrl, setDocumentoUrl] = useState("");
 
@@ -109,6 +110,7 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
   async function handleSave() {
     if (!codigoLote.trim() || !productoElaborado.trim()) return;
     setSaving(true);
+    const zonaFinal = zonaAlmacenamiento === "__manual__" ? zonaManual : zonaAlmacenamiento;
     await base44.entities.RegistroLote.create({
       user_id: user.id,
       business_id: currentBusiness.id,
@@ -117,10 +119,11 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
       fecha_elaboracion: fechaElaboracion || undefined,
       fecha_caducidad: fechaCaducidad || undefined,
       cantidad: cantidad || undefined,
-      zona_almacenamiento: zonaAlmacenamiento || undefined,
+      zona_almacenamiento: zonaFinal || undefined,
       lotes_origen: lotesOrigen.length > 0 ? lotesOrigen : undefined,
       documento_url: documentoUrl || undefined,
       observaciones: observaciones || undefined,
+      fecha: new Date().toISOString(),
     });
     setSaving(false);
     onSaved();
@@ -201,8 +204,16 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
           <div>
             <Label className="mb-1.5 block">Zona de almacenamiento</Label>
             <select
-              value={zonaAlmacenamiento}
-              onChange={(e) => setZonaAlmacenamiento(e.target.value)}
+              value={zonaAlmacenamiento === "__manual__" ? "__manual__" : zonaAlmacenamiento}
+              onChange={(e) => {
+                if (e.target.value === "__manual__") {
+                  setZonaAlmacenamiento("__manual__");
+                  setZonaManual("");
+                } else {
+                  setZonaAlmacenamiento(e.target.value);
+                  setZonaManual("");
+                }
+              }}
               className="w-full h-9 rounded-lg border border-input bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="">Selecciona equipo/zona...</option>
@@ -210,7 +221,12 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
               <option value="__manual__">Escribir manualmente...</option>
             </select>
             {zonaAlmacenamiento === "__manual__" && (
-              <Input className="bg-white mt-2" placeholder="Nombre de la zona" onChange={(e) => setZonaAlmacenamiento(e.target.value)} />
+              <Input
+                className="bg-white mt-2"
+                placeholder="Nombre de la zona"
+                value={zonaManual}
+                onChange={(e) => setZonaManual(e.target.value)}
+              />
             )}
           </div>
         </div>

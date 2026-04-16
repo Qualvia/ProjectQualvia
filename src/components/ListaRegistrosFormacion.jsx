@@ -86,7 +86,7 @@ export default function ListaRegistrosFormacion({ refreshKey }) {
   useEffect(() => {
     if (!currentBusiness) return;
     setLoading(true);
-    base44.entities.RegistroFormacion.filter({ business_id: currentBusiness.id }, "-created_date", 200)
+    base44.entities.RegistroFormacion.filter({ business_id: currentBusiness.id }, "-fecha", 200)
       .then((data) => { setRegistros(data); setLoading(false); })
       .catch(() => { setRegistros([]); setLoading(false); });
   }, [currentBusiness, refreshKey]);

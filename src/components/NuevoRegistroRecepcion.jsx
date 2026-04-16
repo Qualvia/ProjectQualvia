@@ -100,6 +100,7 @@ export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
           lote: lote || undefined,
           alergenos,
           origen: "recepcion",
+          fecha: new Date().toISOString(),
         });
       }
 
