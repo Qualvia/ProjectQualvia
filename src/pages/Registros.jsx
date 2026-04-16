@@ -10,6 +10,9 @@ import ListaRegistrosRecepcion from "@/components/ListaRegistrosRecepcion";
 import NuevoRegistroAgua from "@/components/NuevoRegistroAgua";
 import ListaRegistrosAgua from "@/components/ListaRegistrosAgua";
 import SuministroAguaDialog from "@/components/SuministroAguaDialog";
+import NuevoRegistroPlaga from "@/components/NuevoRegistroPlaga";
+import ListaRegistrosPlagas from "@/components/ListaRegistrosPlagas";
+import GestorPlagasDialog from "@/components/GestorPlagasDialog";
 import {
   Thermometer,
   Droplets,
@@ -50,11 +53,13 @@ export default function Registros() {
   const [showGestionar, setShowGestionar] = useState(false);
   const [showProveedores, setShowProveedores] = useState(false);
   const [showSuministroAgua, setShowSuministroAgua] = useState(false);
+  const [showGestorPlagas, setShowGestorPlagas] = useState(false);
   const [showNuevoRegistro, setShowNuevoRegistro] = useState(false);
   const [registroKey, setRegistroKey] = useState(0);
   const [limpiezaKey, setLimpiezaKey] = useState(0);
   const [recepcionKey, setRecepcionKey] = useState(0);
   const [aguaKey, setAguaKey] = useState(0);
+  const [plagasKey, setPlagasKey] = useState(0);
   const [hayFueraDeRango, setHayFueraDeRango] = useState(false);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
@@ -129,6 +134,12 @@ export default function Registros() {
                   Suministro agua
                 </Button>
               )}
+              {active === "plagas" && (
+                <Button variant="outline" className="bg-white gap-2 text-sm" onClick={() => setShowGestorPlagas(true)}>
+                  <Bug className="w-4 h-4" />
+                  Gestor plagas
+                </Button>
+              )}
               <Button variant="outline" size="icon" className="bg-white" onClick={() => setShowGestionar(true)}>
                 <Settings className="w-4 h-4 text-muted-foreground" />
               </Button>
@@ -179,6 +190,15 @@ export default function Registros() {
               }}
             />
           )}
+          {showNuevoRegistro && active === "plagas" && (
+            <NuevoRegistroPlaga
+              onCancel={() => setShowNuevoRegistro(false)}
+              onSaved={() => {
+                setShowNuevoRegistro(false);
+                setPlagasKey((k) => k + 1);
+              }}
+            />
+          )}
 
           {/* Lista de registros guardados */}
           {active === "temperatura" && (
@@ -193,11 +213,15 @@ export default function Registros() {
           {active === "agua" && (
             <ListaRegistrosAgua refreshKey={aguaKey} />
           )}
+          {active === "plagas" && (
+            <ListaRegistrosPlagas refreshKey={plagasKey} />
+          )}
         </div>
       )}
       <GestionarEquiposDialog open={showGestionar} onOpenChange={setShowGestionar} />
       <GestionarProveedoresDialog open={showProveedores} onOpenChange={setShowProveedores} />
       <SuministroAguaDialog open={showSuministroAgua} onOpenChange={setShowSuministroAgua} />
+      <GestorPlagasDialog open={showGestorPlagas} onOpenChange={setShowGestorPlagas} />
     </div>
   );
 }
