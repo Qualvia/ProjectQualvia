@@ -20,6 +20,8 @@ import NuevoRegistroFormacion from "@/components/NuevoRegistroFormacion";
 import ListaRegistrosFormacion from "@/components/ListaRegistrosFormacion";
 import NuevoRegistroAlergeno from "@/components/NuevoRegistroAlergeno";
 import ListaRegistrosAlergenos from "@/components/ListaRegistrosAlergenos";
+import NuevoRegistroLote from "@/components/NuevoRegistroLote";
+import ListaRegistrosLotes from "@/components/ListaRegistrosLotes";
 import {
   Thermometer,
   Droplets,
@@ -72,6 +74,7 @@ export default function Registros() {
   const [mantenimientoKey, setMantenimientoKey] = useState(0);
   const [formacionKey, setFormacionKey] = useState(0);
   const [alergenosKey, setAlergenosKey] = useState(0);
+  const [lotesKey, setLotesKey] = useState(0);
   const [hayFueraDeRango, setHayFueraDeRango] = useState(false);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
@@ -261,6 +264,15 @@ export default function Registros() {
               }}
             />
           )}
+          {showNuevoRegistro && active === "lotes" && (
+            <NuevoRegistroLote
+              onCancel={() => setShowNuevoRegistro(false)}
+              onSaved={() => {
+                setShowNuevoRegistro(false);
+                setLotesKey((k) => k + 1);
+              }}
+            />
+          )}
 
           {/* Lista de registros guardados */}
           {active === "temperatura" && (
@@ -286,6 +298,9 @@ export default function Registros() {
           )}
           {active === "alergenos" && (
             <ListaRegistrosAlergenos refreshKey={alergenosKey} />
+          )}
+          {active === "lotes" && (
+            <ListaRegistrosLotes refreshKey={lotesKey} />
           )}
         </div>
       )}

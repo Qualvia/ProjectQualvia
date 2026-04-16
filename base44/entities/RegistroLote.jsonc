@@ -1,0 +1,112 @@
+{
+  "name": "RegistroLote",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "business_id": {
+      "type": "string"
+    },
+    "codigo_lote": {
+      "type": "string"
+    },
+    "producto_elaborado": {
+      "type": "string"
+    },
+    "fecha_elaboracion": {
+      "type": "string"
+    },
+    "fecha_caducidad": {
+      "type": "string"
+    },
+    "cantidad": {
+      "type": "string"
+    },
+    "zona_almacenamiento": {
+      "type": "string"
+    },
+    "lotes_origen": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "codigo_lote": {
+            "type": "string"
+          },
+          "producto": {
+            "type": "string"
+          },
+          "proveedor": {
+            "type": "string"
+          },
+          "cantidad_utilizada": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "documento_url": {
+      "type": "string"
+    },
+    "observaciones": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "codigo_lote",
+    "producto_elaborado"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
