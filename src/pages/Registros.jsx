@@ -18,6 +18,8 @@ import ListaRegistrosMantenimiento from "@/components/ListaRegistrosMantenimient
 import EmpresaMantenimientoDialog from "@/components/EmpresaMantenimientoDialog";
 import NuevoRegistroFormacion from "@/components/NuevoRegistroFormacion";
 import ListaRegistrosFormacion from "@/components/ListaRegistrosFormacion";
+import NuevoRegistroAlergeno from "@/components/NuevoRegistroAlergeno";
+import ListaRegistrosAlergenos from "@/components/ListaRegistrosAlergenos";
 import {
   Thermometer,
   Droplets,
@@ -69,6 +71,7 @@ export default function Registros() {
   const [plagasKey, setPlagasKey] = useState(0);
   const [mantenimientoKey, setMantenimientoKey] = useState(0);
   const [formacionKey, setFormacionKey] = useState(0);
+  const [alergenosKey, setAlergenosKey] = useState(0);
   const [hayFueraDeRango, setHayFueraDeRango] = useState(false);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
@@ -249,6 +252,15 @@ export default function Registros() {
               }}
             />
           )}
+          {showNuevoRegistro && active === "alergenos" && (
+            <NuevoRegistroAlergeno
+              onCancel={() => setShowNuevoRegistro(false)}
+              onSaved={() => {
+                setShowNuevoRegistro(false);
+                setAlergenosKey((k) => k + 1);
+              }}
+            />
+          )}
 
           {/* Lista de registros guardados */}
           {active === "temperatura" && (
@@ -271,6 +283,9 @@ export default function Registros() {
           )}
           {active === "formacion" && (
             <ListaRegistrosFormacion refreshKey={formacionKey} />
+          )}
+          {active === "alergenos" && (
+            <ListaRegistrosAlergenos refreshKey={alergenosKey} />
           )}
         </div>
       )}

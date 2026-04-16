@@ -89,6 +89,20 @@ export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
         observaciones: resultado === "rechazado" ? motivoRechazo : undefined,
         fecha: new Date().toISOString(),
       });
+
+      // Auto-crear registro de alérgenos si el producto contiene alérgenos
+      if (contieneAlergenos && alergenos.length > 0) {
+        await base44.entities.RegistroAlergeno.create({
+          user_id: user.id,
+          business_id: currentBusiness.id,
+          producto: producto.trim(),
+          proveedor: proveedorFinal.trim() || undefined,
+          lote: lote || undefined,
+          alergenos,
+          origen: "recepcion",
+        });
+      }
+
       onSaved();
     } catch (err) {
       console.error("Error guardando recepción:", err);

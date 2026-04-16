@@ -1,0 +1,93 @@
+{
+  "name": "RegistroAlergeno",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "business_id": {
+      "type": "string"
+    },
+    "producto": {
+      "type": "string"
+    },
+    "proveedor": {
+      "type": "string"
+    },
+    "lote": {
+      "type": "string"
+    },
+    "alergenos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "medidas_preventivas": {
+      "type": "string"
+    },
+    "observaciones": {
+      "type": "string"
+    },
+    "origen": {
+      "type": "string",
+      "description": "manual | recepcion"
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "producto",
+    "alergenos"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
