@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { Loader2, Trash2, Filter, CalendarDays, User, ChevronDown, Printer, GitBranch } from "lucide-react";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isPast, isToday } from "date-fns";
 import { es } from "date-fns/locale";
 
-const LIMITE = 5;
+const PAGE_SIZE = 20;
 const EMPTY_FILTERS = { periodo: "todos", desde: "", hasta: "" };
 
 function FiltrosPanel({ filtros, setFiltros, onClose }) {
@@ -57,20 +57,23 @@ function FiltrosPanel({ filtros, setFiltros, onClose }) {
   );
 }
 
-function aplicarFiltros(registros, filtros) {
-  return registros.filter((r) => {
-    const fecha = r.fecha ? new Date(r.fecha) : null;
-    if (!fecha) return true;
-    const now = new Date();
-    if (filtros.periodo !== "todos" && filtros.periodo !== "personalizado") {
-      if (filtros.periodo === "hoy" && (fecha < startOfDay(now) || fecha > endOfDay(now))) return false;
-      if (filtros.periodo === "semana" && (fecha < startOfWeek(now, { weekStartsOn: 1 }) || fecha > endOfWeek(now, { weekStartsOn: 1 }))) return false;
-      if (filtros.periodo === "mes" && (fecha < startOfMonth(now) || fecha > endOfMonth(now))) return false;
-    }
-    if (filtros.desde && fecha < startOfDay(new Date(filtros.desde))) return false;
-    if (filtros.hasta && fecha > endOfDay(new Date(filtros.hasta))) return false;
-    return true;
-  });
+function buildQuery(filtros, businessId) {
+  const q = { business_id: businessId };
+  const now = new Date();
+  if (filtros.periodo === "hoy") {
+    q.fecha__gte = startOfDay(now).toISOString();
+    q.fecha__lte = endOfDay(now).toISOString();
+  } else if (filtros.periodo === "semana") {
+    q.fecha__gte = startOfWeek(now, { weekStartsOn: 1 }).toISOString();
+    q.fecha__lte = endOfWeek(now, { weekStartsOn: 1 }).toISOString();
+  } else if (filtros.periodo === "mes") {
+    q.fecha__gte = startOfMonth(now).toISOString();
+    q.fecha__lte = endOfMonth(now).toISOString();
+  } else if (filtros.periodo === "personalizado") {
+    if (filtros.desde) q.fecha__gte = startOfDay(new Date(filtros.desde)).toISOString();
+    if (filtros.hasta) q.fecha__lte = endOfDay(new Date(filtros.hasta)).toISOString();
+  }
+  return q;
 }
 
 function CaducidadBadge({ fecha }) {
@@ -86,39 +89,53 @@ export default function ListaRegistrosLotes({ refreshKey }) {
   const { currentBusiness } = useBusiness();
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [verTodos, setVerTodos] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [skip, setSkip] = useState(0);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [filtros, setFiltros] = useState(EMPTY_FILTERS);
   const [expandedId, setExpandedId] = useState(null);
 
+  const hayFiltrosActivos = JSON.stringify(filtros) !== JSON.stringify(EMPTY_FILTERS);
+
+  async function fetchPage(skipVal, currentFiltros, replace = false) {
+    if (!currentBusiness) return;
+    const q = buildQuery(currentFiltros, currentBusiness.id);
+    const data = await base44.entities.RegistroLote.filter(q, "-fecha", PAGE_SIZE + 1, skipVal);
+    const hasMoreData = data.length > PAGE_SIZE;
+    const slice = hasMoreData ? data.slice(0, PAGE_SIZE) : data;
+    setRegistros((prev) => replace ? slice : [...prev, ...slice]);
+    setHasMore(hasMoreData);
+    setSkip(skipVal + slice.length);
+  }
+
   useEffect(() => {
     if (!currentBusiness) return;
     setLoading(true);
-    base44.entities.RegistroLote.filter({ business_id: currentBusiness.id }, "-fecha", 200)
-      .then((data) => { setRegistros(data); setLoading(false); })
-      .catch(() => { setRegistros([]); setLoading(false); });
-  }, [currentBusiness, refreshKey]);
+    setSkip(0);
+    fetchPage(0, filtros, true).finally(() => setLoading(false));
+  }, [currentBusiness, refreshKey, filtros]);
+
+  async function handleLoadMore() {
+    setLoadingMore(true);
+    await fetchPage(skip, filtros, false);
+    setLoadingMore(false);
+  }
 
   async function handleDelete(id) {
     await base44.entities.RegistroLote.delete(id);
     setRegistros((prev) => prev.filter((r) => r.id !== id));
   }
 
-  const filtrados = useMemo(() => aplicarFiltros(registros, filtros), [registros, filtros]);
-  const hayFiltrosActivos = JSON.stringify(filtros) !== JSON.stringify(EMPTY_FILTERS);
-
   if (loading) return <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
-  if (registros.length === 0) return null;
-
-  const visibles = verTodos ? filtrados : filtrados.slice(0, LIMITE);
-  const hayMas = filtrados.length > LIMITE;
+  if (registros.length === 0 && !hayFiltrosActivos) return null;
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-border">
       <div className="px-5 py-4 flex items-center justify-between bg-secondary border-b border-border/40">
         <p className="font-semibold text-[#0A3E47]">
           Lotes registrados
-          {hayFiltrosActivos && <span className="ml-2 text-xs font-normal text-[#6BB68A]">({filtrados.length} resultados)</span>}
+          {hayFiltrosActivos && <span className="ml-2 text-xs font-normal text-[#6BB68A]">({registros.length} cargados)</span>}
         </p>
         <button
           onClick={() => setMostrarFiltros((v) => !v)}
@@ -131,14 +148,14 @@ export default function ListaRegistrosLotes({ refreshKey }) {
       </div>
 
       {mostrarFiltros && (
-        <FiltrosPanel filtros={filtros} setFiltros={(f) => { setFiltros(f); setVerTodos(false); }} onClose={() => setMostrarFiltros(false)} />
+        <FiltrosPanel filtros={filtros} setFiltros={(f) => { setFiltros(f); }} onClose={() => setMostrarFiltros(false)} />
       )}
 
       <div className="p-4 space-y-3">
-        {visibles.length === 0 && (
+        {registros.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-4">No hay registros con los filtros aplicados.</p>
         )}
-        {visibles.map((r) => (
+        {registros.map((r) => (
           <div key={r.id} className="bg-white rounded-xl border border-border px-5 py-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -172,7 +189,6 @@ export default function ListaRegistrosLotes({ refreshKey }) {
                   </p>
                 )}
 
-                {/* Lotes origen expandibles */}
                 {r.lotes_origen?.length > 0 && (
                   <div className="mt-2">
                     <button
@@ -228,11 +244,14 @@ export default function ListaRegistrosLotes({ refreshKey }) {
           </div>
         ))}
 
-        {hayMas && !verTodos && (
-          <button onClick={() => setVerTodos(true)}
-            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-secondary text-sm font-medium text-[#0A3E47] hover:bg-secondary/70 transition-colors">
-            <ChevronDown className="w-4 h-4" />
-            Ver más ({filtrados.length - LIMITE} restantes)
+        {hasMore && (
+          <button
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-secondary text-sm font-medium text-[#0A3E47] hover:bg-secondary/70 transition-colors"
+          >
+            {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronDown className="w-4 h-4" />}
+            Cargar más
           </button>
         )}
       </div>

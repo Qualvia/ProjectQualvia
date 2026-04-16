@@ -21,12 +21,16 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [recepciones, setRecepciones] = useState([]);
   const [equipos, setEquipos] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
 
-  // Form fields
+  // Recepciones: carga diferida solo cuando el usuario abre el panel de origen
+  const [showOrigenPanel, setShowOrigenPanel] = useState(false);
+  const [recepciones, setRecepciones] = useState([]);
+  const [loadingRecepciones, setLoadingRecepciones] = useState(false);
+  const [recepcionesCargadas, setRecepcionesCargadas] = useState(false);
+
   const today = format(new Date(), "yyyy-MM-dd");
   const [codigoLote, setCodigoLote] = useState("");
   const [productoElaborado, setProductoElaborado] = useState("");
@@ -38,35 +42,39 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
   const [observaciones, setObservaciones] = useState("");
   const [documentoUrl, setDocumentoUrl] = useState("");
 
-  // Lotes origen
   const [lotesOrigen, setLotesOrigen] = useState([]);
   const [buscarDesde, setBuscarDesde] = useState(today);
   const [buscarHasta, setBuscarHasta] = useState(today);
   const [recepcionSeleccionada, setRecepcionSeleccionada] = useState("");
   const [origenManual, setOrigenManual] = useState({ codigo_lote: "", producto: "", proveedor: "", cantidad_utilizada: "" });
 
+  // Carga inicial: solo equipos + código de lote
   useEffect(() => {
     if (!currentBusiness) { setLoadingData(false); return; }
     Promise.all([
-      base44.entities.RegistroRecepcion.filter({ business_id: currentBusiness.id }, "-fecha", 500),
       base44.entities.EquipoTemperatura.filter({ business_id: currentBusiness.id }),
-    ]).then(([recs, eqs]) => {
-      setRecepciones(recs);
+      base44.entities.RegistroLote.filter({ business_id: currentBusiness.id }, "-fecha", 50),
+    ]).then(([eqs, lotes]) => {
       setEquipos(eqs);
+      const hoy = format(new Date(), "yyyy-MM-dd");
+      const lotesHoy = lotes.filter((l) => l.fecha && l.fecha.startsWith(hoy));
+      setCodigoLote(generarCodigoLote(lotesHoy.length + 1));
       setLoadingData(false);
-    }).catch(() => setLoadingData(false));
-
-    // Auto-generar código
-    base44.entities.RegistroLote.filter({ business_id: currentBusiness.id }, "-created_date", 500)
-      .then((lotes) => {
-        const hoy = format(new Date(), "yyyy-MM-dd");
-        const lotesHoy = lotes.filter((l) => l.created_date && l.created_date.startsWith(hoy));
-        setCodigoLote(generarCodigoLote(lotesHoy.length + 1));
-      })
-      .catch(() => setCodigoLote(generarCodigoLote(1)));
+    }).catch(() => { setLoadingData(false); setCodigoLote(generarCodigoLote(1)); });
   }, [currentBusiness]);
 
-  // Filtrar recepciones por rango de fechas
+  // Carga diferida de recepciones solo cuando se abre el panel
+  async function handleOpenOrigenPanel() {
+    setShowOrigenPanel(true);
+    if (!recepcionesCargadas && currentBusiness) {
+      setLoadingRecepciones(true);
+      const recs = await base44.entities.RegistroRecepcion.filter({ business_id: currentBusiness.id }, "-fecha", 500);
+      setRecepciones(recs);
+      setRecepcionesCargadas(true);
+      setLoadingRecepciones(false);
+    }
+  }
+
   const recepcionesFiltradas = recepciones.filter((r) => {
     if (!r.fecha) return false;
     const fecha = r.fecha.slice(0, 10);
@@ -78,12 +86,7 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
     if (!val) return;
     const rec = recepciones.find((r) => r.id === val);
     if (rec) {
-      setOrigenManual({
-        codigo_lote: rec.lote || "",
-        producto: rec.producto || "",
-        proveedor: rec.proveedor || "",
-        cantidad_utilizada: "",
-      });
+      setOrigenManual({ codigo_lote: rec.lote || "", producto: rec.producto || "", proveedor: rec.proveedor || "", cantidad_utilizada: "" });
     }
   }
 
@@ -133,7 +136,6 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
 
   return (
     <div className="space-y-4">
-      {/* Form principal */}
       <div className="bg-secondary rounded-2xl p-6 space-y-5">
         {/* Código + Producto */}
         <div className="grid grid-cols-2 gap-4">
@@ -161,25 +163,15 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
                 <p className="text-blue-700 text-xs"><strong>Ejemplo:</strong> LT-20250124-001</p>
                 <div className="border-t border-blue-200 pt-2">
                   <p className="flex items-center gap-1.5 font-semibold text-blue-800 text-xs"><Link2 className="w-3 h-3" /> Lotes de origen (Trazabilidad)</p>
-                  <p className="text-blue-700 text-xs mt-1">Los <strong>lotes de origen</strong> son las materias primas utilizadas (harina, huevos, carne...). Vincúlalos abajo para saber exactamente qué ingredientes lleva cada lote final.</p>
+                  <p className="text-blue-700 text-xs mt-1">Los <strong>lotes de origen</strong> son las materias primas utilizadas. Vincúlalos abajo para saber exactamente qué ingredientes lleva cada lote final.</p>
                 </div>
               </div>
             )}
-            <Input
-              placeholder="Ej: LT20250101-001"
-              value={codigoLote}
-              onChange={(e) => setCodigoLote(e.target.value)}
-              className="bg-white font-mono"
-            />
+            <Input placeholder="Ej: LT20250101-001" value={codigoLote} onChange={(e) => setCodigoLote(e.target.value)} className="bg-white font-mono" />
           </div>
           <div>
             <Label className="mb-1.5 block">Producto elaborado *</Label>
-            <Input
-              placeholder="Nombre del producto"
-              value={productoElaborado}
-              onChange={(e) => setProductoElaborado(e.target.value)}
-              className="bg-white"
-            />
+            <Input placeholder="Nombre del producto" value={productoElaborado} onChange={(e) => setProductoElaborado(e.target.value)} className="bg-white" />
           </div>
         </div>
 
@@ -221,54 +213,64 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
               <option value="__manual__">Escribir manualmente...</option>
             </select>
             {zonaAlmacenamiento === "__manual__" && (
-              <Input
-                className="bg-white mt-2"
-                placeholder="Nombre de la zona"
-                value={zonaManual}
-                onChange={(e) => setZonaManual(e.target.value)}
-              />
+              <Input className="bg-white mt-2" placeholder="Nombre de la zona" value={zonaManual} onChange={(e) => setZonaManual(e.target.value)} />
             )}
           </div>
         </div>
 
-        {/* Lotes de origen */}
+        {/* Lotes de origen — carga diferida */}
         <div>
           <Label className="mb-2 block">Lotes de origen (materias primas)</Label>
-          <div className="bg-white rounded-xl border border-border p-4 space-y-3">
-            <p className="text-sm font-medium text-[#0A3E47]">Buscar materias primas recibidas entre fechas:</p>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">De:</span>
-              <Input type="date" value={buscarDesde} onChange={(e) => setBuscarDesde(e.target.value)} className="bg-white w-40" />
-              <span className="text-sm text-muted-foreground">A:</span>
-              <Input type="date" value={buscarHasta} onChange={(e) => setBuscarHasta(e.target.value)} className="bg-white w-40" />
-            </div>
-            <select
-              value={recepcionSeleccionada}
-              onChange={(e) => handleSeleccionarRecepcion(e.target.value)}
-              className="w-full h-9 rounded-lg border border-input bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-            >
-              <option value="">Seleccionar materia prima recibida...</option>
-              {recepcionesFiltradas.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.producto} — {r.proveedor} {r.lote ? `(Lote: ${r.lote})` : ""} — {r.fecha ? r.fecha.slice(0, 10) : ""}
-                </option>
-              ))}
-            </select>
 
-            <div className="grid grid-cols-2 gap-2">
-              <Input placeholder="Código de lote" value={origenManual.codigo_lote} onChange={(e) => setOrigenManual((p) => ({ ...p, codigo_lote: e.target.value }))} className="bg-white" />
-              <Input placeholder="Producto/Materia prima" value={origenManual.producto} onChange={(e) => setOrigenManual((p) => ({ ...p, producto: e.target.value }))} className="bg-white" />
-              <Input placeholder="Proveedor" value={origenManual.proveedor} onChange={(e) => setOrigenManual((p) => ({ ...p, proveedor: e.target.value }))} className="bg-white" />
-              <div className="flex gap-2">
-                <Input placeholder="Cantidad utilizada" value={origenManual.cantidad_utilizada} onChange={(e) => setOrigenManual((p) => ({ ...p, cantidad_utilizada: e.target.value }))} className="bg-white" />
-                <Button onClick={handleAddOrigen} disabled={!origenManual.producto.trim()} className="bg-[#6BB68A] hover:bg-[#5aa377] text-white shrink-0">
-                  <Plus className="w-4 h-4 mr-1" /> Añadir
-                </Button>
+          {!showOrigenPanel ? (
+            <button
+              onClick={handleOpenOrigenPanel}
+              className="w-full py-3 rounded-xl border-2 border-dashed border-border bg-white hover:border-[#6BB68A] text-sm text-muted-foreground hover:text-[#6BB68A] transition-colors flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Vincular materias primas (trazabilidad)
+            </button>
+          ) : (
+            <div className="bg-white rounded-xl border border-border p-4 space-y-3">
+              <p className="text-sm font-medium text-[#0A3E47]">Buscar materias primas recibidas entre fechas:</p>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">De:</span>
+                <Input type="date" value={buscarDesde} onChange={(e) => setBuscarDesde(e.target.value)} className="bg-white w-40" />
+                <span className="text-sm text-muted-foreground">A:</span>
+                <Input type="date" value={buscarHasta} onChange={(e) => setBuscarHasta(e.target.value)} className="bg-white w-40" />
+              </div>
+
+              {loadingRecepciones ? (
+                <div className="flex justify-center py-3"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+              ) : (
+                <select
+                  value={recepcionSeleccionada}
+                  onChange={(e) => handleSeleccionarRecepcion(e.target.value)}
+                  className="w-full h-9 rounded-lg border border-input bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="">Seleccionar materia prima recibida...</option>
+                  {recepcionesFiltradas.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.producto} — {r.proveedor} {r.lote ? `(Lote: ${r.lote})` : ""} — {r.fecha ? r.fecha.slice(0, 10) : ""}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              <div className="grid grid-cols-2 gap-2">
+                <Input placeholder="Código de lote" value={origenManual.codigo_lote} onChange={(e) => setOrigenManual((p) => ({ ...p, codigo_lote: e.target.value }))} className="bg-white" />
+                <Input placeholder="Producto/Materia prima" value={origenManual.producto} onChange={(e) => setOrigenManual((p) => ({ ...p, producto: e.target.value }))} className="bg-white" />
+                <Input placeholder="Proveedor" value={origenManual.proveedor} onChange={(e) => setOrigenManual((p) => ({ ...p, proveedor: e.target.value }))} className="bg-white" />
+                <div className="flex gap-2">
+                  <Input placeholder="Cantidad utilizada" value={origenManual.cantidad_utilizada} onChange={(e) => setOrigenManual((p) => ({ ...p, cantidad_utilizada: e.target.value }))} className="bg-white" />
+                  <Button onClick={handleAddOrigen} disabled={!origenManual.producto.trim()} className="bg-[#6BB68A] hover:bg-[#5aa377] text-white shrink-0">
+                    <Plus className="w-4 h-4 mr-1" /> Añadir
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Lista de lotes añadidos */}
           {lotesOrigen.length > 0 && (
             <div className="mt-3 space-y-2">
               {lotesOrigen.map((l, i) => (
@@ -290,7 +292,7 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
 
         {/* Documento adjunto */}
         <div>
-          <Label className="mb-1.5 block">Documentos adjuntos (certificados, fichas técnicas, etc.)</Label>
+          <Label className="mb-1.5 block">Documentos adjuntos</Label>
           <label className="flex items-center justify-center gap-2 w-full h-12 rounded-xl border-2 border-dashed border-border bg-white hover:border-[#6BB68A] cursor-pointer transition-colors text-sm text-muted-foreground hover:text-[#6BB68A]">
             {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
             {documentoUrl ? "Documento adjuntado ✓" : "Adjuntar documento"}
@@ -301,21 +303,12 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
         {/* Observaciones */}
         <div>
           <Label className="mb-1.5 block">Observaciones</Label>
-          <Textarea
-            placeholder="Materias primas utilizadas, observaciones..."
-            value={observaciones}
-            onChange={(e) => setObservaciones(e.target.value)}
-            className="bg-white resize-none h-20"
-          />
+          <Textarea placeholder="Materias primas utilizadas, observaciones..." value={observaciones} onChange={(e) => setObservaciones(e.target.value)} className="bg-white resize-none h-20" />
         </div>
 
         <div className="flex gap-3">
           <Button variant="outline" onClick={onCancel} className="bg-white">Cancelar</Button>
-          <Button
-            onClick={handleSave}
-            disabled={saving || !codigoLote.trim() || !productoElaborado.trim()}
-            className="bg-[#6BB68A] hover:bg-[#5aa377] text-white"
-          >
+          <Button onClick={handleSave} disabled={saving || !codigoLote.trim() || !productoElaborado.trim()} className="bg-[#6BB68A] hover:bg-[#5aa377] text-white">
             {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Guardar lote
           </Button>

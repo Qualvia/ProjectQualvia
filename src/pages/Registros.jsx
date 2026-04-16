@@ -1,44 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import GestionarEquiposDialog from "@/components/GestionarEquiposDialog";
 import GestionarProveedoresDialog from "@/components/GestionarProveedoresDialog";
-import NuevoRegistroTemperatura from "@/components/NuevoRegistroTemperatura";
-import ListaRegistrosTemperatura from "@/components/ListaRegistrosTemperatura";
-import NuevoRegistroLimpieza from "@/components/NuevoRegistroLimpieza";
-import ListaRegistrosLimpieza from "@/components/ListaRegistrosLimpieza";
-import NuevoRegistroRecepcion from "@/components/NuevoRegistroRecepcion";
-import ListaRegistrosRecepcion from "@/components/ListaRegistrosRecepcion";
-import NuevoRegistroAgua from "@/components/NuevoRegistroAgua";
-import ListaRegistrosAgua from "@/components/ListaRegistrosAgua";
-import SuministroAguaDialog from "@/components/SuministroAguaDialog";
-import NuevoRegistroPlaga from "@/components/NuevoRegistroPlaga";
-import ListaRegistrosPlagas from "@/components/ListaRegistrosPlagas";
-import GestorPlagasDialog from "@/components/GestorPlagasDialog";
-import NuevoRegistroMantenimiento from "@/components/NuevoRegistroMantenimiento";
-import ListaRegistrosMantenimiento from "@/components/ListaRegistrosMantenimiento";
-import EmpresaMantenimientoDialog from "@/components/EmpresaMantenimientoDialog";
-import NuevoRegistroFormacion from "@/components/NuevoRegistroFormacion";
-import ListaRegistrosFormacion from "@/components/ListaRegistrosFormacion";
-import NuevoRegistroAlergeno from "@/components/NuevoRegistroAlergeno";
-import ListaRegistrosAlergenos from "@/components/ListaRegistrosAlergenos";
-import NuevoRegistroLote from "@/components/NuevoRegistroLote";
-import ListaRegistrosLotes from "@/components/ListaRegistrosLotes";
 import {
-  Thermometer,
-  Droplets,
-  ClipboardCheck,
-  Waves,
-  Bug,
-  Wrench,
-  GraduationCap,
-  Apple,
-  Package,
-  Snowflake,
-  Trash2,
-  AlertTriangle,
-  Settings,
-  Plus,
+  Thermometer, Droplets, ClipboardCheck, Waves, Bug, Wrench,
+  GraduationCap, Apple, Package, Snowflake, Trash2, AlertTriangle,
+  Settings, Plus, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Lazy-load todos los formularios y listas pesadas
+const NuevoRegistroTemperatura = lazy(() => import("@/components/NuevoRegistroTemperatura"));
+const ListaRegistrosTemperatura = lazy(() => import("@/components/ListaRegistrosTemperatura"));
+const NuevoRegistroLimpieza = lazy(() => import("@/components/NuevoRegistroLimpieza"));
+const ListaRegistrosLimpieza = lazy(() => import("@/components/ListaRegistrosLimpieza"));
+const NuevoRegistroRecepcion = lazy(() => import("@/components/NuevoRegistroRecepcion"));
+const ListaRegistrosRecepcion = lazy(() => import("@/components/ListaRegistrosRecepcion"));
+const NuevoRegistroAgua = lazy(() => import("@/components/NuevoRegistroAgua"));
+const ListaRegistrosAgua = lazy(() => import("@/components/ListaRegistrosAgua"));
+const SuministroAguaDialog = lazy(() => import("@/components/SuministroAguaDialog"));
+const NuevoRegistroPlaga = lazy(() => import("@/components/NuevoRegistroPlaga"));
+const ListaRegistrosPlagas = lazy(() => import("@/components/ListaRegistrosPlagas"));
+const GestorPlagasDialog = lazy(() => import("@/components/GestorPlagasDialog"));
+const NuevoRegistroMantenimiento = lazy(() => import("@/components/NuevoRegistroMantenimiento"));
+const ListaRegistrosMantenimiento = lazy(() => import("@/components/ListaRegistrosMantenimiento"));
+const EmpresaMantenimientoDialog = lazy(() => import("@/components/EmpresaMantenimientoDialog"));
+const NuevoRegistroFormacion = lazy(() => import("@/components/NuevoRegistroFormacion"));
+const ListaRegistrosFormacion = lazy(() => import("@/components/ListaRegistrosFormacion"));
+const NuevoRegistroAlergeno = lazy(() => import("@/components/NuevoRegistroAlergeno"));
+const ListaRegistrosAlergenos = lazy(() => import("@/components/ListaRegistrosAlergenos"));
+const NuevoRegistroLote = lazy(() => import("@/components/NuevoRegistroLote"));
+const ListaRegistrosLotes = lazy(() => import("@/components/ListaRegistrosLotes"));
 
 const REGISTROS = [
   { id: "temperatura", label: "Temperatura", icon: Thermometer, color: "bg-red-500 border-red-500 text-white" },
@@ -56,6 +47,18 @@ const REGISTROS = [
 ];
 
 const INCIDENCIA_ALERT_COLOR = "bg-red-100 border-red-300 text-red-700";
+
+const SuspenseFallbackForm = () => (
+  <div className="bg-secondary rounded-2xl p-6 flex justify-center">
+    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+  </div>
+);
+
+const SuspenseFallbackList = () => (
+  <div className="bg-white rounded-2xl overflow-hidden border border-border p-6 flex justify-center">
+    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+  </div>
+);
 
 export default function Registros() {
   const [active, setActive] = useState("temperatura");
@@ -111,7 +114,7 @@ export default function Registros() {
           return (
             <button
               key={id}
-              onClick={() => setActive(id)}
+              onClick={() => { setActive(id); setShowNuevoRegistro(false); }}
               className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-all aspect-square
                 ${isActive
                   ? color
@@ -191,124 +194,119 @@ export default function Registros() {
             </div>
           </div>
 
-          {/* Formulario inline de nuevo registro */}
+          {/* Formularios inline — lazy */}
           {showNuevoRegistro && active === "temperatura" && (
-            <NuevoRegistroTemperatura
-              onCancel={() => setShowNuevoRegistro(false)}
-              onSaved={() => {
-                setShowNuevoRegistro(false);
-                setRegistroKey((k) => k + 1);
-              }}
-            />
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroTemperatura onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setRegistroKey((k) => k + 1); }} />
+            </Suspense>
           )}
           {showNuevoRegistro && active === "limpieza" && (
-            <NuevoRegistroLimpieza
-              onCancel={() => setShowNuevoRegistro(false)}
-              onSaved={() => {
-                setShowNuevoRegistro(false);
-                setLimpiezaKey((k) => k + 1);
-              }}
-            />
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroLimpieza onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setLimpiezaKey((k) => k + 1); }} />
+            </Suspense>
           )}
           {showNuevoRegistro && active === "recepcion" && (
-            <NuevoRegistroRecepcion
-              onCancel={() => setShowNuevoRegistro(false)}
-              onSaved={() => {
-                setShowNuevoRegistro(false);
-                setRecepcionKey((k) => k + 1);
-              }}
-            />
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroRecepcion onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setRecepcionKey((k) => k + 1); }} />
+            </Suspense>
           )}
           {showNuevoRegistro && active === "agua" && (
-            <NuevoRegistroAgua
-              onCancel={() => setShowNuevoRegistro(false)}
-              onSaved={() => {
-                setShowNuevoRegistro(false);
-                setAguaKey((k) => k + 1);
-              }}
-            />
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroAgua onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setAguaKey((k) => k + 1); }} />
+            </Suspense>
           )}
           {showNuevoRegistro && active === "plagas" && (
-            <NuevoRegistroPlaga
-              onCancel={() => setShowNuevoRegistro(false)}
-              onSaved={() => {
-                setShowNuevoRegistro(false);
-                setPlagasKey((k) => k + 1);
-              }}
-            />
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroPlaga onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setPlagasKey((k) => k + 1); }} />
+            </Suspense>
           )}
           {showNuevoRegistro && active === "mantenimiento" && (
-            <NuevoRegistroMantenimiento
-              onCancel={() => setShowNuevoRegistro(false)}
-              onSaved={() => {
-                setShowNuevoRegistro(false);
-                setMantenimientoKey((k) => k + 1);
-              }}
-            />
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroMantenimiento onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setMantenimientoKey((k) => k + 1); }} />
+            </Suspense>
           )}
           {showNuevoRegistro && active === "formacion" && (
-            <NuevoRegistroFormacion
-              onCancel={() => setShowNuevoRegistro(false)}
-              onSaved={() => {
-                setShowNuevoRegistro(false);
-                setFormacionKey((k) => k + 1);
-              }}
-            />
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroFormacion onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setFormacionKey((k) => k + 1); }} />
+            </Suspense>
           )}
           {showNuevoRegistro && active === "alergenos" && (
-            <NuevoRegistroAlergeno
-              onCancel={() => setShowNuevoRegistro(false)}
-              onSaved={() => {
-                setShowNuevoRegistro(false);
-                setAlergenosKey((k) => k + 1);
-              }}
-            />
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroAlergeno onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setAlergenosKey((k) => k + 1); }} />
+            </Suspense>
           )}
           {showNuevoRegistro && active === "lotes" && (
-            <NuevoRegistroLote
-              onCancel={() => setShowNuevoRegistro(false)}
-              onSaved={() => {
-                setShowNuevoRegistro(false);
-                setLotesKey((k) => k + 1);
-              }}
-            />
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroLote onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setLotesKey((k) => k + 1); }} />
+            </Suspense>
           )}
 
-          {/* Lista de registros guardados */}
+          {/* Listas — lazy */}
           {active === "temperatura" && (
-            <ListaRegistrosTemperatura refreshKey={registroKey} onFueraDeRangoChange={setHayFueraDeRango} />
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosTemperatura refreshKey={registroKey} onFueraDeRangoChange={setHayFueraDeRango} />
+            </Suspense>
           )}
           {active === "limpieza" && (
-            <ListaRegistrosLimpieza refreshKey={limpiezaKey} />
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosLimpieza refreshKey={limpiezaKey} />
+            </Suspense>
           )}
           {active === "recepcion" && (
-            <ListaRegistrosRecepcion refreshKey={recepcionKey} />
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosRecepcion refreshKey={recepcionKey} />
+            </Suspense>
           )}
           {active === "agua" && (
-            <ListaRegistrosAgua refreshKey={aguaKey} />
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosAgua refreshKey={aguaKey} />
+            </Suspense>
           )}
           {active === "plagas" && (
-            <ListaRegistrosPlagas refreshKey={plagasKey} />
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosPlagas refreshKey={plagasKey} />
+            </Suspense>
           )}
           {active === "mantenimiento" && (
-            <ListaRegistrosMantenimiento refreshKey={mantenimientoKey} />
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosMantenimiento refreshKey={mantenimientoKey} />
+            </Suspense>
           )}
           {active === "formacion" && (
-            <ListaRegistrosFormacion refreshKey={formacionKey} />
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosFormacion refreshKey={formacionKey} />
+            </Suspense>
           )}
           {active === "alergenos" && (
-            <ListaRegistrosAlergenos refreshKey={alergenosKey} />
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosAlergenos refreshKey={alergenosKey} />
+            </Suspense>
           )}
           {active === "lotes" && (
-            <ListaRegistrosLotes refreshKey={lotesKey} />
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosLotes refreshKey={lotesKey} />
+            </Suspense>
           )}
         </div>
       )}
+
       <GestionarEquiposDialog open={showGestionar} onOpenChange={setShowGestionar} initialTab={gestionarTab} />
       <GestionarProveedoresDialog open={showProveedores} onOpenChange={setShowProveedores} />
-      <SuministroAguaDialog open={showSuministroAgua} onOpenChange={setShowSuministroAgua} />
-      <GestorPlagasDialog open={showGestorPlagas} onOpenChange={setShowGestorPlagas} />
-      <EmpresaMantenimientoDialog open={showEmpresaMantenimiento} onOpenChange={setShowEmpresaMantenimiento} />
+      {showSuministroAgua && (
+        <Suspense fallback={null}>
+          <SuministroAguaDialog open={showSuministroAgua} onOpenChange={setShowSuministroAgua} />
+        </Suspense>
+      )}
+      {showGestorPlagas && (
+        <Suspense fallback={null}>
+          <GestorPlagasDialog open={showGestorPlagas} onOpenChange={setShowGestorPlagas} />
+        </Suspense>
+      )}
+      {showEmpresaMantenimiento && (
+        <Suspense fallback={null}>
+          <EmpresaMantenimientoDialog open={showEmpresaMantenimiento} onOpenChange={setShowEmpresaMantenimiento} />
+        </Suspense>
+      )}
     </div>
   );
 }
