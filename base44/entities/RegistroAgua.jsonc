@@ -1,0 +1,103 @@
+{
+  "name": "RegistroAgua",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "business_id": {
+      "type": "string"
+    },
+    "punto_id": {
+      "type": "string"
+    },
+    "punto_nombre": {
+      "type": "string"
+    },
+    "cloro_nivel": {
+      "type": "number"
+    },
+    "cloro_min": {
+      "type": "number"
+    },
+    "cloro_max": {
+      "type": "number"
+    },
+    "ph_nivel": {
+      "type": "number"
+    },
+    "ph_min": {
+      "type": "number"
+    },
+    "ph_max": {
+      "type": "number"
+    },
+    "propiedades_organolepticas": {
+      "type": "boolean",
+      "default": true
+    },
+    "observaciones": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "punto_id",
+    "punto_nombre"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
