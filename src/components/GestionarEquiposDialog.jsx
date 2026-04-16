@@ -88,9 +88,9 @@ function ItemList({ items, onEdit, onDelete, tab }) {
   );
 }
 
-export default function GestionarEquiposDialog({ open, onOpenChange }) {
+export default function GestionarEquiposDialog({ open, onOpenChange, initialTab }) {
   const { currentBusiness, user } = useBusiness();
-  const [activeTab, setActiveTab] = useState("equipos");
+  const [activeTab, setActiveTab] = useState(initialTab || "equipos");
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(emptyForm("equipos"));
   const [editingId, setEditingId] = useState(null);
@@ -98,6 +98,11 @@ export default function GestionarEquiposDialog({ open, onOpenChange }) {
   const [loading, setLoading] = useState(false);
 
   const entityName = ENTITY_MAP[activeTab];
+
+  // Reset to initialTab when dialog opens
+  useEffect(() => {
+    if (open) setActiveTab(initialTab || "equipos");
+  }, [open, initialTab]);
 
   // Load items whenever tab or dialog opens
   useEffect(() => {

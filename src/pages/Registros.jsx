@@ -54,6 +54,7 @@ const INCIDENCIA_ALERT_COLOR = "bg-red-100 border-red-300 text-red-700";
 export default function Registros() {
   const [active, setActive] = useState("temperatura");
   const [showGestionar, setShowGestionar] = useState(false);
+  const [gestionarTab, setGestionarTab] = useState("equipos");
   const [showProveedores, setShowProveedores] = useState(false);
   const [showSuministroAgua, setShowSuministroAgua] = useState(false);
   const [showGestorPlagas, setShowGestorPlagas] = useState(false);
@@ -151,9 +152,26 @@ export default function Registros() {
                   Empresa mantenimiento
                 </Button>
               )}
-              <Button variant="outline" size="icon" className="bg-white" onClick={() => setShowGestionar(true)}>
-                <Settings className="w-4 h-4 text-muted-foreground" />
-              </Button>
+              {active === "temperatura" && (
+                <Button variant="outline" size="icon" className="bg-white" onClick={() => { setGestionarTab("equipos"); setShowGestionar(true); }}>
+                  <Settings className="w-4 h-4 text-muted-foreground" />
+                </Button>
+              )}
+              {active === "limpieza" && (
+                <Button variant="outline" size="icon" className="bg-white" onClick={() => { setGestionarTab("zonas"); setShowGestionar(true); }}>
+                  <Settings className="w-4 h-4 text-muted-foreground" />
+                </Button>
+              )}
+              {active === "agua" && (
+                <Button variant="outline" size="icon" className="bg-white" onClick={() => { setGestionarTab("agua"); setShowGestionar(true); }}>
+                  <Settings className="w-4 h-4 text-muted-foreground" />
+                </Button>
+              )}
+              {active === "plagas" && (
+                <Button variant="outline" size="icon" className="bg-white" onClick={() => { setGestionarTab("plagas"); setShowGestionar(true); }}>
+                  <Settings className="w-4 h-4 text-muted-foreground" />
+                </Button>
+              )}
               <Button
                 className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2"
                 onClick={() => setShowNuevoRegistro((v) => !v)}
@@ -241,7 +259,7 @@ export default function Registros() {
           )}
         </div>
       )}
-      <GestionarEquiposDialog open={showGestionar} onOpenChange={setShowGestionar} />
+      <GestionarEquiposDialog open={showGestionar} onOpenChange={setShowGestionar} initialTab={gestionarTab} />
       <GestionarProveedoresDialog open={showProveedores} onOpenChange={setShowProveedores} />
       <SuministroAguaDialog open={showSuministroAgua} onOpenChange={setShowSuministroAgua} />
       <GestorPlagasDialog open={showGestorPlagas} onOpenChange={setShowGestorPlagas} />
