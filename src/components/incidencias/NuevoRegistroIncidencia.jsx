@@ -12,19 +12,20 @@ const PRIORIDADES = [
   { value: "critica", label: "Crítica" },
 ];
 
-export default function NuevoRegistroIncidencia({ onCancel, onSaved, nextNumero }) {
+export default function NuevoRegistroIncidencia({ onCancel, onSaved, nextNumero, incidenciaExistente }) {
   const { currentBusiness, user } = useBusiness();
+  const isEdit = !!incidenciaExistente;
   const [form, setForm] = useState({
-    tipo: "Temperatura",
-    modulo_origen: "",
-    prioridad: "media",
-    responsable: "",
-    fecha_prevista_resolucion: format(new Date(), "yyyy-MM-dd"),
-    descripcion: "",
-    causa: "",
-    solucion_provisional: "",
+    tipo: incidenciaExistente?.tipo || "Temperatura",
+    modulo_origen: incidenciaExistente?.modulo_origen || "",
+    prioridad: incidenciaExistente?.prioridad || "media",
+    responsable: incidenciaExistente?.responsable || "",
+    fecha_prevista_resolucion: incidenciaExistente?.fecha_prevista_resolucion || format(new Date(), "yyyy-MM-dd"),
+    descripcion: incidenciaExistente?.descripcion || "",
+    causa: incidenciaExistente?.causa || "",
+    solucion_provisional: incidenciaExistente?.solucion_provisional || "",
   });
-  const [evidenciaUrl, setEvidenciaUrl] = useState("");
+  const [evidenciaUrl, setEvidenciaUrl] = useState(incidenciaExistente?.evidencia_url || "");
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -42,15 +43,22 @@ export default function NuevoRegistroIncidencia({ onCancel, onSaved, nextNumero 
   async function handleGuardar() {
     if (!form.descripcion.trim()) return;
     setLoading(true);
-    await base44.entities.Incidencia.create({
-      ...form,
-      numero: nextNumero,
-      evidencia_url: evidenciaUrl || undefined,
-      estado: "abierta",
-      user_id: user.id,
-      business_id: currentBusiness.id,
-      fecha: new Date().toISOString(),
-    });
+    if (isEdit) {
+      await base44.entities.Incidencia.update(incidenciaExistente.id, {
+        ...form,
+        evidencia_url: evidenciaUrl || undefined,
+      });
+    } else {
+      await base44.entities.Incidencia.create({
+        ...form,
+        numero: nextNumero,
+        evidencia_url: evidenciaUrl || undefined,
+        estado: "abierta",
+        user_id: user.id,
+        business_id: currentBusiness.id,
+        fecha: new Date().toISOString(),
+      });
+    }
     setLoading(false);
     onSaved();
   }
@@ -143,7 +151,7 @@ export default function NuevoRegistroIncidencia({ onCancel, onSaved, nextNumero 
         <button type="button" disabled={loading || !form.descripcion.trim()} onClick={handleGuardar}
           className="px-5 py-2.5 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2">
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-          Registrar incidencia
+          {isEdit ? "Guardar cambios" : "Registrar incidencia"}
         </button>
       </div>
     </div>

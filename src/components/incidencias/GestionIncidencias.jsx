@@ -149,14 +149,10 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange }) 
 
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="bg-secondary rounded-2xl px-5 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-[#0A3E47]" strokeWidth={1.5} />
-          <span className="font-semibold text-[#0A3E47]">Gestión de Incidencias</span>
-        </div>
+      {/* Botón nueva incidencia */}
+      <div className="flex justify-end">
         <button
-          onClick={() => setShowNuevo((v) => !v)}
+          onClick={() => { setShowNuevo((v) => !v); setEditDialog(null); }}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white text-sm font-semibold transition-colors">
           <Plus className="w-4 h-4" />
           Nueva incidencia
@@ -164,11 +160,21 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange }) 
       </div>
 
       {/* Formulario nuevo */}
-      {showNuevo && (
+      {showNuevo && !editDialog && (
         <NuevoRegistroIncidencia
           nextNumero={nextNumero}
           onCancel={() => setShowNuevo(false)}
           onSaved={() => { setShowNuevo(false); reload(); }}
+        />
+      )}
+
+      {/* Formulario editar */}
+      {editDialog && (
+        <NuevoRegistroIncidencia
+          nextNumero={editDialog.numero}
+          incidenciaExistente={editDialog}
+          onCancel={() => setEditDialog(null)}
+          onSaved={() => { setEditDialog(null); reload(); }}
         />
       )}
 
@@ -384,6 +390,9 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange }) 
                       </button>
                     </>
                   )}
+                  <button onClick={() => { setEditDialog(inc); setShowNuevo(false); }} className="text-muted-foreground hover:text-foreground transition-colors p-1.5">
+                    <Pencil className="w-4 h-4" />
+                  </button>
                   <button onClick={() => handleDelete(inc.id)} className="text-destructive/60 hover:text-destructive transition-colors p-1.5">
                     <Trash2 className="w-4 h-4" />
                   </button>
