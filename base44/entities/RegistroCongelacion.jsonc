@@ -1,0 +1,101 @@
+{
+  "name": "RegistroCongelacion",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "business_id": {
+      "type": "string"
+    },
+    "producto": {
+      "type": "string"
+    },
+    "operacion": {
+      "type": "string",
+      "enum": [
+        "Congelaci\u00f3n",
+        "Descongelaci\u00f3n"
+      ],
+      "default": "Congelaci\u00f3n"
+    },
+    "equipo_id": {
+      "type": "string"
+    },
+    "equipo_nombre": {
+      "type": "string"
+    },
+    "temperatura_inicial": {
+      "type": "number"
+    },
+    "temperatura_final": {
+      "type": "number"
+    },
+    "consumir_antes_de": {
+      "type": "string"
+    },
+    "observaciones": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "producto",
+    "operacion"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

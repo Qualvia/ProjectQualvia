@@ -30,6 +30,8 @@ const NuevoRegistroAlergeno = lazy(() => import("@/components/NuevoRegistroAlerg
 const ListaRegistrosAlergenos = lazy(() => import("@/components/ListaRegistrosAlergenos"));
 const NuevoRegistroLote = lazy(() => import("@/components/NuevoRegistroLote"));
 const ListaRegistrosLotes = lazy(() => import("@/components/ListaRegistrosLotes"));
+const NuevoRegistroCongelacion = lazy(() => import("@/components/NuevoRegistroCongelacion"));
+const ListaRegistrosCongelacion = lazy(() => import("@/components/ListaRegistrosCongelacion"));
 
 const REGISTROS = [
   { id: "temperatura", label: "Temperatura", icon: Thermometer, color: "bg-red-500 border-red-500 text-white" },
@@ -78,6 +80,7 @@ export default function Registros() {
   const [formacionKey, setFormacionKey] = useState(0);
   const [alergenosKey, setAlergenosKey] = useState(0);
   const [lotesKey, setLotesKey] = useState(0);
+  const [congelacionKey, setCongelacionKey] = useState(0);
   const [hayFueraDeRango, setHayFueraDeRango] = useState(false);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
@@ -240,6 +243,11 @@ export default function Registros() {
               <NuevoRegistroLote onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setLotesKey((k) => k + 1); }} />
             </Suspense>
           )}
+          {showNuevoRegistro && active === "congelacion" && (
+            <Suspense fallback={<SuspenseFallbackForm />}>
+              <NuevoRegistroCongelacion onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setCongelacionKey((k) => k + 1); }} />
+            </Suspense>
+          )}
 
           {/* Listas — lazy */}
           {active === "temperatura" && (
@@ -285,6 +293,11 @@ export default function Registros() {
           {active === "lotes" && (
             <Suspense fallback={<SuspenseFallbackList />}>
               <ListaRegistrosLotes refreshKey={lotesKey} />
+            </Suspense>
+          )}
+          {active === "congelacion" && (
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <ListaRegistrosCongelacion refreshKey={congelacionKey} />
             </Suspense>
           )}
         </div>
