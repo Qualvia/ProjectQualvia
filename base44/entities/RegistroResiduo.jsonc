@@ -1,0 +1,125 @@
+{
+  "name": "RegistroResiduo",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "business_id": {
+      "type": "string"
+    },
+    "tipo_residuo": {
+      "type": "string",
+      "enum": [
+        "Org\u00e1nico",
+        "Envases y pl\u00e1sticos",
+        "Papel y cart\u00f3n",
+        "Vidrio",
+        "Aceite usado",
+        "Subproducto animal",
+        "Otro"
+      ]
+    },
+    "descripcion": {
+      "type": "string"
+    },
+    "cantidad": {
+      "type": "number"
+    },
+    "unidad": {
+      "type": "string",
+      "enum": [
+        "kg",
+        "litros",
+        "unidades",
+        "m\u00b3"
+      ],
+      "default": "kg"
+    },
+    "gestion_realizada": {
+      "type": "string",
+      "enum": [
+        "Recogida por gestor autorizado",
+        "Entrega en punto limpio",
+        "Reutilizaci\u00f3n interna",
+        "Compostaje",
+        "Otro"
+      ]
+    },
+    "gestor_tipo": {
+      "type": "string",
+      "enum": [
+        "Empresa / Gestor autorizado",
+        "Interno"
+      ]
+    },
+    "gestor_nombre": {
+      "type": "string"
+    },
+    "documento_acreditativo": {
+      "type": "string"
+    },
+    "observaciones": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "tipo_residuo"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -21,6 +21,8 @@ const CHILD_ENTITIES = [
   "RegistroAlergeno",
   "RegistroLote",
   "RegistroCongelacion",
+  "RegistroResiduo",
+  "GestorResiduos",
 ];
 
 Deno.serve(async (req) => {
