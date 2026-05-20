@@ -224,7 +224,7 @@ export default function Registros() {
           {/* Formularios inline — lazy */}
           {showNuevoRegistro && active === "temperatura" && (
             <Suspense fallback={<SuspenseFallbackForm />}>
-              <NuevoRegistroTemperatura onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setRegistroKey((k) => k + 1); }} />
+              <NuevoRegistroTemperatura onCancel={() => setShowNuevoRegistro(false)} onSaved={() => { setShowNuevoRegistro(false); setRegistroKey((k) => k + 1); setIncidenciasKey((k) => k + 1); }} />
             </Suspense>
           )}
           {showNuevoRegistro && active === "limpieza" && (
