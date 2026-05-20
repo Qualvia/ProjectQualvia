@@ -42,28 +42,46 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
     const filled = equipos.filter((e) => values[e.id]?.temperatura !== "");
     if (filled.length === 0) return;
     setSaving(true);
-    try {
-      await Promise.all(
-        filled.map((e) =>
-          base44.entities.RegistroTemperatura.create({
-            user_id: user.id,
-            business_id: currentBusiness.id,
-            equipo_id: e.id,
-            equipo_nombre: e.nombre,
-            temperatura: Number(values[e.id].temperatura),
-            observaciones: values[e.id].observaciones,
-            temp_min: e.temp_min,
-            temp_max: e.temp_max,
-            fecha: new Date().toISOString(),
-          })
-        )
-      );
-      onSaved();
-    } catch (err) {
-      console.error("Error guardando registros de temperatura:", err);
-    } finally {
-      setSaving(false);
+    const registrosCreados = await Promise.all(
+      filled.map((e) =>
+        base44.entities.RegistroTemperatura.create({
+          user_id: user.id,
+          business_id: currentBusiness.id,
+          equipo_id: e.id,
+          equipo_nombre: e.nombre,
+          temperatura: Number(values[e.id].temperatura),
+          observaciones: values[e.id].observaciones,
+          temp_min: e.temp_min,
+          temp_max: e.temp_max,
+          fecha: new Date().toISOString(),
+        })
+      )
+    );
+    // Generar incidencias automáticas para registros fuera de rango
+    const fueraDeRango = registrosCreados.filter((r) => {
+      if (r.temp_min === undefined || r.temp_max === undefined) return false;
+      return r.temperatura < r.temp_min || r.temperatura > r.temp_max;
+    });
+    for (const r of fueraDeRango) {
+      const existentes = await base44.entities.Incidencia.filter({ business_id: currentBusiness.id }, "-numero", 1, 0);
+      const nextNumero = existentes.length > 0 ? (existentes[0].numero || 0) + 1 : 1;
+      const desviacion = Math.max(r.temp_min - r.temperatura, r.temperatura - r.temp_max);
+      await base44.entities.Incidencia.create({
+        user_id: user.id,
+        business_id: currentBusiness.id,
+        numero: nextNumero,
+        tipo: "Temperatura",
+        modulo_origen: "Control de Temperatura",
+        prioridad: desviacion > 3 ? "critica" : "alta",
+        descripcion: `Temperatura fuera de rango en ${r.equipo_nombre}: ${r.temperatura}°C (Permitido: ${r.temp_min}°C-${r.temp_max}°C)`,
+        causa: "Desviación crítica de temperatura",
+        estado: "abierta",
+        origen_automatico: true,
+        fecha: new Date().toISOString(),
+      });
     }
+    setSaving(false);
+    onSaved();
   }
 
   if (loading) {

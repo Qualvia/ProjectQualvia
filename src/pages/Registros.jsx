@@ -35,6 +35,7 @@ const ListaRegistrosCongelacion = lazy(() => import("@/components/ListaRegistros
 const NuevoRegistroResiduo = lazy(() => import("@/components/NuevoRegistroResiduo"));
 const ListaRegistrosResiduos = lazy(() => import("@/components/ListaRegistrosResiduos"));
 const GestorResiduosDialog = lazy(() => import("@/components/GestorResiduosDialog"));
+const GestionIncidencias = lazy(() => import("@/components/incidencias/GestionIncidencias"));
 
 const REGISTROS = [
   { id: "temperatura", label: "Temperatura", icon: Thermometer, color: "bg-red-500 border-red-500 text-white" },
@@ -86,6 +87,7 @@ export default function Registros() {
   const [congelacionKey, setCongelacionKey] = useState(0);
   const [residuosKey, setResiduosKey] = useState(0);
   const [showGestorResiduos, setShowGestorResiduos] = useState(false);
+  const [incidenciasKey, setIncidenciasKey] = useState(0);
   const [hayFueraDeRango, setHayFueraDeRango] = useState(false);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
@@ -149,7 +151,7 @@ export default function Registros() {
             <div className="flex items-center gap-3">
               {ActiveIcon && <ActiveIcon className="w-5 h-5 text-[#0A3E47]" strokeWidth={1.5} />}
               <span className="font-semibold text-[#0A3E47]">
-                {active === "congelacion" ? "Control de congelación/descongelación" : `Control de ${activeRegistro.label}${active === "temperatura" ? " (°C)" : ""}`}
+                {active === "incidencias" ? "Gestión de Incidencias" : active === "congelacion" ? "Control de congelación/descongelación" : `Control de ${activeRegistro.label}${active === "temperatura" ? " (°C)" : ""}`}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -197,13 +199,15 @@ export default function Registros() {
                   <Settings className="w-4 h-4 text-muted-foreground" />
                 </Button>
               )}
-              <Button
-                className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2"
-                onClick={() => setShowNuevoRegistro((v) => !v)}
-              >
-                <Plus className="w-4 h-4" />
-                Nuevo registro
-              </Button>
+              {active !== "incidencias" && (
+                <Button
+                  className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2"
+                  onClick={() => setShowNuevoRegistro((v) => !v)}
+                >
+                  <Plus className="w-4 h-4" />
+                  Nuevo registro
+                </Button>
+              )}
             </div>
           </div>
 
@@ -318,6 +322,11 @@ export default function Registros() {
           {active === "residuos" && (
             <Suspense fallback={<SuspenseFallbackList />}>
               <ListaRegistrosResiduos refreshKey={residuosKey} />
+            </Suspense>
+          )}
+          {active === "incidencias" && (
+            <Suspense fallback={<SuspenseFallbackList />}>
+              <GestionIncidencias refreshKey={incidenciasKey} />
             </Suspense>
           )}
         </div>

@@ -1,0 +1,153 @@
+{
+  "name": "Incidencia",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "business_id": {
+      "type": "string"
+    },
+    "numero": {
+      "type": "number"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Temperatura",
+        "Limpieza",
+        "Recepci\u00f3n",
+        "Agua",
+        "Plagas",
+        "Mantenimiento",
+        "Formaci\u00f3n",
+        "Al\u00e9rgenos",
+        "Lotes",
+        "Congelaci\u00f3n",
+        "Residuos",
+        "Otro"
+      ]
+    },
+    "modulo_origen": {
+      "type": "string"
+    },
+    "prioridad": {
+      "type": "string",
+      "enum": [
+        "baja",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
+    },
+    "responsable": {
+      "type": "string"
+    },
+    "fecha_prevista_resolucion": {
+      "type": "string"
+    },
+    "descripcion": {
+      "type": "string"
+    },
+    "causa": {
+      "type": "string"
+    },
+    "solucion_provisional": {
+      "type": "string"
+    },
+    "evidencia_url": {
+      "type": "string"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "abierta",
+        "seguimiento",
+        "cerrada"
+      ],
+      "default": "abierta"
+    },
+    "accion_correctiva": {
+      "type": "string"
+    },
+    "fecha_cierre": {
+      "type": "string"
+    },
+    "seguimiento_fecha": {
+      "type": "string"
+    },
+    "seguimiento_responsable": {
+      "type": "string"
+    },
+    "seguimiento_plan": {
+      "type": "string"
+    },
+    "seguimiento_observaciones": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "origen_automatico": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "descripcion"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
