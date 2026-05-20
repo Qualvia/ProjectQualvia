@@ -1,4 +1,6 @@
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
+import { base44 } from "@/api/base44Client";
+import { useBusiness } from "@/contexts/BusinessContext";
 const GestionarEquiposDialog = lazy(() => import("@/components/GestionarEquiposDialog"));
 const GestionarProveedoresDialog = lazy(() => import("@/components/GestionarProveedoresDialog"));
 import {
@@ -88,7 +90,15 @@ export default function Registros() {
   const [residuosKey, setResiduosKey] = useState(0);
   const [showGestorResiduos, setShowGestorResiduos] = useState(false);
   const [incidenciasKey, setIncidenciasKey] = useState(0);
-  const [hayFueraDeRango, setHayFueraDeRango] = useState(false);
+  const [hayIncidenciasAbiertas, setHayIncidenciasAbiertas] = useState(false);
+  const { currentBusiness } = useBusiness();
+
+  useEffect(() => {
+    if (!currentBusiness) return;
+    base44.entities.Incidencia.filter({ business_id: currentBusiness.id, estado: "abierta" }, "-fecha", 1, 0)
+      .then((data) => setHayIncidenciasAbiertas(data.length > 0))
+      .catch(() => {});
+  }, [currentBusiness, incidenciasKey]);
 
   const activeRegistro = REGISTROS.find((r) => r.id === active);
   const ActiveIcon = activeRegistro?.icon;
@@ -120,7 +130,7 @@ export default function Registros() {
         {REGISTROS.map(({ id, label, icon: Icon, color }) => {
           const isActive = active === id;
           const isIncidencia = id === "incidencias";
-          const incidenciaAlert = isIncidencia && hayFueraDeRango;
+          const incidenciaAlert = isIncidencia && hayIncidenciasAbiertas;
           return (
             <button
               key={id}
@@ -271,7 +281,7 @@ export default function Registros() {
           {/* Listas — lazy */}
           {active === "temperatura" && (
             <Suspense fallback={<SuspenseFallbackList />}>
-              <ListaRegistrosTemperatura refreshKey={registroKey} onFueraDeRangoChange={setHayFueraDeRango} />
+              <ListaRegistrosTemperatura refreshKey={registroKey} />
             </Suspense>
           )}
           {active === "limpieza" && (
@@ -326,7 +336,7 @@ export default function Registros() {
           )}
           {active === "incidencias" && (
             <Suspense fallback={<SuspenseFallbackList />}>
-              <GestionIncidencias refreshKey={incidenciasKey} />
+              <GestionIncidencias refreshKey={incidenciasKey} onIncidenciasChange={() => setIncidenciasKey((k) => k + 1)} />
             </Suspense>
           )}
         </div>

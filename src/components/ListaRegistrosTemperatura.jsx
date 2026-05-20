@@ -3,26 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { Loader2, Trash2, Filter, CalendarDays, User, ChevronDown, X } from "lucide-react";
 
-async function crearIncidenciaTemperatura(registro, business, user) {
-  // Obtener el siguiente número de incidencia
-  const existentes = await base44.entities.Incidencia.filter({ business_id: business.id }, "-numero", 1, 0);
-  const nextNumero = existentes.length > 0 ? (existentes[0].numero || 0) + 1 : 1;
-  const desviacion = Math.max(registro.temp_min - registro.temperatura, registro.temperatura - registro.temp_max);
-  const prioridad = desviacion > 3 ? "critica" : "alta";
-  await base44.entities.Incidencia.create({
-    user_id: user.id,
-    business_id: business.id,
-    numero: nextNumero,
-    tipo: "Temperatura",
-    modulo_origen: "Control de Temperatura",
-    prioridad,
-    descripcion: `Temperatura fuera de rango en ${registro.equipo_nombre}: ${registro.temperatura}°C (Permitido: ${registro.temp_min}°C-${registro.temp_max}°C)`,
-    causa: "Desviación crítica de temperatura",
-    estado: "abierta",
-    origen_automatico: true,
-    fecha: new Date().toISOString(),
-  });
-}
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -133,8 +113,8 @@ function aplicarFiltros(registros, filtros) {
   });
 }
 
-export default function ListaRegistrosTemperatura({ refreshKey, onFueraDeRangoChange }) {
-  const { currentBusiness, user } = useBusiness();
+export default function ListaRegistrosTemperatura({ refreshKey }) {
+  const { currentBusiness } = useBusiness();
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -144,25 +124,14 @@ export default function ListaRegistrosTemperatura({ refreshKey, onFueraDeRangoCh
   const [filtros, setFiltros] = useState(EMPTY_FILTERS);
   const hayFiltrosActivos = JSON.stringify(filtros) !== JSON.stringify(EMPTY_FILTERS);
 
-  async function fetchPage(skipVal, replace = false, newRecords = []) {
+  async function fetchPage(skipVal, replace = false) {
     if (!currentBusiness) return;
     const data = await base44.entities.RegistroTemperatura.filter({ business_id: currentBusiness.id }, "-fecha", PAGE_SIZE + 1, skipVal);
     const hasMoreData = data.length > PAGE_SIZE;
     const slice = hasMoreData ? data.slice(0, PAGE_SIZE) : data;
-    setRegistros((prev) => {
-      const next = replace ? slice : [...prev, ...slice];
-      const hayFuera = next.some((r) => getStatus(r) !== "correcto");
-      onFueraDeRangoChange?.(hayFuera);
-      return next;
-    });
+    setRegistros((prev) => replace ? slice : [...prev, ...slice]);
     setHasMore(hasMoreData);
     setSkip(skipVal + slice.length);
-    // Crear incidencias automáticas para nuevos registros fuera de rango
-    for (const r of newRecords) {
-      if (getStatus(r) !== "correcto") {
-        crearIncidenciaTemperatura(r, currentBusiness, user).catch(() => {});
-      }
-    }
   }
 
   useEffect(() => {
@@ -180,9 +149,7 @@ export default function ListaRegistrosTemperatura({ refreshKey, onFueraDeRangoCh
 
   async function handleDelete(id) {
     await base44.entities.RegistroTemperatura.delete(id);
-    const updated = registros.filter((r) => r.id !== id);
-    setRegistros(updated);
-    onFueraDeRangoChange?.(updated.some((r) => getStatus(r) !== "correcto"));
+    setRegistros((prev) => prev.filter((r) => r.id !== id));
   }
 
   const filtrados = useMemo(() => aplicarFiltros(registros, filtros), [registros, filtros]);

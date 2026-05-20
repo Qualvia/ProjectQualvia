@@ -66,7 +66,7 @@ function filtrarPorPeriodo(registros, periodo, desde, hasta) {
 
 const PAGE_SIZE = 30;
 
-export default function GestionIncidencias({ refreshKey }) {
+export default function GestionIncidencias({ refreshKey, onIncidenciasChange }) {
   const { currentBusiness, user } = useBusiness();
   const [incidencias, setIncidencias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -112,7 +112,7 @@ export default function GestionIncidencias({ refreshKey }) {
 
   async function handleLoadMore() { setLoadingMore(true); await fetchPage(skip, false); setLoadingMore(false); }
 
-  function reload() { setLoading(true); setSkip(0); fetchPage(0, true).finally(() => setLoading(false)); }
+  function reload() { setLoading(true); setSkip(0); fetchPage(0, true).finally(() => setLoading(false)); onIncidenciasChange?.(); }
 
   const nextNumero = useMemo(() => {
     if (incidencias.length === 0) return 1;
