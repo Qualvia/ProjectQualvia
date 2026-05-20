@@ -209,7 +209,15 @@ export default function Registros() {
                   <Settings className="w-4 h-4 text-muted-foreground" />
                 </Button>
               )}
-              {active !== "incidencias" && (
+              {active === "incidencias" ? (
+                <Button
+                  className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2"
+                  onClick={() => setShowNuevoRegistro((v) => !v)}
+                >
+                  <Plus className="w-4 h-4" />
+                  Nueva incidencia
+                </Button>
+              ) : (
                 <Button
                   className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2"
                   onClick={() => setShowNuevoRegistro((v) => !v)}
@@ -336,7 +344,12 @@ export default function Registros() {
           )}
           {active === "incidencias" && (
             <Suspense fallback={<SuspenseFallbackList />}>
-              <GestionIncidencias refreshKey={incidenciasKey} onIncidenciasChange={() => setIncidenciasKey((k) => k + 1)} />
+              <GestionIncidencias
+                refreshKey={incidenciasKey}
+                onIncidenciasChange={() => setIncidenciasKey((k) => k + 1)}
+                showNuevo={showNuevoRegistro}
+                onCloseNuevo={() => setShowNuevoRegistro(false)}
+              />
             </Suspense>
           )}
         </div>

@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import {
   AlertTriangle, Eye, CheckCircle2, TrendingUp, Clock,
-  Plus, Filter, FileText, Pencil, Trash2, Loader2, ChevronDown,
+  Filter, FileText, Pencil, Trash2, Loader2, ChevronDown,
   AlertCircle
 } from "lucide-react";
 import { format, subWeeks, subMonths, subQuarters, subYears, startOfDay, endOfDay } from "date-fns";
@@ -66,7 +66,7 @@ function filtrarPorPeriodo(registros, periodo, desde, hasta) {
 
 const PAGE_SIZE = 30;
 
-export default function GestionIncidencias({ refreshKey, onIncidenciasChange }) {
+export default function GestionIncidencias({ refreshKey, onIncidenciasChange, showNuevo: showNuevoProp, onCloseNuevo }) {
   const { currentBusiness, user } = useBusiness();
   const [incidencias, setIncidencias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,7 +74,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange }) 
   const [hasMore, setHasMore] = useState(false);
   const [skip, setSkip] = useState(0);
 
-  const [showNuevo, setShowNuevo] = useState(false);
+  const showNuevo = showNuevoProp ?? false;
   const [showFiltros, setShowFiltros] = useState(false);
   const [periodo, setPeriodo] = useState("todas");
   const [showPeriodoDropdown, setShowPeriodoDropdown] = useState(false);
@@ -149,22 +149,13 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange }) 
 
   return (
     <div className="space-y-5">
-      {/* Botón nueva incidencia */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => { setShowNuevo((v) => !v); setEditDialog(null); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white text-sm font-semibold transition-colors">
-          <Plus className="w-4 h-4" />
-          Nueva incidencia
-        </button>
-      </div>
 
       {/* Formulario nuevo */}
       {showNuevo && !editDialog && (
         <NuevoRegistroIncidencia
           nextNumero={nextNumero}
-          onCancel={() => setShowNuevo(false)}
-          onSaved={() => { setShowNuevo(false); reload(); }}
+          onCancel={() => onCloseNuevo?.()}
+          onSaved={() => { onCloseNuevo?.(); reload(); }}
         />
       )}
 
@@ -390,7 +381,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange }) 
                       </button>
                     </>
                   )}
-                  <button onClick={() => { setEditDialog(inc); setShowNuevo(false); }} className="text-muted-foreground hover:text-foreground transition-colors p-1.5">
+                  <button onClick={() => { setEditDialog(inc); onCloseNuevo?.(); }} className="text-muted-foreground hover:text-foreground transition-colors p-1.5">
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button onClick={() => handleDelete(inc.id)} className="text-destructive/60 hover:text-destructive transition-colors p-1.5">
