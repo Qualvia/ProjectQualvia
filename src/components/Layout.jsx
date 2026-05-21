@@ -103,7 +103,7 @@ export default function Layout() {
         </nav>
 
         {/* Negocio activo — fondo arena */}
-        <div className="px-3 pt-2 pb-3 shrink-0">
+        <div className="px-3 pt-0 pb-3 shrink-0">
           <div className="bg-[#EDE6DA] rounded-xl px-3 py-2">
             <p className="text-[10px] font-semibold text-[#0A3E47]/50 mb-1 uppercase tracking-wide">Negocio activo</p>
             <BusinessSelector />
