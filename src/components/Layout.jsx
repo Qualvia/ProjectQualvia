@@ -81,7 +81,7 @@ export default function Layout() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 pt-4 space-y-0.5 overflow-y-auto">
+        <nav className="px-3 pt-4 space-y-0.5">
           {NAV_ITEMS.map(({ to, label, icon: Icon }) =>
           <NavLink
             key={to}
@@ -102,10 +102,13 @@ export default function Layout() {
           )}
         </nav>
 
+        {/* Spacer */}
+        <div className="flex-1" />
+
         {/* Negocio activo — fondo arena */}
-        <div className="px-3 pt-0 pb-3 shrink-0">
-          <div className="bg-[#EDE6DA] rounded-xl px-3 py-2">
-            <p className="text-[10px] font-semibold text-[#0A3E47]/50 mb-1 uppercase tracking-wide">Negocio activo</p>
+        <div className="px-3 pb-4 shrink-0">
+          <div className="bg-[#EDE6DA] rounded-xl px-3 py-2.5">
+            <p className="text-[10px] font-semibold text-[#0A3E47]/50 mb-1.5 uppercase tracking-wide">Negocio activo</p>
             <BusinessSelector />
           </div>
         </div>
