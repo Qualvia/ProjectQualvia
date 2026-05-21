@@ -126,6 +126,7 @@ export default function SelectorUsuarioInterno() {
                   placeholder="••••"
                   value={pin}
                   onChange={(e) => { setPin(e.target.value); setError(""); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" && pin) handleAcceder(); }}
                   className="w-48 text-center text-2xl tracking-widest border-2 border-border rounded-xl px-4 py-3 focus:outline-none focus:border-[#6BB68A]"
                   autoFocus
                 />

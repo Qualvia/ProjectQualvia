@@ -131,7 +131,7 @@ export default function Registros() {
 
       {/* Grid de registros */}
       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-6 gap-2">
-        {REGISTROS.map(({ id, label, icon: Icon, color }) => {
+        {REGISTROS.filter(({ id }) => !(esOperario && id === "incidencias")).map(({ id, label, icon: Icon, color }) => {
           const isActive = active === id;
           const isIncidencia = id === "incidencias";
           const incidenciaAlert = isIncidencia && hayIncidenciasAbiertas;
