@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { base44 } from "@/api/base44Client";
 import BusinessSelector from "@/components/BusinessSelector";
+import SelectorUsuarioInterno from "@/components/SelectorUsuarioInterno";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -97,8 +98,13 @@ export default function Layout() {
             </NavLink>
           )}
 
+          {/* Selector usuario interno */}
+          <div className="mt-3">
+            <SelectorUsuarioInterno />
+          </div>
+
           {/* Business selector — debajo de Ajustes */}
-          <div className="mt-3 bg-[#EDE6DA] rounded-xl px-3 py-2">
+          <div className="mt-2 bg-[#EDE6DA] rounded-xl px-3 py-2">
             <BusinessSelector />
           </div>
         </nav>

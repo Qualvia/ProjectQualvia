@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { BusinessProvider } from './contexts/BusinessContext';
+import { UsuarioInternoProvider } from './contexts/UsuarioInternoContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Registros from './pages/Registros.jsx';
@@ -40,6 +41,7 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
+    <UsuarioInternoProvider>
     <BusinessProvider authenticatedUser={user}>
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
@@ -54,6 +56,7 @@ const AuthenticatedApp = () => {
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </BusinessProvider>
+    </UsuarioInternoProvider>
   );
 };
 
