@@ -72,7 +72,7 @@ export default function Layout() {
           <img
             src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
             alt="Qualvia"
-            className="h-10 object-contain" />
+            className="h-10 object-contain rounded-none" />
         </div>
 
         {/* Usuario interno */}
@@ -91,9 +91,9 @@ export default function Layout() {
             className={({ isActive }) =>
             cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-              isActive
-                ? "bg-[#FAFAF7]/15 text-[#FAFAF7] font-semibold"
-                : "text-[#FAFAF7]/60 hover:bg-[#FAFAF7]/10 hover:text-[#FAFAF7]"
+              isActive ?
+              "bg-[#FAFAF7]/15 text-[#FAFAF7] font-semibold" :
+              "text-[#FAFAF7]/60 hover:bg-[#FAFAF7]/10 hover:text-[#FAFAF7]"
             )
             }>
               <Icon className="w-4 h-4 shrink-0" />
@@ -126,8 +126,8 @@ export default function Layout() {
             <button
               onClick={() => base44.auth.logout()}
               title="Cerrar sesión"
-              className="shrink-0 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-            >
+              className="shrink-0 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+              
               <LogOut className="w-4 h-4" />
             </button>
           </div>
