@@ -103,15 +103,15 @@ export default function Layout() {
         </nav>
 
         {/* Negocio activo — fondo arena */}
-        <div className="px-3 pt-4 shrink-0">
-          <div className="bg-[#EDE6DA] rounded-2xl px-4 py-3">
-            <p className="text-xs font-semibold text-[#0A3E47]/60 mb-2">Negocio activo</p>
+        <div className="px-3 pt-2 pb-3 shrink-0">
+          <div className="bg-[#EDE6DA] rounded-xl px-3 py-2">
+            <p className="text-[10px] font-semibold text-[#0A3E47]/50 mb-1 uppercase tracking-wide">Negocio activo</p>
             <BusinessSelector />
           </div>
         </div>
 
         {/* Usuario + Cerrar sesión */}
-        <div className="px-3 pb-5 pt-3 shrink-0 border-t border-border mt-3">
+        <div className="px-3 pb-5 pt-3 shrink-0 border-t border-border">
           <div className="flex items-center gap-2 px-1 py-1">
             <div className="w-8 h-8 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
               {(user?.full_name || user?.email || "?")[0].toUpperCase()}
