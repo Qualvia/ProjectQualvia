@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, X, MessageSquare, Camera, Loader2, Ban } from "lucide-react";
@@ -124,6 +125,7 @@ function ZonaRow({ zona, estado, onChange }) {
 
 export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
+  const { nombreRegistrador } = useUsuarioInterno();
   const [zonas, setZonas] = useState([]);
   const [productos, setProductos] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -178,6 +180,7 @@ export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
         foto_url: zonasEstado[z.id].foto || "",
         productos_usados: productosSeleccionados,
         observaciones_generales: observaciones,
+        registrado_por: nombreRegistrador || user.full_name || user.email,
         fecha: new Date().toISOString(),
       }));
 

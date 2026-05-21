@@ -1,6 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 const GestionarEquiposDialog = lazy(() => import("@/components/GestionarEquiposDialog"));
 const GestionarProveedoresDialog = lazy(() => import("@/components/GestionarProveedoresDialog"));
 import {
@@ -92,6 +93,7 @@ export default function Registros() {
   const [incidenciasKey, setIncidenciasKey] = useState(0);
   const [hayIncidenciasAbiertas, setHayIncidenciasAbiertas] = useState(false);
   const { currentBusiness } = useBusiness();
+  const { esOperario } = useUsuarioInterno();
 
   useEffect(() => {
     if (!currentBusiness) return;
@@ -113,16 +115,18 @@ export default function Registros() {
             Gestiona todos tus controles diarios
           </p>
         </div>
-        <div className="flex flex-col gap-2 shrink-0">
-          <Button className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2" onClick={() => setShowGestionar(true)}>
-            <Plus className="w-4 h-4" />
-            Gestionar equipos/zonas
-          </Button>
-          <Button variant="outline" className="border-[#6BB68A] text-[#6BB68A] hover:bg-[#6BB68A]/10 gap-2" onClick={() => setShowProveedores(true)}>
-            <Plus className="w-4 h-4" />
-            Gestionar proveedores
-          </Button>
-        </div>
+        {!esOperario && (
+          <div className="flex flex-col gap-2 shrink-0">
+            <Button className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2" onClick={() => setShowGestionar(true)}>
+              <Plus className="w-4 h-4" />
+              Gestionar equipos/zonas
+            </Button>
+            <Button variant="outline" className="border-[#6BB68A] text-[#6BB68A] hover:bg-[#6BB68A]/10 gap-2" onClick={() => setShowProveedores(true)}>
+              <Plus className="w-4 h-4" />
+              Gestionar proveedores
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Grid de registros */}
@@ -165,46 +169,46 @@ export default function Registros() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              {active === "agua" && (
+              {!esOperario && active === "agua" && (
                 <Button variant="outline" className="bg-white gap-2 text-sm" onClick={() => setShowSuministroAgua(true)}>
                   <Waves className="w-4 h-4" />
                   Suministro agua
                 </Button>
               )}
-              {active === "plagas" && (
+              {!esOperario && active === "plagas" && (
                 <Button variant="outline" className="bg-white gap-2 text-sm" onClick={() => setShowGestorPlagas(true)}>
                   <Bug className="w-4 h-4" />
                   Gestor plagas
                 </Button>
               )}
-              {active === "mantenimiento" && (
+              {!esOperario && active === "mantenimiento" && (
                 <Button variant="outline" className="bg-white gap-2 text-sm" onClick={() => setShowEmpresaMantenimiento(true)}>
                   <Wrench className="w-4 h-4" />
                   Empresa mantenimiento
                 </Button>
               )}
-              {active === "residuos" && (
+              {!esOperario && active === "residuos" && (
                 <Button variant="outline" className="bg-white gap-2 text-sm" onClick={() => setShowGestorResiduos(true)}>
                   <Trash2 className="w-4 h-4" />
                   Gestor de residuos
                 </Button>
               )}
-              {active === "temperatura" && (
+              {!esOperario && active === "temperatura" && (
                 <Button variant="outline" size="icon" className="bg-white" onClick={() => { setGestionarTab("equipos"); setShowGestionar(true); }}>
                   <Settings className="w-4 h-4 text-muted-foreground" />
                 </Button>
               )}
-              {active === "limpieza" && (
+              {!esOperario && active === "limpieza" && (
                 <Button variant="outline" size="icon" className="bg-white" onClick={() => { setGestionarTab("zonas"); setShowGestionar(true); }}>
                   <Settings className="w-4 h-4 text-muted-foreground" />
                 </Button>
               )}
-              {active === "agua" && (
+              {!esOperario && active === "agua" && (
                 <Button variant="outline" size="icon" className="bg-white" onClick={() => { setGestionarTab("agua"); setShowGestionar(true); }}>
                   <Settings className="w-4 h-4 text-muted-foreground" />
                 </Button>
               )}
-              {active === "plagas" && (
+              {!esOperario && active === "plagas" && (
                 <Button variant="outline" size="icon" className="bg-white" onClick={() => { setGestionarTab("plagas"); setShowGestionar(true); }}>
                   <Settings className="w-4 h-4 text-muted-foreground" />
                 </Button>

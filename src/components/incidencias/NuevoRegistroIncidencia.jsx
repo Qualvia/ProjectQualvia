@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Loader2, Upload } from "lucide-react";
 import { format } from "date-fns";
 
@@ -14,6 +15,7 @@ const PRIORIDADES = [
 
 export default function NuevoRegistroIncidencia({ onCancel, onSaved, nextNumero, incidenciaExistente }) {
   const { currentBusiness, user } = useBusiness();
+  const { nombreRegistrador } = useUsuarioInterno();
   const isEdit = !!incidenciaExistente;
   const [form, setForm] = useState({
     tipo: incidenciaExistente?.tipo || "Temperatura",
@@ -56,6 +58,7 @@ export default function NuevoRegistroIncidencia({ onCancel, onSaved, nextNumero,
         estado: "abierta",
         user_id: user.id,
         business_id: currentBusiness.id,
+        registrado_por: nombreRegistrador || user.full_name || user.email,
         fecha: new Date().toISOString(),
       });
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +16,7 @@ const ALERGENOS = [
 
 export default function NuevoRegistroAlergeno({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
+  const { nombreRegistrador } = useUsuarioInterno();
   const [proveedores, setProveedores] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -68,6 +70,7 @@ export default function NuevoRegistroAlergeno({ onCancel, onSaved }) {
       medidas_preventivas: form.medidas_preventivas || undefined,
       observaciones: form.observaciones || undefined,
       origen: "manual",
+      registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
     setSaving(false);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +18,7 @@ const ESTADOS_ENVASE = ["Correcto", "Dañado", "Deteriorado"];
 
 export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
+  const { nombreRegistrador } = useUsuarioInterno();
   const [proveedores, setProveedores] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -87,6 +89,7 @@ export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
         temperatura: temperatura !== "" ? Number(temperatura) : undefined,
         estado_envase: estadoEnvase || undefined,
         observaciones: resultado === "rechazado" ? motivoRechazo : undefined,
+        registrado_por: nombreRegistrador || user.full_name || user.email,
         fecha: new Date().toISOString(),
       });
 

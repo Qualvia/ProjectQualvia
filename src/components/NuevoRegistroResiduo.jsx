@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Loader2 } from "lucide-react";
 
 const TIPOS_RESIDUO = ["Orgánico", "Envases y plásticos", "Papel y cartón", "Vidrio", "Aceite usado", "Subproducto animal", "Otro"];
@@ -10,6 +11,7 @@ const GESTOR_TIPOS = ["Empresa / Gestor autorizado", "Interno"];
 
 export default function NuevoRegistroResiduo({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
+  const { nombreRegistrador } = useUsuarioInterno();
   const [gestorNombre, setGestorNombre] = useState("");
   const [form, setForm] = useState({
     tipo_residuo: "Orgánico",
@@ -41,6 +43,7 @@ export default function NuevoRegistroResiduo({ onCancel, onSaved }) {
       gestor_nombre: form.gestor_tipo === "Empresa / Gestor autorizado" ? (form.gestor_nombre || gestorNombre) : form.gestor_nombre,
       user_id: user.id,
       business_id: currentBusiness.id,
+      registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
     setLoading(false);

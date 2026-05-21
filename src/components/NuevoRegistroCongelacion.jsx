@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Loader2 } from "lucide-react";
 
 const OPERACIONES = ["Congelación", "Descongelación"];
 
 export default function NuevoRegistroCongelacion({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
+  const { nombreRegistrador } = useUsuarioInterno();
   const [equipos, setEquipos] = useState([]);
   const [form, setForm] = useState({
     producto: "",
@@ -48,6 +50,7 @@ export default function NuevoRegistroCongelacion({ onCancel, onSaved }) {
       temperatura_final: form.temperatura_final !== "" ? parseFloat(form.temperatura_final) : undefined,
       user_id: user.id,
       business_id: currentBusiness.id,
+      registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
     setLoading(false);

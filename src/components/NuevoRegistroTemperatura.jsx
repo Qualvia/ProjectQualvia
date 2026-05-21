@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +9,7 @@ import { Loader2 } from "lucide-react";
 
 export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
+  const { nombreRegistrador } = useUsuarioInterno();
   const [equipos, setEquipos] = useState([]);
   const [values, setValues] = useState({}); // { equipo_id: { temperatura, observaciones } }
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,7 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
           observaciones: values[e.id].observaciones,
           temp_min: e.temp_min,
           temp_max: e.temp_max,
+          registrado_por: nombreRegistrador || user.full_name || user.email,
           fecha: new Date().toISOString(),
         })
       )

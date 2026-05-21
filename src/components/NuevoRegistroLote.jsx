@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +20,7 @@ function generarCodigoLote(contador = 1) {
 
 export default function NuevoRegistroLote({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
+  const { nombreRegistrador } = useUsuarioInterno();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [equipos, setEquipos] = useState([]);
@@ -126,6 +128,7 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
       lotes_origen: lotesOrigen.length > 0 ? lotesOrigen : undefined,
       documento_url: documentoUrl || undefined,
       observaciones: observaciones || undefined,
+      registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
     setSaving(false);

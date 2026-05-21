@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +11,7 @@ import { format } from "date-fns";
 
 export default function NuevoRegistroFormacion({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
+  const { nombreRegistrador } = useUsuarioInterno();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     tema: "",
@@ -32,6 +34,7 @@ export default function NuevoRegistroFormacion({ onCancel, onSaved }) {
       duracion_horas: form.duracion_horas ? Number(form.duracion_horas) : undefined,
       user_id: user.id,
       business_id: currentBusiness.id,
+      registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
     setSaving(false);

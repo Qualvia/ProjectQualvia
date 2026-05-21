@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { base44 } from "@/api/base44Client";
 import BusinessSelector from "@/components/BusinessSelector";
 import SelectorUsuarioInterno from "@/components/SelectorUsuarioInterno";
@@ -18,19 +19,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-{ to: "/", label: "Dashboard", icon: LayoutDashboard },
-{ to: "/registros", label: "Registros", icon: ClipboardList },
-{ to: "/documentos", label: "Documentos", icon: FileText },
-{ to: "/checklist", label: "Checklist", icon: CheckSquare },
-{ to: "/asistente", label: "Asistente", icon: Bot },
-{ to: "/ajustes", label: "Ajustes", icon: Settings }];
+const ALL_NAV_ITEMS = [
+{ to: "/", label: "Dashboard", icon: LayoutDashboard, soloAdmin: true },
+{ to: "/registros", label: "Registros", icon: ClipboardList, soloAdmin: false },
+{ to: "/documentos", label: "Documentos", icon: FileText, soloAdmin: true },
+{ to: "/checklist", label: "Checklist", icon: CheckSquare, soloAdmin: false },
+{ to: "/asistente", label: "Asistente", icon: Bot, soloAdmin: true },
+{ to: "/ajustes", label: "Ajustes", icon: Settings, soloAdmin: true }];
 
 
 export default function Layout() {
   const { user, businesses, currentBusiness, isLoading } = useBusiness();
+  const { esOperario } = useUsuarioInterno();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+
+  const NAV_ITEMS = esOperario
+    ? ALL_NAV_ITEMS.filter((item) => !item.soloAdmin)
+    : ALL_NAV_ITEMS;
 
   useEffect(() => {
     if (isLoading) return;

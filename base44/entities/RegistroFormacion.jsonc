@@ -31,6 +31,10 @@
     },
     "observaciones": {
       "type": "string"
+    },
+    "registrado_por": {
+      "type": "string",
+      "description": "Nombre del usuario interno o propietario que realiz\u00f3 el registro"
     }
   },
   "required": [
