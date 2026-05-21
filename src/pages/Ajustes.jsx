@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import TabNegocio from "@/components/ajustes/TabNegocio";
 import TabEquipos from "@/components/ajustes/TabEquipos";
+import TabPreferencias from "@/components/ajustes/TabPreferencias";
 
 const TABS = [
   { id: "negocio",       label: "Negocio",       icon: Building2 },
@@ -54,7 +55,8 @@ export default function Ajustes() {
       {/* Contenido */}
       {activeTab === "negocio" && <TabNegocio />}
       {activeTab === "equipos" && <TabEquipos />}
-      {activeTab !== "negocio" && activeTab !== "equipos" && (
+      {activeTab === "preferencias" && <TabPreferencias />}
+      {activeTab !== "negocio" && activeTab !== "equipos" && activeTab !== "preferencias" && (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
           <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center">
             {React.createElement(TABS.find(t => t.id === activeTab)?.icon || Settings, { className: "w-7 h-7 text-muted-foreground/50" })}

@@ -1,0 +1,46 @@
+{
+  "name": "UserPreferences",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "idioma": {
+      "type": "string",
+      "default": "Espa\u00f1ol"
+    },
+    "unidad_temperatura": {
+      "type": "string",
+      "default": "celsius"
+    },
+    "unidad_peso": {
+      "type": "string",
+      "default": "kg"
+    },
+    "unidad_volumen": {
+      "type": "string",
+      "default": "litros"
+    },
+    "notificaciones": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "read": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "data.user_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.user_id": "{{user.id}}"
+    }
+  }
+}
