@@ -63,7 +63,7 @@ export default function Layout() {
       <aside
         className={cn(
           "fixed lg:static inset-y-0 left-0 z-30 w-60 h-full flex flex-col transition-transform duration-200",
-          "bg-[#FAFAF7] border-r border-border",
+          "bg-[#0A3E47] border-r border-[#0d4d5a]",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}>
         
@@ -92,8 +92,8 @@ export default function Layout() {
             cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
               isActive
-                ? "bg-[#0A3E47] text-white font-semibold"
-                : "text-foreground/80 hover:bg-[#0A3E47]/8 hover:text-foreground"
+                ? "bg-white/15 text-white font-semibold"
+                : "text-white/70 hover:bg-white/10 hover:text-white"
             )
             }>
               <Icon className="w-4 h-4 shrink-0" />
@@ -107,26 +107,26 @@ export default function Layout() {
 
         {/* Negocio activo — fondo arena */}
         <div className="px-3 pb-4 shrink-0">
-          <div className="bg-[#EDE6DA] rounded-xl px-3 py-2.5">
-            <p className="text-[10px] font-semibold text-[#0A3E47]/50 mb-1.5 uppercase tracking-wide">Negocio activo</p>
+          <div className="bg-white/10 rounded-xl px-3 py-2.5">
+            <p className="text-[10px] font-semibold text-white/50 mb-1.5 uppercase tracking-wide">Negocio activo</p>
             <BusinessSelector />
           </div>
         </div>
 
         {/* Usuario + Cerrar sesión */}
-        <div className="px-3 pb-5 pt-3 shrink-0 border-t border-border">
+        <div className="px-3 pb-5 pt-3 shrink-0 border-t border-white/10">
           <div className="flex items-center gap-2 px-1 py-1">
             <div className="w-8 h-8 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
               {(user?.full_name || user?.email || "?")[0].toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-foreground truncate">{user?.full_name || "—"}</p>
-              <p className="text-xs text-[#6BB68A] truncate">{user?.email}</p>
+              <p className="text-xs font-semibold text-white truncate">{user?.full_name || "—"}</p>
+              <p className="text-xs text-white/50 truncate">{user?.email}</p>
             </div>
             <button
               onClick={() => base44.auth.logout()}
               title="Cerrar sesión"
-              className="shrink-0 p-1.5 rounded-lg text-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors"
+              className="shrink-0 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors"
             >
               <LogOut className="w-4 h-4" />
             </button>
