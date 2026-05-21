@@ -26,19 +26,19 @@ export default function Ajustes() {
             Gestiona tu negocio, perfil y preferencias
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white text-sm font-semibold transition-colors shrink-0">
+        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0A3E47] hover:bg-[#0a3340] text-white text-sm font-semibold transition-colors shrink-0">
           <HelpCircle className="w-4 h-4" />
           Ayuda / Soporte
         </button>
       </div>
 
       {/* Tabs nav */}
-      <div className="flex items-center gap-1 bg-secondary rounded-2xl p-1.5 w-full flex-wrap">
+      <div className="flex items-center gap-1 bg-secondary rounded-2xl p-1.5 w-full">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-semibold transition-all ${
               activeTab === id
                 ? "bg-white text-[#0A3E47] shadow-sm"
                 : "text-muted-foreground hover:text-foreground"

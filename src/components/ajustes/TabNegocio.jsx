@@ -262,7 +262,38 @@ export default function TabNegocio() {
       {/* Horarios */}
       <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
         <SectionHeader icon={Clock} title="Horarios y Apertura" color="text-[#0A3E47]" />
-...
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Horario Apertura">
+            <Input type="time" placeholder="09:00" value={form.horario_inicio} onChange={(e) => set("horario_inicio", e.target.value)} />
+          </Field>
+          <Field label="Horario Cierre">
+            <Input type="time" placeholder="22:00" value={form.horario_fin} onChange={(e) => set("horario_fin", e.target.value)} />
+          </Field>
+        </div>
+        <Field label="Días Laborables">
+          <div className="flex gap-2 flex-wrap mt-1">
+            {DIAS.map((dia) => (
+              <button
+                key={dia}
+                type="button"
+                onClick={() => toggleDia(dia)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors",
+                  form.dias_apertura.includes(dia)
+                    ? "bg-[#0A3E47] text-white border-[#0A3E47]"
+                    : "bg-white text-foreground border-border hover:border-[#0A3E47]"
+                )}
+              >
+                {dia}
+              </button>
+            ))}
+          </div>
+        </Field>
+      </div>
+
+      {/* Contacto */}
+      <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
         <SectionHeader icon={User} title="Contacto" color="text-[#0A3E47]" />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
