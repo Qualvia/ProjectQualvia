@@ -16,6 +16,11 @@ export default function SelectorUsuarioInterno() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
 
+  // Al cambiar de negocio, resetear al usuario principal
+  useEffect(() => {
+    setUsuarioActivo(null);
+  }, [currentBusiness?.id]);
+
   useEffect(() => {
     if (!currentBusiness) return;
     base44.entities.UsuarioInterno.filter({ business_id: currentBusiness.id })
