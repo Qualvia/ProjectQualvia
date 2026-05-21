@@ -103,11 +103,31 @@ export default function Layout() {
         </nav>
 
         {/* Negocio activo — fondo arena */}
-        <div className="px-3 pb-5 pt-4 shrink-0">
+        <div className="px-3 pt-4 shrink-0">
           <div className="bg-[#EDE6DA] rounded-2xl px-4 py-3">
             <p className="text-xs font-semibold text-[#0A3E47]/60 mb-2">Negocio activo</p>
             <BusinessSelector />
           </div>
+        </div>
+
+        {/* Usuario + Cerrar sesión */}
+        <div className="px-3 pb-5 pt-3 shrink-0 border-t border-border mt-3">
+          <div className="flex items-center gap-3 px-1 py-2">
+            <div className="w-9 h-9 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
+              {(user?.full_name || user?.email || "?")[0].toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-foreground truncate">{user?.full_name || "—"}</p>
+              <p className="text-xs text-[#6BB68A] truncate">{user?.email}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => base44.auth.logout()}
+            className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#0A3E47] text-[#0A3E47] text-sm font-semibold hover:bg-[#0A3E47]/5 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Cerrar sesión
+          </button>
         </div>
       </aside>
 
