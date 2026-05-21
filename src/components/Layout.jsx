@@ -68,16 +68,19 @@ export default function Layout() {
         )}>
         
         {/* Logo */}
-        <div className="px-5 h-16 flex items-center shrink-0 border-b border-white/10">
+        <div className="px-5 pt-6 pb-4 flex items-center shrink-0">
           <img
             src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
-            alt="Qualvia" className="mx-8 h-12 w-full object-contain object-left" />
+            alt="Qualvia" className="h-10 w-full object-contain object-left" />
+        </div>
 
-          
+        {/* Selector usuario interno — arriba, espaciado */}
+        <div className="px-3 pb-4">
+          <SelectorUsuarioInterno />
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map(({ to, label, icon: Icon }) =>
           <NavLink
             key={to}
@@ -92,25 +95,21 @@ export default function Layout() {
               "text-white/70 hover:bg-white/10 hover:text-white"
             )
             }>
-            
               <Icon className="w-4 h-4 shrink-0" />
               {label}
             </NavLink>
           )}
-
-          {/* Selector usuario interno */}
-          <div className="mt-3">
-            <SelectorUsuarioInterno />
-          </div>
-
-          {/* Business selector — debajo de Ajustes */}
-          <div className="mt-2 bg-[#EDE6DA] rounded-xl px-3 py-2">
-            <BusinessSelector />
-          </div>
         </nav>
 
+        {/* Business selector */}
+        <div className="px-3 py-4">
+          <div className="bg-[#EDE6DA] rounded-xl px-3 py-2">
+            <BusinessSelector />
+          </div>
+        </div>
+
         {/* Bottom: User + Logout */}
-        <div className="px-3 py-4 border-t border-white/10 shrink-0 space-y-3">
+        <div className="px-3 pb-5 border-t border-white/10 pt-4 shrink-0 space-y-3">
           {/* User info */}
           <div className="flex items-center gap-3 px-1">
             <div className="w-9 h-9 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
@@ -126,7 +125,6 @@ export default function Layout() {
           <button
             onClick={() => base44.auth.logout()}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/20 text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-            
             <LogOut className="w-4 h-4 shrink-0" />
             Cerrar sesión
           </button>
