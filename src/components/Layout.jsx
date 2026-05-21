@@ -68,16 +68,19 @@ export default function Layout() {
         )}>
         
         {/* Logo */}
-        <div className="px-5 pt-6 pb-4 flex items-center shrink-0">
+        <div className="px-5 pt-6 pb-5 flex items-center shrink-0">
           <img
             src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
             alt="Qualvia" className="h-10 w-full object-contain object-left" />
         </div>
 
-        {/* Selector usuario interno — arriba, espaciado */}
-        <div className="px-3 pb-4">
+        {/* Selector usuario interno — compacto */}
+        <div className="px-3 pb-5">
           <SelectorUsuarioInterno />
         </div>
+
+        {/* Separador */}
+        <div className="mx-3 mb-4 border-t border-white/10" />
 
         {/* Nav */}
         <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
@@ -101,9 +104,10 @@ export default function Layout() {
           )}
         </nav>
 
-        {/* Business selector */}
+        {/* Business selector — verde claro */}
         <div className="px-3 py-4">
-          <div className="bg-[#EDE6DA] rounded-xl px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 px-1 mb-1.5">Negocio activo</p>
+          <div className="bg-[#6BB68A]/20 border border-[#6BB68A]/30 rounded-xl px-1 py-1">
             <BusinessSelector />
           </div>
         </div>
