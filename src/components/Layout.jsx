@@ -92,8 +92,8 @@ export default function Layout() {
             cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
               isActive
-                ? "bg-white/15 text-white font-semibold"
-                : "text-white/70 hover:bg-white/10 hover:text-white"
+                ? "bg-[#FAFAF7]/15 text-[#FAFAF7] font-semibold"
+                : "text-[#FAFAF7]/60 hover:bg-[#FAFAF7]/10 hover:text-[#FAFAF7]"
             )
             }>
               <Icon className="w-4 h-4 shrink-0" />

@@ -68,13 +68,13 @@ export default function SelectorUsuarioInterno() {
       {/* Botón en sidebar */}
       <button
         onClick={handleOpen}
-        className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl border border-dashed border-border hover:bg-black/5 transition-colors text-left"
+        className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl border border-dashed border-[#FAFAF7]/30 hover:bg-[#FAFAF7]/10 transition-colors text-left"
       >
-        <div className="w-7 h-7 rounded-full bg-[#0A3E47] flex items-center justify-center text-white font-bold text-xs shrink-0">
+        <div className="w-7 h-7 rounded-full bg-[#FAFAF7]/20 flex items-center justify-center text-[#FAFAF7] font-bold text-xs shrink-0">
           {inicial}
         </div>
-        <p className="text-xs font-semibold text-foreground truncate flex-1">{displayName}</p>
-        <span className="text-foreground/40 text-xs shrink-0">›</span>
+        <p className="text-xs font-semibold text-[#FAFAF7] truncate flex-1">{displayName}</p>
+        <span className="text-[#FAFAF7]/50 text-xs shrink-0">›</span>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
