@@ -21,7 +21,8 @@ const STEPS = [
 
 const TIPOS_NEGOCIO = [
   "Restaurante", "Bar / Cafetería", "Catering", "Panadería / Pastelería",
-  "Carnicería", "Pescadería", "Supermercado", "Colmado / Tienda", "Otro",
+  "Carnicería", "Pescadería", "Supermercado", "Colmado / Tienda",
+  "Obrador", "Industria alimentaria", "Otro",
 ];
 
 const CCAA = [
