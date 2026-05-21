@@ -136,6 +136,17 @@ export default function TabUsuarios() {
   return (
     <div className="space-y-8 max-w-3xl">
 
+      {/* Banner negocio activo */}
+      <div className="rounded-2xl bg-secondary p-4 flex items-center gap-4">
+        <div className="w-10 h-10 rounded-xl bg-[#0A3E47]/10 flex items-center justify-center shrink-0">
+          <UserCog className="w-5 h-5 text-[#0A3E47]" />
+        </div>
+        <div>
+          <p className="font-bold text-[#0A3E47]">Usuarios del Negocio</p>
+          <p className="text-sm text-muted-foreground">Negocio activo: <span className="font-semibold text-foreground">{currentBusiness.name}</span></p>
+        </div>
+      </div>
+
       {/* ── Usuarios Internos ── */}
       <div className="space-y-0">
         {/* Header */}
