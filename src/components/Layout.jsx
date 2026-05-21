@@ -112,12 +112,14 @@ export default function Layout() {
         <div className="flex-1" />
 
         {/* Negocio activo — fondo arena */}
-        <div className="px-3 pb-4 shrink-0">
-          <div className="bg-white/10 rounded-xl px-3 py-2.5">
-            <p className="text-[10px] font-semibold text-white/50 mb-1.5 uppercase tracking-wide">Negocio activo</p>
-            <BusinessSelector />
+        {!esOperario && (
+          <div className="px-3 pb-4 shrink-0">
+            <div className="bg-white/10 rounded-xl px-3 py-2.5">
+              <p className="text-[10px] font-semibold text-white/50 mb-1.5 uppercase tracking-wide">Negocio activo</p>
+              <BusinessSelector />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Usuario + Cerrar sesión */}
         <div className="px-3 pb-5 pt-3 shrink-0 border-t border-white/10">

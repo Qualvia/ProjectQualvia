@@ -176,7 +176,7 @@ export default function ListaRegistrosLimpieza({ refreshKey }) {
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                   <span className="flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" />{r.fecha ? format(new Date(r.fecha), "d MMM yyyy HH:mm", { locale: es }) : "—"}</span>
                   <span>·</span>
-                  <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{r.created_by?.split("@")[0] || "—"}</span>
+                  <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{r.registrado_por || r.created_by?.split("@")[0] || "—"}</span>
                 </div>
               </div>
             );

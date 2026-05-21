@@ -228,7 +228,7 @@ export default function ListaRegistrosLotes({ refreshKey }) {
                   <span>·</span>
                   <span className="flex items-center gap-1">
                     <User className="w-3.5 h-3.5" />
-                    {r.created_by?.split("@")[0] || "—"}
+                    {r.registrado_por || r.created_by?.split("@")[0] || "—"}
                   </span>
                 </div>
               </div>

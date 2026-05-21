@@ -157,7 +157,7 @@ export default function ListaRegistrosAgua({ refreshKey }) {
                   <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
                     <span className="flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5" />{r.fecha ? format(new Date(r.fecha), "d MMM yyyy HH:mm", { locale: es }) : "—"}</span>
                     <span>·</span>
-                    <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{r.created_by?.split("@")[0] || "—"}</span>
+                    <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{r.registrado_por || r.created_by?.split("@")[0] || "—"}</span>
                   </div>
                 </div>
                 <button onClick={() => handleDelete(r.id)} className="text-destructive/60 hover:text-destructive transition-colors ml-3"><Trash2 className="w-4 h-4" /></button>
