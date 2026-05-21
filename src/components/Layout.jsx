@@ -68,15 +68,15 @@ export default function Layout() {
         )}>
         
         {/* Logo */}
-        <div className="px-4 pt-5 pb-4 shrink-0 flex items-center justify-center border-b border-white/10">
+        <div className="px-6 pt-7 pb-6 shrink-0 flex items-center justify-center border-b border-white/10">
           <img
             src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
             alt="Qualvia"
-            className="w-full max-h-8 object-contain" />
+            className="h-10 object-contain" />
         </div>
 
         {/* Usuario interno */}
-        <div className="px-3 pt-3 pb-1 shrink-0">
+        <div className="px-3 pt-4 pb-2 shrink-0">
           <SelectorUsuarioInterno />
         </div>
 
