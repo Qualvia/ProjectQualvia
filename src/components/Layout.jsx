@@ -62,7 +62,7 @@ export default function Layout() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-30 w-60 flex flex-col transition-transform duration-200",
+          "fixed lg:static inset-y-0 left-0 z-30 w-60 h-full flex flex-col transition-transform duration-200",
           "bg-[#FAFAF7] border-r border-border",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}>
