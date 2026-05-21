@@ -68,21 +68,17 @@ export default function Layout() {
         )}>
         
         {/* Logo */}
-        <div className="px-5 pt-6 pb-5 flex items-center shrink-0">
+        <div className="px-5 pt-7 pb-6 shrink-0">
           <img
             src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
-            alt="Qualvia" className="h-10 w-full object-contain object-left" />
+            alt="Qualvia"
+            className="h-9 w-auto object-contain object-left" />
         </div>
 
-        {/* Selector usuario interno — compacto */}
-        <div className="px-3 pb-5">
-          <SelectorUsuarioInterno />
-        </div>
+        {/* Separador top */}
+        <div className="mx-4 mb-5 border-t border-white/10" />
 
-        {/* Separador */}
-        <div className="mx-3 mb-4 border-t border-white/10" />
-
-        {/* Nav */}
+        {/* Nav — ocupa el espacio central */}
         <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map(({ to, label, icon: Icon }) =>
           <NavLink
@@ -93,9 +89,9 @@ export default function Layout() {
             className={({ isActive }) =>
             cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-              isActive ?
-              "bg-[#6BB68A] text-white" :
-              "text-white/70 hover:bg-white/10 hover:text-white"
+              isActive
+                ? "bg-[#6BB68A] text-white shadow-sm"
+                : "text-white/65 hover:bg-white/10 hover:text-white"
             )
             }>
               <Icon className="w-4 h-4 shrink-0" />
@@ -104,34 +100,42 @@ export default function Layout() {
           )}
         </nav>
 
-        {/* Business selector — verde claro */}
-        <div className="px-3 py-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40 px-1 mb-1.5">Negocio activo</p>
-          <div className="bg-[#6BB68A]/20 border border-[#6BB68A]/30 rounded-xl px-1 py-1">
-            <BusinessSelector />
-          </div>
-        </div>
+        {/* Bloque inferior */}
+        <div className="px-3 pb-5 pt-3 shrink-0 space-y-3">
 
-        {/* Bottom: User + Logout */}
-        <div className="px-3 pb-5 border-t border-white/10 pt-4 shrink-0 space-y-3">
+          {/* Separador */}
+          <div className="border-t border-white/10 mb-1" />
+
+          {/* Selector usuario interno */}
+          <SelectorUsuarioInterno />
+
+          {/* Negocio activo */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-white/35 px-1 mb-1.5">Negocio activo</p>
+            <div className="bg-[#6BB68A]/15 border border-[#6BB68A]/25 rounded-xl px-1 py-1">
+              <BusinessSelector />
+            </div>
+          </div>
+
+          {/* Separador */}
+          <div className="border-t border-white/10" />
+
           {/* User info */}
           <div className="flex items-center gap-3 px-1">
-            <div className="w-9 h-9 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
               {user?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{user?.full_name || "—"}</p>
-              <p className="text-xs text-[#6BB68A] truncate">{user?.email}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-white truncate leading-tight">{user?.full_name || "—"}</p>
+              <p className="text-[11px] text-[#6BB68A] truncate leading-tight">{user?.email}</p>
             </div>
+            <button
+              onClick={() => base44.auth.logout()}
+              title="Cerrar sesión"
+              className="shrink-0 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
-
-          {/* Logout */}
-          <button
-            onClick={() => base44.auth.logout()}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-white/20 text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-            <LogOut className="w-4 h-4 shrink-0" />
-            Cerrar sesión
-          </button>
         </div>
       </aside>
 
