@@ -26,14 +26,14 @@ export default function Ajustes() {
             Gestiona tu negocio, perfil y preferencias
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#0A3E47] text-[#0A3E47] text-sm font-semibold hover:bg-[#0A3E47]/5 transition-colors shrink-0">
+        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white text-sm font-semibold transition-colors shrink-0">
           <HelpCircle className="w-4 h-4" />
           Ayuda / Soporte
         </button>
       </div>
 
       {/* Tabs nav */}
-      <div className="flex items-center gap-1 bg-secondary rounded-2xl p-1.5 w-fit flex-wrap">
+      <div className="flex items-center gap-1 bg-secondary rounded-2xl p-1.5 w-full flex-wrap">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
