@@ -6,6 +6,7 @@ import { ClipboardList, UtensilsCrossed, Factory, Search, FileDown, Loader2, Cal
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import AuditoriaRestauranteForm from "./AuditoriaRestauranteForm";
+import AuditoriaObradorForm from "./AuditoriaObradorForm";
 
 const TIPO_CONFIG = {
   restaurante: {
@@ -79,6 +80,15 @@ export default function TabAuditorias({ onIniciarAuditoria }) {
   if (formularioActivo === "restaurante") {
     return (
       <AuditoriaRestauranteForm
+        onCancel={() => setFormularioActivo(null)}
+        onGuardado={() => { setFormularioActivo(null); cargar(); }}
+      />
+    );
+  }
+
+  if (formularioActivo === "industria_obrador") {
+    return (
+      <AuditoriaObradorForm
         onCancel={() => setFormularioActivo(null)}
         onGuardado={() => { setFormularioActivo(null); cargar(); }}
       />
