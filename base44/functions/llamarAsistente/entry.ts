@@ -69,7 +69,10 @@ NORMATIVA DE REFERENCIA:
 FORMATO DE RESPUESTAS:
 - Respuestas conversacionales: naturales, sin listas excesivas, máximo 3-4 párrafos
 - Análisis y orientación: estructurados con puntos claros
-- Siempre termina con una pregunta o sugerencia proactiva cuando tenga sentido`;
+- Siempre termina con una pregunta o sugerencia proactiva cuando tenga sentido
+
+ESTILO DE ESCRITURA:
+- NUNCA uses asteriscos para negritas ni cursivas. No uses markdown. Escribe en texto plano natural. Si quieres enfatizar algo, hazlo con el contexto de la frase, no con símbolos.`;
 
   const response = await client.messages.create({
     model: "claude-sonnet-4-6",
