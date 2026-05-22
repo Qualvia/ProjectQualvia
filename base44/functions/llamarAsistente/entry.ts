@@ -74,7 +74,13 @@ FORMATO DE RESPUESTAS:
   const response = await client.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 1024,
-    system: system_prompt,
+    system: [
+      {
+        type: "text",
+        text: system_prompt,
+        cache_control: { type: "ephemeral" }
+      }
+    ],
     messages: mensajes
   });
 
