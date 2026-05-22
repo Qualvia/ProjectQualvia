@@ -5,6 +5,7 @@ import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { ClipboardList, UtensilsCrossed, Factory, Search, FileDown, Loader2, CalendarDays, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import AuditoriaRestauranteForm from "./AuditoriaRestauranteForm";
 
 const TIPO_CONFIG = {
   restaurante: {
@@ -37,6 +38,7 @@ export default function TabAuditorias({ onIniciarAuditoria }) {
   const [busqueda, setBusqueda] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("todo");
   const [filtroResultado, setFiltroResultado] = useState("todos");
+  const [formularioActivo, setFormularioActivo] = useState(null); // "restaurante" | "industria_obrador" | null
 
   async function cargar() {
     if (!currentBusiness) return;
@@ -73,6 +75,15 @@ export default function TabAuditorias({ onIniciarAuditoria }) {
 
   const ultimaFecha = auditorias[0]?.fecha ? format(new Date(auditorias[0].fecha), "d MMM yyyy", { locale: es }) : null;
 
+  if (formularioActivo === "restaurante") {
+    return (
+      <AuditoriaRestauranteForm
+        onCancel={() => setFormularioActivo(null)}
+        onGuardado={() => { setFormularioActivo(null); cargar(); }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Banner informativo */}
@@ -107,7 +118,7 @@ export default function TabAuditorias({ onIniciarAuditoria }) {
               return (
                 <button
                   key={key}
-                  onClick={() => onIniciarAuditoria?.(key)}
+                  onClick={() => setFormularioActivo(key)}
                   className="flex flex-col items-center gap-1.5 p-4 rounded-xl bg-secondary hover:bg-secondary/70 transition-colors shadow-sm border border-border"
                 >
                   <Icon className="w-6 h-6 text-[#0A3E47]" />
