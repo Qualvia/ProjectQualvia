@@ -87,7 +87,7 @@ export default function EjecutarChecklist({ plantilla, onCancel, onCompletado })
             return (
               <div key={i} className={`rounded-xl border px-5 py-4 transition-colors ${esKo ? "bg-red-50 border-red-200" : r.estado === "ok" ? "bg-white border-[#6BB68A]/30" : "bg-white border-border"}`}>
                 <div className="flex items-center justify-between gap-4">
-                  <p className={`text-sm font-medium flex-1 ${esKo ? "text-red-700" : "text-foreground"}`}>{item.texto}</p>
+                  <p className={`text-base font-medium flex-1 ${esKo ? "text-red-700" : "text-foreground"}`}>{item.texto}</p>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => setEstado(i, r.estado === "ok" ? "pendiente" : "ok")}
