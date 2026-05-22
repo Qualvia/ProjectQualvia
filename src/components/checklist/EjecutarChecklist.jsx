@@ -5,10 +5,17 @@ import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { ArrowLeft, ClipboardList } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
+
+// Texto del item → ruta de destino
+const ITEM_LINKS = {
+  "Registrar la temperatura de equipos de frío": "/registros?tab=temperatura",
+};
 
 export default function EjecutarChecklist({ plantilla, onCancel, onCompletado }) {
   const { currentBusiness, user } = useBusiness();
   const { usuarioActivo } = useUsuarioInterno();
+  const navigate = useNavigate();
   const [respuestas, setRespuestas] = useState(() =>
     (plantilla.items || []).map(() => ({ estado: "pendiente", motivo: "" }))
   );
@@ -87,7 +94,17 @@ export default function EjecutarChecklist({ plantilla, onCancel, onCompletado })
             return (
               <div key={i} className={`rounded-xl border px-5 py-4 transition-colors ${esKo ? "bg-red-50 border-red-200" : r.estado === "ok" ? "bg-white border-[#6BB68A]/30" : "bg-white border-border"}`}>
                 <div className="flex items-center justify-between gap-4">
-                  <p className={`text-base font-medium flex-1 ${esKo ? "text-red-700" : "text-foreground"}`}>{item.texto}</p>
+                  <div className="flex-1">
+                    <p className={`text-base font-medium ${esKo ? "text-red-700" : "text-foreground"}`}>{item.texto}</p>
+                    {ITEM_LINKS[item.texto] && (
+                      <button
+                        onClick={() => navigate(ITEM_LINKS[item.texto])}
+                        className="mt-1 text-sm text-[#6BB68A] hover:text-[#5aa377] font-medium flex items-center gap-1 transition-colors"
+                      >
+                        → Ir a registro de Temperatura
+                      </button>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => setEstado(i, r.estado === "ok" ? "pendiente" : "ok")}

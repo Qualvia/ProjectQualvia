@@ -70,7 +70,10 @@ const SuspenseFallbackList = () => (
 );
 
 export default function Registros() {
-  const [active, setActive] = useState("temperatura");
+  const [active, setActive] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") || "temperatura";
+  });
   const [showGestionar, setShowGestionar] = useState(false);
   const [gestionarTab, setGestionarTab] = useState("equipos");
   const [showProveedores, setShowProveedores] = useState(false);
