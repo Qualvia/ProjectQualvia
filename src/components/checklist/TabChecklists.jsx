@@ -104,7 +104,10 @@ export default function TabChecklists({ onChecklistCompletado }) {
   async function seedPredefinidos() {
     if (!currentBusiness || !user) return;
     setSeeding(true);
+    const existentes = await base44.entities.ChecklistPlantilla.filter({ business_id: currentBusiness.id });
+    const nombresExistentes = new Set(existentes.map((e) => e.nombre));
     for (const p of PREDEFINIDOS) {
+      if (nombresExistentes.has(p.nombre)) continue;
       await base44.entities.ChecklistPlantilla.create({
         user_id: user.id,
         business_id: currentBusiness.id,
