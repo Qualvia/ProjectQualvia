@@ -108,11 +108,11 @@ export default function TabAuditorias({ onIniciarAuditoria }) {
                 <button
                   key={key}
                   onClick={() => onIniciarAuditoria?.(key)}
-                  className="flex flex-col items-center gap-1.5 p-4 rounded-xl bg-[#0A3E47] hover:bg-[#0A3E47]/90 transition-colors shadow-sm"
+                  className="flex flex-col items-center gap-1.5 p-4 rounded-xl bg-secondary hover:bg-secondary/70 transition-colors shadow-sm border border-border"
                 >
-                  <Icon className="w-6 h-6 text-white" />
-                  <span className="font-bold text-sm text-white">{cfg.label}</span>
-                  <span className="text-xs text-white/70">{cfg.sublabel}</span>
+                  <Icon className="w-6 h-6 text-[#0A3E47]" />
+                  <span className="font-bold text-sm text-[#0A3E47]">{cfg.label}</span>
+                  <span className="text-xs text-muted-foreground">{cfg.sublabel}</span>
                 </button>
               );
             })}
