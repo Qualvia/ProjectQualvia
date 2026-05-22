@@ -41,15 +41,16 @@ const PREDEFINIDOS = [
     ],
   },
   {
-    nombre: "Control de producción",
-    descripcion: "Control diario de producción en cocina",
+    nombre: "Recepción de mercancía",
+    descripcion: "Control en la recepción de pedidos",
     items: [
-      { texto: "Verificar recetas y gramajes actualizados" },
-      { texto: "Controlar calidad de materias primas (olor, color, fecha)" },
-      { texto: "Registrar hora de inicio y fin de producción (ir a Lotes)" },
-      { texto: "Revisar temperatura de amasado, fermentado y horneado" },
-      { texto: "Controlar cantidad producida vs planificada" },
-      { texto: "Registrar incidencias (si las hay)" },
+      { texto: "Verificar que el proveedor coincide con el albarán" },
+      { texto: "Comprobar temperatura de productos refrigerados y congelados" },
+      { texto: "Revisar estado del envase y embalaje (sin golpes ni rotura)" },
+      { texto: "Verificar fechas de caducidad y consumo preferente" },
+      { texto: "Comprobar que la cantidad recibida coincide con el pedido" },
+      { texto: "Registrar lote y proveedor en el sistema" },
+      { texto: "Almacenar los productos en la zona correspondiente inmediatamente" },
     ],
   },
   {
@@ -64,16 +65,15 @@ const PREDEFINIDOS = [
     ],
   },
   {
-    nombre: "Recepción de mercancía",
-    descripcion: "Control en la recepción de pedidos",
+    nombre: "Control de producción",
+    descripcion: "Control diario de producción en cocina",
     items: [
-      { texto: "Verificar que el proveedor coincide con el albarán" },
-      { texto: "Comprobar temperatura de productos refrigerados y congelados" },
-      { texto: "Revisar estado del envase y embalaje (sin golpes ni rotura)" },
-      { texto: "Verificar fechas de caducidad y consumo preferente" },
-      { texto: "Comprobar que la cantidad recibida coincide con el pedido" },
-      { texto: "Registrar lote y proveedor en el sistema" },
-      { texto: "Almacenar los productos en la zona correspondiente inmediatamente" },
+      { texto: "Verificar recetas y gramajes actualizados" },
+      { texto: "Controlar calidad de materias primas (olor, color, fecha)" },
+      { texto: "Registrar hora de inicio y fin de producción (ir a Lotes)" },
+      { texto: "Revisar temperatura de amasado, fermentado y horneado" },
+      { texto: "Controlar cantidad producida vs planificada" },
+      { texto: "Registrar incidencias (si las hay)" },
     ],
   },
 ];
@@ -186,7 +186,15 @@ export default function TabChecklists({ onChecklistCompletado }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {plantillas.map((p) => (
+          {[...plantillas].sort((a, b) => {
+            const orden = PREDEFINIDOS.map(p => p.nombre);
+            const ia = orden.indexOf(a.nombre);
+            const ib = orden.indexOf(b.nombre);
+            if (ia === -1 && ib === -1) return new Date(a.created_date) - new Date(b.created_date);
+            if (ia === -1) return 1;
+            if (ib === -1) return -1;
+            return ia - ib;
+          }).map((p) => (
             <div key={p.id} className="bg-white border border-border rounded-2xl p-5 flex flex-col gap-3 relative">
               {/* Menu */}
               <div className="absolute top-4 right-4">
@@ -231,6 +239,17 @@ export default function TabChecklists({ onChecklistCompletado }) {
               </button>
             </div>
           ))}
+
+          {/* Botón crear nuevo checklist */}
+          <button
+            onClick={() => { setEditando(null); setShowForm(true); }}
+            className="bg-muted/40 border-2 border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center gap-3 hover:bg-muted/60 transition-colors min-h-[200px]"
+          >
+            <div className="w-10 h-10 flex items-center justify-center">
+              <Plus className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <span className="font-semibold text-muted-foreground text-sm">Crear nuevo checklist</span>
+          </button>
         </div>
       )}
 
