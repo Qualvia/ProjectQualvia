@@ -101,7 +101,7 @@ export default function TabHistorico({ refreshKey }) {
           <div className="ml-auto">
             <button
               onClick={() => {}}
-              className="flex items-center gap-2 h-9 px-4 rounded-lg border border-border bg-white text-sm font-medium text-[#0A3E47] hover:bg-secondary transition-colors"
+              className="flex items-center gap-2 h-9 px-4 rounded-lg border border-[#6BB68A] bg-[#6BB68A] text-sm font-medium text-white hover:bg-[#5aa377] transition-colors"
             >
               <FileDown className="w-4 h-4" />
               Exportar Excel
