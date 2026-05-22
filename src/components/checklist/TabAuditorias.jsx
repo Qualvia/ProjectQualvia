@@ -98,21 +98,21 @@ export default function TabAuditorias({ onIniciarAuditoria }) {
       {/* Selector de tipo + contador */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Selector */}
-        <div className="md:col-span-2 bg-white border border-border rounded-2xl p-6">
-          <h2 className="text-2xl font-bold text-[#0A3E47] mb-1">Auditorías Internas</h2>
-          <p className="text-sm text-[#0A3E47] font-medium mb-5">Selecciona el tipo de auditoría para comenzar la evaluación:</p>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="md:col-span-2 bg-white border border-border rounded-2xl p-4">
+          <h2 className="text-lg font-bold text-[#0A3E47] mb-0.5">Auditorías Internas</h2>
+          <p className="text-xs text-[#0A3E47] font-medium mb-3">Selecciona el tipo de auditoría para comenzar la evaluación:</p>
+          <div className="grid grid-cols-2 gap-3">
             {Object.entries(TIPO_CONFIG).map(([key, cfg]) => {
               const Icon = cfg.icon;
               return (
                 <button
                   key={key}
                   onClick={() => onIniciarAuditoria?.(key)}
-                  className={`flex flex-col items-center gap-2 p-5 rounded-xl border-2 ${cfg.border} hover:bg-[#0A3E47]/5 transition-colors`}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 ${cfg.border} hover:bg-[#0A3E47]/5 transition-colors`}
                 >
-                  <Icon className={`w-8 h-8 ${cfg.color}`} />
-                  <span className={`font-bold text-base ${cfg.color}`}>{cfg.label}</span>
-                  <span className="text-sm text-muted-foreground">{cfg.sublabel}</span>
+                  <Icon className={`w-6 h-6 ${cfg.color}`} />
+                  <span className={`font-bold text-sm ${cfg.color}`}>{cfg.label}</span>
+                  <span className="text-xs text-muted-foreground">{cfg.sublabel}</span>
                 </button>
               );
             })}
@@ -120,11 +120,11 @@ export default function TabAuditorias({ onIniciarAuditoria }) {
         </div>
 
         {/* Contador */}
-        <div className="bg-white border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-          <p className="text-6xl font-bold text-[#0A3E47] mb-1">{auditorias.length}</p>
-          <p className="text-base font-semibold text-foreground">Auditorías Realizadas</p>
+        <div className="bg-white border border-border rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+          <p className="text-5xl font-bold text-[#0A3E47] mb-1">{auditorias.length}</p>
+          <p className="text-sm font-semibold text-foreground">Auditorías Realizadas</p>
           {ultimaFecha && (
-            <p className="text-sm text-muted-foreground mt-1">Última: {ultimaFecha}</p>
+            <p className="text-xs text-muted-foreground mt-1">Última: {ultimaFecha}</p>
           )}
         </div>
       </div>
