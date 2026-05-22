@@ -271,6 +271,7 @@ export default function Asistente() {
               <Send className="w-4 h-4 text-white" />
             </button>
           </div>
+          <p className="text-center text-xs text-muted-foreground mt-2">QUALVIA es una herramienta de apoyo basada en IA. No sustituye asesoramiento oficial.</p>
         </div>
       </div>
     </>
