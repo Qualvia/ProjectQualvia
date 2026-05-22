@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
-import { Plus, Play, MoreVertical, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Play, MoreVertical, Pencil, Trash2, Loader2, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChecklistFormDialog from "./ChecklistFormDialog";
 import EjecutarChecklist from "./EjecutarChecklist";
@@ -138,6 +138,26 @@ export default function TabChecklists({ onChecklistCompletado }) {
 
   return (
     <div className="space-y-6">
+      {/* Banner informativo */}
+      <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#0A3E47] to-[#6BB68A] p-6 relative">
+        <div className="absolute right-6 top-4 opacity-10">
+          <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+            <path d="M80 10 L150 110 L10 110 Z" fill="white" />
+          </svg>
+        </div>
+        <div className="flex items-start gap-4 relative z-10">
+          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+            <CheckSquare className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <p className="font-bold text-white text-lg mb-1">¿Qué son los Checklists?</p>
+            <p className="text-white/85 text-sm leading-relaxed">
+              Los checklists son listas de control digitales que te permiten estandarizar y verificar las tareas clave de tu negocio. Son totalmente flexibles: puedes personalizarlos, crear nuevos y adaptarlos a tus necesidades operativas para garantizar siempre la máxima calidad.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
       ) : plantillas.length === 0 ? (
