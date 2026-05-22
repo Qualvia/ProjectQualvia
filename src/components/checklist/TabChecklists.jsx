@@ -19,7 +19,7 @@ const PREDEFINIDOS = [
       { texto: "Revisar el estado del aceite de las freidoras y planchas" },
       { texto: "Encender maquinaria del mostrador y salón" },
       { texto: "Comprobar que las mesas y sillas están limpias y correctamente colocadas" },
-      { texto: "Confirmar que la iluminación, música ambiente aire acondicionado/calefacción están configuradas" },
+      { texto: "Confirmar que la iluminación, música ambiente, aire acondicionado/calefacción están configuradas" },
       { texto: "Revisar aseos de clientes: papel, jabón, limpieza y basuras vacías" },
       { texto: "Asegurar que los cubos están limpios y con bolsa" },
       { texto: "Revisar tareas administrativas" },
