@@ -179,18 +179,25 @@ export default function Asistente() {
       .filter(m => m.role === "user" || m.role === "assistant")
       .map(m => ({ role: m.role, content: m.content }));
 
-    const res = await base44.functions.invoke("llamarAsistente", {
-      business_id: currentBusiness?.id,
-      mensajes: historial,
-      contexto_negocio: contextNegocio,
-      memoria_previa: memoriaPrevia,
-      intencion: detectarIntencion(textoFinal),
-    });
-
-    const respuesta = res?.data?.respuesta || "Lo siento, no pude procesar tu consulta en este momento.";
-    setMensajes(prev => [...prev, { role: "assistant", content: respuesta }]);
-    setCargando(false);
-    resetInactividad();
+    try {
+      const res = await base44.functions.invoke("llamarAsistente", {
+        business_id: currentBusiness?.id,
+        mensajes: historial,
+        contexto_negocio: contextNegocio,
+        memoria_previa: memoriaPrevia,
+        intencion: detectarIntencion(textoFinal),
+      });
+      const respuesta = res?.data?.respuesta || "Lo siento, no pude procesar tu consulta en este momento.";
+      setMensajes(prev => [...prev, { role: "assistant", content: respuesta }]);
+    } catch (error) {
+      setMensajes(prev => [...prev, { 
+        role: "assistant", 
+        content: "Ha ocurrido un error al procesar tu consulta. Por favor inténtalo de nuevo." 
+      }]);
+    } finally {
+      setCargando(false);
+      resetInactividad();
+    }
   }
 
   function handleKeyDown(e) {
