@@ -131,6 +131,11 @@ export default function Asistente() {
     if (!currentBusiness || !user) return;
 
     async function init() {
+      setMensajes([]);
+      setMemoriaPrevia(null);
+      setMemoriaId(null);
+      setMostrarSugerencias(true);
+
       // Cargar perfil del negocio
       const perfiles = await base44.entities.BusinessProfile.filter({ business_id: currentBusiness.id });
       const perfil = perfiles[0] || {};
