@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
-import { ArrowLeft, CheckCircle2, XCircle, ClipboardList } from "lucide-react";
+import { ArrowLeft, ClipboardList } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -91,15 +91,15 @@ export default function EjecutarChecklist({ plantilla, onCancel, onCompletado })
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => setEstado(i, r.estado === "ok" ? "pendiente" : "ok")}
-                      className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all ${r.estado === "ok" ? "bg-[#6BB68A] border-[#6BB68A] text-white" : "border-border text-muted-foreground hover:border-[#6BB68A]"}`}
+                      className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${r.estado === "ok" ? "bg-[#6BB68A] border-[#6BB68A] text-white" : "border-border bg-white text-muted-foreground hover:border-[#6BB68A] hover:text-[#6BB68A]"}`}
                     >
-                      <CheckCircle2 className="w-4 h-4" />
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="20 6 9 17 4 12" /></svg>
                     </button>
                     <button
                       onClick={() => setEstado(i, r.estado === "ko" ? "pendiente" : "ko")}
-                      className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all ${r.estado === "ko" ? "bg-red-500 border-red-500 text-white" : "border-border text-muted-foreground hover:border-red-400"}`}
+                      className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${r.estado === "ko" ? "bg-red-500 border-red-500 text-white" : "border-border bg-white text-muted-foreground hover:border-red-400 hover:text-red-400"}`}
                     >
-                      <XCircle className="w-4 h-4" />
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                     </button>
                   </div>
                 </div>
