@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
-import { Plus, Play, MoreVertical, Pencil, Trash2, Loader2, CheckSquare, ClipboardList, Sparkles } from "lucide-react";
+import { Plus, Play, MoreVertical, Pencil, Trash2, Loader2, CheckSquare, ClipboardList, Sparkles, GripVertical } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
 import ChecklistFormDialog from "./ChecklistFormDialog";
 import EjecutarChecklist from "./EjecutarChecklist";
@@ -92,9 +93,21 @@ export default function TabChecklists({ onChecklistCompletado }) {
 
   async function cargar() {
     if (!currentBusiness) return;
-    const data = await base44.entities.ChecklistPlantilla.filter({ business_id: currentBusiness.id }, "-created_date");
+    const data = await base44.entities.ChecklistPlantilla.filter({ business_id: currentBusiness.id }, "orden");
     setPlantillas(data);
     setLoading(false);
+  }
+
+  async function handleDragEnd(result) {
+    if (!result.destination) return;
+    const items = Array.from(plantillas);
+    const [moved] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, moved);
+    const updated = items.map((p, i) => ({ ...p, orden: i }));
+    setPlantillas(updated);
+    for (const p of updated) {
+      await base44.entities.ChecklistPlantilla.update(p.id, { orden: p.orden });
+    }
   }
 
   useEffect(() => {
@@ -186,76 +199,95 @@ export default function TabChecklists({ onChecklistCompletado }) {
           <p className="text-xs text-muted-foreground mt-4">Se cargarán {PREDEFINIDOS.length} checklists listos para usar</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...plantillas].sort((a, b) => {
-            const orden = PREDEFINIDOS.map(p => p.nombre);
-            const ia = orden.indexOf(a.nombre);
-            const ib = orden.indexOf(b.nombre);
-            if (ia === -1 && ib === -1) return new Date(a.created_date) - new Date(b.created_date);
-            if (ia === -1) return 1;
-            if (ib === -1) return -1;
-            return ia - ib;
-          }).map((p) => (
-            <div key={p.id} className="bg-white border border-border rounded-2xl p-5 flex flex-col gap-3 relative">
-              {/* Menu (solo para no operarios) */}
-              {!esOperario && (
-                <div className="absolute top-4 right-4">
-                  <button onClick={() => setOpenMenu(openMenu === p.id ? null : p.id)} className="text-muted-foreground hover:text-foreground p-1 rounded">
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
-                  {openMenu === p.id && (
-                    <div className="absolute right-0 top-7 bg-white border border-border rounded-xl shadow-lg z-10 py-1 w-36">
-                      <button onClick={() => { setEditando(p); setShowForm(true); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-secondary transition-colors">
-                        <Pencil className="w-4 h-4" /> Editar
-                      </button>
-                      <button onClick={() => handleDelete(p.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-red-50 transition-colors">
-                        <Trash2 className="w-4 h-4" /> Eliminar
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="checklists" direction="horizontal">
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              >
+                {plantillas.map((p, index) => (
+                  <Draggable key={p.id} draggableId={p.id} index={index}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={`bg-white border border-border rounded-2xl p-5 flex flex-col gap-3 relative ${snapshot.isDragging ? "shadow-xl opacity-90" : ""}`}
+                      >
+                        {/* Grip handle + menu */}
+                        <div className="flex items-center justify-between">
+                          <div
+                            {...provided.dragHandleProps}
+                            className="text-muted-foreground/40 hover:text-muted-foreground cursor-grab active:cursor-grabbing p-0.5"
+                          >
+                            <GripVertical className="w-4 h-4" />
+                          </div>
+                          {!esOperario && (
+                            <div className="relative">
+                              <button onClick={() => setOpenMenu(openMenu === p.id ? null : p.id)} className="text-muted-foreground hover:text-foreground p-1 rounded">
+                                <MoreVertical className="w-4 h-4" />
+                              </button>
+                              {openMenu === p.id && (
+                                <div className="absolute right-0 top-7 bg-white border border-border rounded-xl shadow-lg z-10 py-1 w-36">
+                                  <button onClick={() => { setEditando(p); setShowForm(true); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-secondary transition-colors">
+                                    <Pencil className="w-4 h-4" /> Editar
+                                  </button>
+                                  <button onClick={() => handleDelete(p.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-red-50 transition-colors">
+                                    <Trash2 className="w-4 h-4" /> Eliminar
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
 
-              <div className={esOperario ? "" : "pr-6"}>
-                <p className="font-bold text-[#0A3E47] text-base leading-snug">{p.nombre}</p>
-                {p.descripcion && <p className="text-sm text-muted-foreground mt-0.5">{p.descripcion}</p>}
-              </div>
+                        <div>
+                          <p className="font-bold text-[#0A3E47] text-base leading-snug">{p.nombre}</p>
+                          {p.descripcion && <p className="text-sm text-muted-foreground mt-0.5">{p.descripcion}</p>}
+                        </div>
 
-              <div className="flex-1 space-y-1">
-                {(p.items || []).slice(0, 3).map((it, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm text-foreground">
-                    <span className="w-2 h-2 rounded-full bg-[#6BB68A] mt-1.5 shrink-0" />
-                    <span className="truncate">{it.texto}</span>
-                  </div>
+                        <div className="flex-1 space-y-1">
+                          {(p.items || []).slice(0, 3).map((it, i) => (
+                            <div key={i} className="flex items-start gap-2 text-sm text-foreground">
+                              <span className="w-2 h-2 rounded-full bg-[#6BB68A] mt-1.5 shrink-0" />
+                              <span className="truncate">{it.texto}</span>
+                            </div>
+                          ))}
+                          {(p.items || []).length > 3 && (
+                            <p className="text-xs text-muted-foreground pl-4">+ {p.items.length - 3} más</p>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => setEjecutando(p)}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white font-semibold text-sm transition-colors mt-1"
+                        >
+                          <Play className="w-4 h-4" />
+                          Iniciar checklist
+                        </button>
+                      </div>
+                    )}
+                  </Draggable>
                 ))}
-                {(p.items || []).length > 3 && (
-                  <p className="text-xs text-muted-foreground pl-4">+ {p.items.length - 3} más</p>
+                {provided.placeholder}
+
+                {/* Botón crear nuevo checklist (solo para no operarios) */}
+                {!esOperario && (
+                  <button
+                    onClick={() => { setEditando(null); setShowForm(true); }}
+                    className="bg-muted/40 border-2 border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center gap-3 hover:bg-muted/60 transition-colors min-h-[200px]"
+                  >
+                    <div className="w-10 h-10 flex items-center justify-center">
+                      <Plus className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <span className="font-semibold text-muted-foreground text-sm">Crear nuevo checklist</span>
+                  </button>
                 )}
               </div>
-
-              <button
-                onClick={() => setEjecutando(p)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white font-semibold text-sm transition-colors mt-1"
-              >
-                <Play className="w-4 h-4" />
-                Iniciar checklist
-              </button>
-            </div>
-          ))}
-
-          {/* Botón crear nuevo checklist (solo para no operarios) */}
-          {!esOperario && (
-            <button
-              onClick={() => { setEditando(null); setShowForm(true); }}
-              className="bg-muted/40 border-2 border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center gap-3 hover:bg-muted/60 transition-colors min-h-[200px]"
-            >
-              <div className="w-10 h-10 flex items-center justify-center">
-                <Plus className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <span className="font-semibold text-muted-foreground text-sm">Crear nuevo checklist</span>
-            </button>
-          )}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       )}
 
       {showForm && (

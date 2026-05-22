@@ -28,6 +28,10 @@
     "es_predefinido": {
       "type": "boolean",
       "default": false
+    },
+    "orden": {
+      "type": "number",
+      "default": 0
     }
   },
   "required": [
