@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 // Texto del item → ruta de destino
 const ITEM_LINKS = {
   "Registrar la temperatura de equipos de frío": "/registros?tab=temperatura",
+  "Registrar limpieza y desinfección de cocina, aseos y sala": "/registros?tab=limpieza",
 };
 
 export default function EjecutarChecklist({ plantilla, onCancel, onCompletado }) {
@@ -101,7 +102,7 @@ export default function EjecutarChecklist({ plantilla, onCancel, onCompletado })
                         onClick={() => navigate(ITEM_LINKS[item.texto])}
                         className="mt-1 text-sm text-[#6BB68A] hover:text-[#5aa377] font-medium flex items-center gap-1 transition-colors"
                       >
-                        → Ir a registro de Temperatura
+                        → Ir a registro de {ITEM_LINKS[item.texto].includes("temperatura") ? "Temperatura" : "Limpieza"}
                       </button>
                     )}
                   </div>
