@@ -264,7 +264,7 @@ export default function Asistente() {
         }));
       }
     } catch (e) {
-      // Si falla la carga de datos contextuales, continúa sin ellos
+      console.error("Error cargando contexto:", e);
     }
 
     try {
