@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
-import { ClipboardList, UtensilsCrossed, Factory, Search, FileDown, Loader2, CalendarDays, CheckCircle2 } from "lucide-react";
+import { ClipboardList, UtensilsCrossed, Factory, Search, FileDown, Loader2, CalendarDays, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import AuditoriaRestauranteForm from "./AuditoriaRestauranteForm";
@@ -39,6 +39,7 @@ export default function TabAuditorias({ onIniciarAuditoria }) {
   const [filtroTipo, setFiltroTipo] = useState("todo");
   const [filtroResultado, setFiltroResultado] = useState("todos");
   const [formularioActivo, setFormularioActivo] = useState(null); // "restaurante" | "industria_obrador" | null
+  const [expandedId, setExpandedId] = useState(null);
 
   async function cargar() {
     if (!currentBusiness) return;
@@ -187,29 +188,68 @@ export default function TabAuditorias({ onIniciarAuditoria }) {
               const cfg = TIPO_CONFIG[a.tipo] || {};
               const borderColor = a.puntuacion === 100 ? "border-l-[#6BB68A]" : a.puntuacion >= 75 ? "border-l-yellow-400" : "border-l-red-400";
               const punColor = PuntuacionColor({ puntuacion: a.puntuacion });
+              const expanded = expandedId === a.id;
               return (
-                <div key={a.id} className={`bg-white rounded-2xl border border-border border-l-4 ${borderColor} px-5 py-4 flex flex-wrap items-center gap-4`}>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-foreground text-base">Auditoría interna {cfg.label}</p>
-                    <p className="text-sm text-muted-foreground">Auditor: {a.auditor || "—"}</p>
+                <div key={a.id} className={`bg-white rounded-2xl border border-border border-l-4 ${borderColor} overflow-hidden`}>
+                  {/* Cabecera clicable */}
+                  <div
+                    className="px-5 py-4 flex flex-wrap items-center gap-4 cursor-pointer hover:bg-muted/30 transition-colors"
+                    onClick={() => setExpandedId(expanded ? null : a.id)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-foreground text-base">Auditoría interna {cfg.label}</p>
+                      <p className="text-sm text-muted-foreground">Auditor: {a.auditor || "—"}</p>
+                    </div>
+                    {a.fecha && (
+                      <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-sm text-foreground shrink-0">
+                        <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                        {format(new Date(a.fecha), "d MMM yyyy - HH:mm", { locale: es })}
+                      </div>
+                    )}
+                    <div className="text-center shrink-0">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Cumplimiento</p>
+                      <p className={`text-2xl font-bold ${punColor}`}>{a.puntuacion ?? "—"}%</p>
+                    </div>
+                    {a.puntuacion === 100 && <CheckCircle2 className="w-6 h-6 text-[#6BB68A] shrink-0" />}
+                    {expanded ? <ChevronUp className="w-5 h-5 text-muted-foreground shrink-0" /> : <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0" />}
                   </div>
-                  {a.fecha && (
-                    <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-sm text-foreground shrink-0">
-                      <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                      {format(new Date(a.fecha), "d MMM yyyy - HH:mm", { locale: es })}
+
+                  {/* Detalle expandible */}
+                  {expanded && (
+                    <div className="border-t border-border px-5 py-4 space-y-4">
+                      {(a.secciones || []).map((sec, si) => (
+                        <div key={si}>
+                          <p className="font-bold text-sm text-[#0A3E47] mb-2">{sec.nombre}</p>
+                          <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
+                            {(sec.items || []).map((item, ii) => (
+                              <div key={ii} className="flex items-center gap-3 px-4 py-2.5">
+                                {item.estado === "cumple" && (
+                                  <span className="w-5 h-5 rounded-full bg-[#6BB68A] flex items-center justify-center shrink-0">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12" /></svg>
+                                  </span>
+                                )}
+                                {item.estado === "no_cumple" && (
+                                  <span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                                  </span>
+                                )}
+                                {item.estado === "na" && (
+                                  <span className="w-5 h-5 rounded-full border-2 border-border shrink-0" />
+                                )}
+                                <p className="text-sm text-foreground">{item.pregunta}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      {a.observaciones_generales && (
+                        <div className="p-3 bg-secondary rounded-xl">
+                          <p className="text-xs font-semibold text-foreground mb-1">Observaciones:</p>
+                          <p className="text-sm text-muted-foreground">{a.observaciones_generales}</p>
+                        </div>
+                      )}
                     </div>
                   )}
-                  <div className="text-center shrink-0">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Cumplimiento</p>
-                    <p className={`text-2xl font-bold ${punColor}`}>{a.puntuacion ?? "—"}%</p>
-                  </div>
-                  {a.puntuacion === 100 && (
-                    <CheckCircle2 className="w-6 h-6 text-[#6BB68A] shrink-0" />
-                  )}
-                  <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#6BB68A] text-[#6BB68A] text-sm font-medium hover:bg-[#6BB68A]/10 transition-colors shrink-0">
-                    <FileDown className="w-4 h-4" />
-                    Descargar Informe Excel
-                  </button>
                 </div>
               );
             })}

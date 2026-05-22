@@ -163,18 +163,33 @@ export default function AuditoriaRestauranteForm({ onCancel, onGuardado }) {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="bg-white border border-border rounded-2xl overflow-hidden">
-        <div className="h-1.5 bg-[#0A3E47]" />
-        <div className="px-5 py-4 flex items-center justify-between gap-4">
+      {/* Header sticky */}
+      <div className="sticky top-0 z-20 bg-white border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="h-1 bg-[#0A3E47]" />
+        <div className="px-5 py-3 flex items-center justify-between gap-4">
           <button onClick={onCancel} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" /> Volver
           </button>
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground font-medium">Puntuación actual</p>
-            <p className={`text-2xl font-bold ${puntuacion === 0 ? "text-red-500" : puntuacion >= 75 ? "text-[#2d8a5e]" : "text-yellow-600"}`}>
-              {progreso}%
-            </p>
+          <div className="flex items-center gap-4 flex-1 justify-end">
+            {/* Barra de progreso */}
+            <div className="flex items-center gap-3 flex-1 max-w-xs">
+              <div className="flex-1 h-2 bg-border rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${progreso}%`,
+                    backgroundColor: progreso === 100 ? "#6BB68A" : progreso >= 75 ? "#ca8a04" : "#ef4444",
+                  }}
+                />
+              </div>
+              <span className="text-xs text-muted-foreground shrink-0">{respondidos}/{totalItems}</span>
+            </div>
+            <div className="text-right shrink-0">
+              <p className="text-xs text-muted-foreground font-medium leading-none mb-0.5">Progreso</p>
+              <p className={`text-xl font-bold leading-none ${progreso === 0 ? "text-red-500" : progreso >= 75 ? "text-[#2d8a5e]" : "text-yellow-600"}`}>
+                {progreso}%
+              </p>
+            </div>
           </div>
         </div>
       </div>
