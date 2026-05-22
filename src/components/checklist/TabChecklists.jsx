@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
-import { Plus, Play, MoreVertical, Pencil, Trash2, Loader2, CheckSquare } from "lucide-react";
+import { Plus, Play, MoreVertical, Pencil, Trash2, Loader2, CheckSquare, ClipboardList, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChecklistFormDialog from "./ChecklistFormDialog";
 import EjecutarChecklist from "./EjecutarChecklist";
@@ -168,12 +168,21 @@ export default function TabChecklists({ onChecklistCompletado }) {
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
       ) : plantillas.length === 0 ? (
-        <div className="text-center py-14 space-y-4">
-          <p className="text-muted-foreground">No hay checklists creados todavía.</p>
-          <Button onClick={seedPredefinidos} disabled={seeding} className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2">
-            {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-            Cargar checklists predefinidos
-          </Button>
+        <div className="flex flex-col items-center justify-center py-16 px-6">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#0A3E47]/10 to-[#6BB68A]/20 flex items-center justify-center mb-5">
+            <ClipboardList className="w-10 h-10 text-[#0A3E47]/60" />
+          </div>
+          <h3 className="text-lg font-bold text-[#0A3E47] mb-2">Aún no tienes checklists</h3>
+          <p className="text-muted-foreground text-sm text-center max-w-sm mb-8">
+            Comienza cargando las plantillas predefinidas o crea tus propias listas de control personalizadas.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button onClick={seedPredefinidos} disabled={seeding} className="bg-[#0A3E47] hover:bg-[#0A3E47]/90 text-white gap-2 px-6">
+              {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              Cargar plantillas predefinidas
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-4">Se cargarán {PREDEFINIDOS.length} checklists listos para usar</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
