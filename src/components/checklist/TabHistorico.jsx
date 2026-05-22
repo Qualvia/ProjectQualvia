@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { Loader2, ChevronDown, ChevronUp, User, CalendarDays, Filter } from "lucide-react";
+import { Loader2, ChevronDown, ChevronUp, User, CalendarDays, Filter, FileDown } from "lucide-react";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
@@ -98,6 +98,15 @@ export default function TabHistorico({ refreshKey }) {
             <button onClick={() => setFiltros({ periodo: "todos", desde: "", hasta: "", checklist: "todos" })}
               className="text-xs text-[#6BB68A] hover:underline">Limpiar</button>
           )}
+          <div className="ml-auto">
+            <button
+              onClick={() => {}}
+              className="flex items-center gap-2 h-9 px-4 rounded-lg border border-border bg-white text-sm font-medium text-[#0A3E47] hover:bg-secondary transition-colors"
+            >
+              <FileDown className="w-4 h-4" />
+              Exportar Excel
+            </button>
+          </div>
         </div>
       </div>
 
