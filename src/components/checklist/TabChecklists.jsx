@@ -81,6 +81,7 @@ const PREDEFINIDOS = [
 export default function TabChecklists({ onChecklistCompletado }) {
   const { currentBusiness, user } = useBusiness();
   const { usuarioActivo } = useUsuarioInterno();
+  const esOperario = usuarioActivo?.rol === "operario";
   const [plantillas, setPlantillas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -196,24 +197,26 @@ export default function TabChecklists({ onChecklistCompletado }) {
             return ia - ib;
           }).map((p) => (
             <div key={p.id} className="bg-white border border-border rounded-2xl p-5 flex flex-col gap-3 relative">
-              {/* Menu */}
-              <div className="absolute top-4 right-4">
-                <button onClick={() => setOpenMenu(openMenu === p.id ? null : p.id)} className="text-muted-foreground hover:text-foreground p-1 rounded">
-                  <MoreVertical className="w-4 h-4" />
-                </button>
-                {openMenu === p.id && (
-                  <div className="absolute right-0 top-7 bg-white border border-border rounded-xl shadow-lg z-10 py-1 w-36">
-                    <button onClick={() => { setEditando(p); setShowForm(true); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-secondary transition-colors">
-                      <Pencil className="w-4 h-4" /> Editar
-                    </button>
-                    <button onClick={() => handleDelete(p.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-red-50 transition-colors">
-                      <Trash2 className="w-4 h-4" /> Eliminar
-                    </button>
-                  </div>
-                )}
-              </div>
+              {/* Menu (solo para no operarios) */}
+              {!esOperario && (
+                <div className="absolute top-4 right-4">
+                  <button onClick={() => setOpenMenu(openMenu === p.id ? null : p.id)} className="text-muted-foreground hover:text-foreground p-1 rounded">
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                  {openMenu === p.id && (
+                    <div className="absolute right-0 top-7 bg-white border border-border rounded-xl shadow-lg z-10 py-1 w-36">
+                      <button onClick={() => { setEditando(p); setShowForm(true); setOpenMenu(null); }} className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-secondary transition-colors">
+                        <Pencil className="w-4 h-4" /> Editar
+                      </button>
+                      <button onClick={() => handleDelete(p.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-red-50 transition-colors">
+                        <Trash2 className="w-4 h-4" /> Eliminar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
-              <div className="pr-6">
+              <div className={esOperario ? "" : "pr-6"}>
                 <p className="font-bold text-[#0A3E47] text-base leading-snug">{p.nombre}</p>
                 {p.descripcion && <p className="text-sm text-muted-foreground mt-0.5">{p.descripcion}</p>}
               </div>
@@ -240,16 +243,18 @@ export default function TabChecklists({ onChecklistCompletado }) {
             </div>
           ))}
 
-          {/* Botón crear nuevo checklist */}
-          <button
-            onClick={() => { setEditando(null); setShowForm(true); }}
-            className="bg-muted/40 border-2 border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center gap-3 hover:bg-muted/60 transition-colors min-h-[200px]"
-          >
-            <div className="w-10 h-10 flex items-center justify-center">
-              <Plus className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <span className="font-semibold text-muted-foreground text-sm">Crear nuevo checklist</span>
-          </button>
+          {/* Botón crear nuevo checklist (solo para no operarios) */}
+          {!esOperario && (
+            <button
+              onClick={() => { setEditando(null); setShowForm(true); }}
+              className="bg-muted/40 border-2 border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center gap-3 hover:bg-muted/60 transition-colors min-h-[200px]"
+            >
+              <div className="w-10 h-10 flex items-center justify-center">
+                <Plus className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <span className="font-semibold text-muted-foreground text-sm">Crear nuevo checklist</span>
+            </button>
+          )}
         </div>
       )}
 
