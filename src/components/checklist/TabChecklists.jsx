@@ -53,14 +53,14 @@ const PREDEFINIDOS = [
     ],
   },
   {
-    nombre: "Higiene del personal",
-    descripcion: "Control de buenas prácticas de higiene",
+    nombre: "Checklist de inventario y materias primas",
+    descripcion: "Control de inventario y estado de materias primas",
     items: [
-      { texto: "Verificar uniformidad completa y limpia del personal" },
-      { texto: "Comprobar que el personal lleva el cabello recogido y protegido" },
-      { texto: "Revisar ausencia de joyas, relojes y objetos en manos" },
-      { texto: "Confirmar lavado de manos al inicio del turno" },
-      { texto: "Verificar que no hay personal con síntomas de enfermedad manipulando alimentos" },
+      { texto: "Control de entradas y salidas de materia prima" },
+      { texto: "Revisión de fechas de caducidad y lotes" },
+      { texto: "Almacenamiento correcto (FIFO / FEFO)" },
+      { texto: "Estado de envases y etiquetado" },
+      { texto: "Registro de desperdicios o mermas" },
     ],
   },
   {
