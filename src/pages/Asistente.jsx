@@ -253,12 +253,10 @@ export default function Asistente() {
 
       } else if (intencion === "auditoria") {
         const data = await base44.entities.AuditoriaInterna.filter(
-          { business_id: currentBusiness.id }
+          { business_id: currentBusiness.id },
+          "-fecha", 3, 0
         );
-        const recientes = data
-          .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-          .slice(0, 3);
-        contexto_enriquecido.auditorias = recientes.map(a => ({
+        contexto_enriquecido.auditorias = data.map(a => ({
           tipo: a.tipo,
           puntuacion: a.puntuacion,
           fecha: a.fecha,
