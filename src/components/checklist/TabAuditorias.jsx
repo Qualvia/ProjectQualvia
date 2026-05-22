@@ -1,14 +1,210 @@
-import React from "react";
-import { ClipboardList } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { base44 } from "@/api/base44Client";
+import { useBusiness } from "@/contexts/BusinessContext";
+import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
+import { ClipboardList, UtensilsCrossed, Factory, Search, FileDown, Loader2, CalendarDays, CheckCircle2 } from "lucide-react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
-export default function TabAuditorias() {
+const TIPO_CONFIG = {
+  restaurante: {
+    label: "Restaurante",
+    sublabel: "Hostelería general",
+    icon: UtensilsCrossed,
+    color: "text-[#0A3E47]",
+    border: "border-[#0A3E47]",
+  },
+  industria_obrador: {
+    label: "Industria / Obrador",
+    sublabel: "Obradores y producción",
+    icon: Factory,
+    color: "text-[#0A3E47]",
+    border: "border-[#0A3E47]",
+  },
+};
+
+function PuntuacionColor({ puntuacion }) {
+  if (puntuacion === 100) return "text-[#2d8a5e]";
+  if (puntuacion >= 75) return "text-yellow-600";
+  return "text-red-500";
+}
+
+export default function TabAuditorias({ onIniciarAuditoria }) {
+  const { currentBusiness, user } = useBusiness();
+  const { usuarioActivo } = useUsuarioInterno();
+  const [auditorias, setAuditorias] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroTipo, setFiltroTipo] = useState("todo");
+  const [filtroResultado, setFiltroResultado] = useState("todos");
+
+  async function cargar() {
+    if (!currentBusiness) return;
+    const data = await base44.entities.AuditoriaInterna.filter(
+      { business_id: currentBusiness.id },
+      "-fecha",
+      50
+    );
+    setAuditorias(data);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    setLoading(true);
+    cargar();
+  }, [currentBusiness]);
+
+  const filtradas = useMemo(() => {
+    return auditorias.filter((a) => {
+      if (filtroTipo !== "todo" && a.tipo !== filtroTipo) return false;
+      if (filtroResultado === "cumple" && a.puntuacion < 75) return false;
+      if (filtroResultado === "no_cumple" && a.puntuacion >= 75) return false;
+      if (busqueda) {
+        const q = busqueda.toLowerCase();
+        if (
+          !a.auditor?.toLowerCase().includes(q) &&
+          !(TIPO_CONFIG[a.tipo]?.label || "").toLowerCase().includes(q)
+        )
+          return false;
+      }
+      return true;
+    });
+  }, [auditorias, filtroTipo, filtroResultado, busqueda]);
+
+  const ultimaFecha = auditorias[0]?.fecha ? format(new Date(auditorias[0].fecha), "d MMM yyyy", { locale: es }) : null;
+
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
-      <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center">
-        <ClipboardList className="w-7 h-7 text-muted-foreground" />
+    <div className="space-y-6">
+      {/* Banner informativo */}
+      <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#0A3E47] to-[#6BB68A] p-6 relative">
+        <div className="absolute right-6 top-4 opacity-10">
+          <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+            <path d="M80 10 L150 110 L10 110 Z" fill="white" />
+          </svg>
+        </div>
+        <div className="flex items-start gap-4 relative z-10">
+          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+            <ClipboardList className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <p className="font-bold text-white text-lg mb-1">Auditorías Internas: Tu herramienta de mejora</p>
+            <p className="text-white/85 text-sm leading-relaxed">
+              Las auditorías internas permiten autoevaluar el estado real de tu negocio frente a normativas y estándares de calidad. Realizarlas periódicamente te ayuda a detectar desviaciones a tiempo, preparar a tu equipo para inspecciones oficiales y garantizar la excelencia operativa y seguridad alimentaria.
+            </p>
+          </div>
+        </div>
       </div>
-      <p className="text-lg font-semibold text-foreground">Auditorías</p>
-      <p className="text-sm text-muted-foreground max-w-xs">Esta sección estará disponible próximamente. Aquí podrás realizar auditorías completas de tu negocio.</p>
+
+      {/* Selector de tipo + contador */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Selector */}
+        <div className="md:col-span-2 bg-white border border-border rounded-2xl p-6">
+          <h2 className="text-2xl font-bold text-[#0A3E47] mb-1">Auditorías Internas</h2>
+          <p className="text-sm text-[#0A3E47] font-medium mb-5">Selecciona el tipo de auditoría para comenzar la evaluación:</p>
+          <div className="grid grid-cols-2 gap-4">
+            {Object.entries(TIPO_CONFIG).map(([key, cfg]) => {
+              const Icon = cfg.icon;
+              return (
+                <button
+                  key={key}
+                  onClick={() => onIniciarAuditoria?.(key)}
+                  className={`flex flex-col items-center gap-2 p-5 rounded-xl border-2 ${cfg.border} hover:bg-[#0A3E47]/5 transition-colors`}
+                >
+                  <Icon className={`w-8 h-8 ${cfg.color}`} />
+                  <span className={`font-bold text-base ${cfg.color}`}>{cfg.label}</span>
+                  <span className="text-sm text-muted-foreground">{cfg.sublabel}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Contador */}
+        <div className="bg-white border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+          <p className="text-6xl font-bold text-[#0A3E47] mb-1">{auditorias.length}</p>
+          <p className="text-base font-semibold text-foreground">Auditorías Realizadas</p>
+          {ultimaFecha && (
+            <p className="text-sm text-muted-foreground mt-1">Última: {ultimaFecha}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Historial */}
+      <div>
+        {/* Cabecera historial */}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <h3 className="text-xl font-bold text-foreground flex-1">Historial de Auditorías</h3>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="h-9 pl-9 pr-3 rounded-lg border border-border text-sm focus:outline-none focus:border-[#6BB68A] bg-white w-44"
+            />
+          </div>
+          <select
+            value={filtroTipo}
+            onChange={(e) => setFiltroTipo(e.target.value)}
+            className="h-9 rounded-lg border border-border px-3 text-sm focus:outline-none focus:border-[#6BB68A] bg-white"
+          >
+            <option value="todo">Todo</option>
+            <option value="restaurante">Restaurante</option>
+            <option value="industria_obrador">Industria / Obrador</option>
+          </select>
+          <select
+            value={filtroResultado}
+            onChange={(e) => setFiltroResultado(e.target.value)}
+            className="h-9 rounded-lg border border-border px-3 text-sm focus:outline-none focus:border-[#6BB68A] bg-white"
+          >
+            <option value="todos">Todos</option>
+            <option value="cumple">Cumple</option>
+            <option value="no_cumple">No cumple</option>
+          </select>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+        ) : filtradas.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-sm">No hay auditorías registradas todavía.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtradas.map((a) => {
+              const cfg = TIPO_CONFIG[a.tipo] || {};
+              const borderColor = a.puntuacion === 100 ? "border-l-[#6BB68A]" : a.puntuacion >= 75 ? "border-l-yellow-400" : "border-l-red-400";
+              const punColor = PuntuacionColor({ puntuacion: a.puntuacion });
+              return (
+                <div key={a.id} className={`bg-white rounded-2xl border border-border border-l-4 ${borderColor} px-5 py-4 flex flex-wrap items-center gap-4`}>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-foreground text-base">Auditoría interna {cfg.label}</p>
+                    <p className="text-sm text-muted-foreground">Auditor: {a.auditor || "—"}</p>
+                  </div>
+                  {a.fecha && (
+                    <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-sm text-foreground shrink-0">
+                      <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                      {format(new Date(a.fecha), "d MMM yyyy - HH:mm", { locale: es })}
+                    </div>
+                  )}
+                  <div className="text-center shrink-0">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Cumplimiento</p>
+                    <p className={`text-2xl font-bold ${punColor}`}>{a.puntuacion ?? "—"}%</p>
+                  </div>
+                  {a.puntuacion === 100 && (
+                    <CheckCircle2 className="w-6 h-6 text-[#6BB68A] shrink-0" />
+                  )}
+                  <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#6BB68A] text-[#6BB68A] text-sm font-medium hover:bg-[#6BB68A]/10 transition-colors shrink-0">
+                    <FileDown className="w-4 h-4" />
+                    Descargar Informe Excel
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -71,7 +71,9 @@ export default function Checklist() {
       {activeTab === "historico" && (
         <TabHistorico refreshKey={historicoKey} />
       )}
-      {activeTab === "auditorias" && <TabAuditorias />}
+      {activeTab === "auditorias" && (
+        <TabAuditorias onIniciarAuditoria={(tipo) => console.log("Iniciar auditoría:", tipo)} />
+      )}
 
       {showNuevo && (
         <ChecklistFormDialog
