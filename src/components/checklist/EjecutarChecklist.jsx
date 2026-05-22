@@ -13,6 +13,8 @@ const ITEM_LINKS = {
   "Registrar limpieza y desinfección de cocina, aseos y sala": "/registros?tab=limpieza",
   "Registrar hora de inicio y fin de producción (ir a Lotes)": "/registros?tab=lotes",
   "Registrar incidencias (si las hay)": "/registros?tab=incidencias",
+  "Verificar que el proveedor coincide con el albarán": "/registros?tab=recepcion",
+  "Registrar lote y proveedor en el sistema": "/registros?tab=lotes",
 };
 
 const ITEM_LINK_LABELS = {
@@ -20,6 +22,7 @@ const ITEM_LINK_LABELS = {
   "/registros?tab=limpieza": "Limpieza",
   "/registros?tab=lotes": "Lotes",
   "/registros?tab=incidencias": "Incidencias",
+  "/registros?tab=recepcion": "Recepción",
 };
 
 export default function EjecutarChecklist({ plantilla, onCancel, onCompletado }) {

@@ -54,7 +54,7 @@ const PREDEFINIDOS = [
     ],
   },
   {
-    nombre: "Checklist de inventario y materias primas",
+    nombre: "Inventario y materias primas",
     descripcion: "Control de inventario y estado de materias primas",
     items: [
       { texto: "Control de entradas y salidas de materia prima" },
