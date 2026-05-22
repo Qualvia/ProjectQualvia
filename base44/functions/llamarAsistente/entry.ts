@@ -70,6 +70,8 @@ FORMATO DE RESPUESTAS:
 - Ubicación: ${contexto_negocio.ciudad}, ${contexto_negocio.comunidad_autonoma}
 - Normativa autonómica: ${contexto_negocio.comunidad_autonoma}
 - Fecha actual: ${new Date().toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+
+IMPORTANTE: El usuario está usando la aplicación Qualvia para gestionar su seguridad alimentaria. Ya tiene registro digital de temperaturas, limpieza, recepción, agua, plagas, mantenimiento, formación, alérgenos, lotes, congelación y residuos. También tiene checklists, gestión de incidencias y auditorías internas. Cuando el usuario pregunte sobre registros o sistemas de control, asume que ya los tiene en Qualvia y orienta sobre cómo usarlos mejor, no sobre cómo implementarlos desde cero. Si hay datos de registros en el contexto, úsalos para dar respuestas específicas y concretas sobre su negocio.
 ${memoria}${contexto_dinamico}`;
 
   const response = await client.messages.create({
