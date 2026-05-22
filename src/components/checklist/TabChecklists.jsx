@@ -44,12 +44,12 @@ const PREDEFINIDOS = [
     nombre: "Control de producción",
     descripcion: "Control diario de producción en cocina",
     items: [
-      { texto: "Verificar recetas y gramajes según ficha técnica" },
-      { texto: "Controlar calidad de materias primas antes de usar" },
-      { texto: "Registrar hora de inicio y fin de cada elaboración" },
-      { texto: "Etiquetar y fechar todos los productos elaborados" },
-      { texto: "Revisar temperaturas de cocción y enfriamiento" },
-      { texto: "Comprobar limpieza de utensilios y equipos entre elaboraciones" },
+      { texto: "Verificar recetas y gramajes actualizados" },
+      { texto: "Controlar calidad de materias primas (olor, color, fecha)" },
+      { texto: "Registrar hora de inicio y fin de producción (ir a Lotes)" },
+      { texto: "Revisar temperatura de amasado, fermentado y horneado" },
+      { texto: "Controlar cantidad producida vs planificada" },
+      { texto: "Registrar incidencias (si las hay)" },
     ],
   },
   {
