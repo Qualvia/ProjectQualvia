@@ -38,7 +38,7 @@ export default function Checklist() {
         {!esOperario && activeTab === "checklists" && (
           <button
             onClick={() => setShowNuevo(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white text-sm font-semibold transition-colors shrink-0"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] text-white text-sm font-semibold transition-colors shrink-0 mt-1"
           >
             <Plus className="w-4 h-4" />
             Crear nuevo checklist

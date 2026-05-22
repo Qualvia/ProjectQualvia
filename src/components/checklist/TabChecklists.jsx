@@ -138,19 +138,6 @@ export default function TabChecklists({ onChecklistCompletado }) {
 
   return (
     <div className="space-y-6">
-      {/* Banner informativo */}
-      <div className="bg-[#0A3E47] rounded-2xl p-5 flex gap-4 items-start text-white">
-        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-          </svg>
-        </div>
-        <div>
-          <p className="font-bold text-base mb-1">¿Qué son los Checklists?</p>
-          <p className="text-sm text-white/80 leading-relaxed">Los checklists son listas de control digitales que te permiten estandarizar y verificar las tareas clave de tu negocio. Son totalmente flexibles: puedes personalizarlos, crear nuevos y adaptarlos a tus necesidades operativas para garantizar siempre la máxima calidad.</p>
-        </div>
-      </div>
-
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
       ) : plantillas.length === 0 ? (
