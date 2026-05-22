@@ -11,6 +11,15 @@ import { useNavigate } from "react-router-dom";
 const ITEM_LINKS = {
   "Registrar la temperatura de equipos de frío": "/registros?tab=temperatura",
   "Registrar limpieza y desinfección de cocina, aseos y sala": "/registros?tab=limpieza",
+  "Registrar hora de inicio y fin de producción (ir a Lotes)": "/registros?tab=lotes",
+  "Registrar incidencias (si las hay)": "/registros?tab=incidencias",
+};
+
+const ITEM_LINK_LABELS = {
+  "/registros?tab=temperatura": "Temperatura",
+  "/registros?tab=limpieza": "Limpieza",
+  "/registros?tab=lotes": "Lotes",
+  "/registros?tab=incidencias": "Incidencias",
 };
 
 export default function EjecutarChecklist({ plantilla, onCancel, onCompletado }) {
@@ -102,7 +111,7 @@ export default function EjecutarChecklist({ plantilla, onCancel, onCompletado })
                         onClick={() => navigate(ITEM_LINKS[item.texto])}
                         className="mt-1 text-sm text-[#6BB68A] hover:text-[#5aa377] font-medium flex items-center gap-1 transition-colors"
                       >
-                        → Ir a registro de {ITEM_LINKS[item.texto].includes("temperatura") ? "Temperatura" : "Limpieza"}
+                        → Ir a {ITEM_LINKS[item.texto].includes("incidencias") ? "" : "registro de "}{ITEM_LINK_LABELS[ITEM_LINKS[item.texto]]}
                       </button>
                     )}
                   </div>
