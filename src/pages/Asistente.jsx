@@ -14,9 +14,17 @@ const SUGERENCIAS = [
 
 function detectarIntencion(texto) {
   const t = texto.toLowerCase();
-  if (t.includes("temperatura") || t.includes("registro")) return "registros";
-  if (t.includes("incidencia") || t.includes("problema")) return "incidencias";
-  if (t.includes("semana") || t.includes("mes") || t.includes("cómo vamos")) return "resumen";
+  if (t.includes("temperatura") || t.includes("registro") || 
+      t.includes("limpieza") || t.includes("recepción") ||
+      t.includes("lote") || t.includes("alérgeno")) return "registros";
+  if (t.includes("incidencia") || t.includes("problema") || 
+      t.includes("no conformidad")) return "incidencias";
+  if (t.includes("semana") || t.includes("mes") || 
+      t.includes("cómo vamos") || t.includes("resumen")) return "resumen";
+  if (t.includes("checklist") || t.includes("apertura") || 
+      t.includes("cierre") || t.includes("lista")) return "checklist";
+  if (t.includes("auditoría") || t.includes("auditoria") || 
+      t.includes("inspección") || t.includes("inspeccion")) return "auditoria";
   return "general";
 }
 
@@ -179,13 +187,93 @@ export default function Asistente() {
       .filter(m => m.role === "user" || m.role === "assistant")
       .map(m => ({ role: m.role, content: m.content }));
 
+    const intencion = detectarIntencion(textoFinal);
+    let contexto_enriquecido = { ...contextNegocio };
+
+    try {
+      if (intencion === "incidencias") {
+        const data = await base44.entities.Incidencia.filter(
+          { business_id: currentBusiness.id },
+          "-fecha", 5, 0
+        );
+        contexto_enriquecido.incidencias = data.map(i => ({
+          tipo: i.tipo,
+          estado: i.estado,
+          descripcion: i.descripcion,
+          fecha: i.fecha,
+          prioridad: i.prioridad
+        }));
+
+      } else if (intencion === "registros") {
+        const data = await base44.entities.RegistroTemperatura.filter(
+          { business_id: currentBusiness.id },
+          "-fecha", 10, 0
+        );
+        contexto_enriquecido.ultimos_registros = data.map(r => ({
+          equipo: r.equipo,
+          temperatura: r.temperatura,
+          resultado: r.resultado,
+          fecha: r.fecha
+        }));
+
+      } else if (intencion === "resumen") {
+        const [incidencias, registros] = await Promise.all([
+          base44.entities.Incidencia.filter(
+            { business_id: currentBusiness.id, estado: "abierta" },
+            "-fecha", 5, 0
+          ),
+          base44.entities.RegistroTemperatura.filter(
+            { business_id: currentBusiness.id },
+            "-fecha", 5, 0
+          )
+        ]);
+        contexto_enriquecido.kpis = {
+          incidencias_abiertas: incidencias.length,
+          ultimos_registros_temperatura: registros.map(r => ({
+            equipo: r.equipo,
+            temperatura: r.temperatura,
+            resultado: r.resultado,
+            fecha: r.fecha
+          }))
+        };
+
+      } else if (intencion === "checklist") {
+        const data = await base44.entities.ChecklistEjecucion.filter(
+          { business_id: currentBusiness.id },
+          "-fecha", 5, 0
+        );
+        contexto_enriquecido.checklists = data.map(c => ({
+          nombre: c.plantilla_nombre,
+          puntuacion: c.puntuacion,
+          fecha: c.fecha,
+          registrado_por: c.registrado_por,
+          items_ok: c.items_ok,
+          total_items: c.total_items
+        }));
+
+      } else if (intencion === "auditoria") {
+        const data = await base44.entities.AuditoriaInterna.filter(
+          { business_id: currentBusiness.id },
+          "-fecha", 3, 0
+        );
+        contexto_enriquecido.auditorias = data.map(a => ({
+          tipo: a.tipo,
+          puntuacion: a.puntuacion,
+          fecha: a.fecha,
+          auditor: a.auditor
+        }));
+      }
+    } catch (e) {
+      // Si falla la carga de datos contextuales, continúa sin ellos
+    }
+
     try {
       const res = await base44.functions.invoke("llamarAsistente", {
         business_id: currentBusiness?.id,
         mensajes: historial,
-        contexto_negocio: contextNegocio,
+        contexto_negocio: contexto_enriquecido,
         memoria_previa: memoriaPrevia,
-        intencion: detectarIntencion(textoFinal),
+        intencion: intencion,
       });
       const respuesta = res?.data?.respuesta || "Lo siento, no pude procesar tu consulta en este momento.";
       setMensajes(prev => [...prev, { role: "assistant", content: respuesta }]);
