@@ -20,10 +20,14 @@ function detectarIntencion(texto) {
   return "general";
 }
 
+const QUALVIA_AVATAR = "https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/4bfbe29ea_IconJPEG01-01.jpg";
+
 function TypingIndicator() {
   return (
     <div className="flex items-end gap-2 mb-4">
-      <div className="w-8 h-8 rounded-full bg-[#0A3E47] flex items-center justify-center text-white font-bold text-sm shrink-0">Q</div>
+      <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border">
+        <img src={QUALVIA_AVATAR} alt="QUALVIA" className="w-full h-full object-cover" />
+      </div>
       <div className="bg-white border border-border rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
         <div className="flex gap-1 items-center h-4">
           <span className="w-2 h-2 bg-[#6BB68A] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -40,7 +44,9 @@ function Mensaje({ msg }) {
   return (
     <div className={`flex items-end gap-2 mb-4 ${esUsuario ? "flex-row-reverse" : ""}`}>
       {!esUsuario && (
-        <div className="w-8 h-8 rounded-full bg-[#0A3E47] flex items-center justify-center text-white font-bold text-sm shrink-0">Q</div>
+        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border">
+          <img src={QUALVIA_AVATAR} alt="QUALVIA" className="w-full h-full object-cover" />
+        </div>
       )}
       <div
         className={`max-w-[75%] px-4 py-3 rounded-2xl shadow-sm text-sm leading-relaxed whitespace-pre-wrap ${
@@ -244,7 +250,7 @@ export default function Asistente() {
                   <button
                     key={i}
                     onClick={() => enviar(s.texto)}
-                    className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2 text-left text-xs text-green-800 hover:bg-green-100 hover:border-green-300 transition-all"
+                    className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2 text-left text-xs text-foreground hover:bg-green-100 hover:border-green-300 transition-all"
                   >
                     <Icon className="w-3.5 h-3.5 text-[#6BB68A] shrink-0" />
                     <span className="leading-snug">{s.texto}</span>
