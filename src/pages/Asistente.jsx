@@ -228,31 +228,31 @@ export default function Asistente() {
               <Mensaje key={i} msg={msg} />
             ))}
 
-            {/* Sugerencias rápidas */}
-            {mostrarSugerencias && mensajes.length === 1 && (
-              <div className="grid grid-cols-2 gap-2 mt-2 mb-4" style={{ animation: "fadeInMsg 0.3s ease-out" }}>
-                {SUGERENCIAS.map((s, i) => {
-                  const Icon = s.icon;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => enviar(s.texto)}
-                      className="flex items-center gap-2 bg-white border border-border rounded-xl px-3 py-2.5 text-left text-sm text-foreground hover:border-[#6BB68A] hover:bg-green-50 transition-all shadow-sm"
-                    >
-                      <Icon className="w-4 h-4 text-[#6BB68A] shrink-0" />
-                      <span className="leading-snug">{s.texto}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+
 
             {cargando && <TypingIndicator />}
           </div>
         </div>
 
         {/* Input fijo abajo */}
-        <div className="bg-white border-t border-border px-4 py-3 shrink-0">
+        <div className="bg-white border-t border-border px-4 pt-3 pb-2 shrink-0">
+          {mostrarSugerencias && (
+            <div className="max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+              {SUGERENCIAS.map((s, i) => {
+                const Icon = s.icon;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => enviar(s.texto)}
+                    className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2 text-left text-xs text-green-800 hover:bg-green-100 hover:border-green-300 transition-all"
+                  >
+                    <Icon className="w-3.5 h-3.5 text-[#6BB68A] shrink-0" />
+                    <span className="leading-snug">{s.texto}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <div className="max-w-3xl mx-auto flex items-center gap-2">
             <input
               type="text"
