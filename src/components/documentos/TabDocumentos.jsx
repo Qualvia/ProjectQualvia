@@ -7,54 +7,54 @@ const DOCUMENTOS = [
     title: "Plan APPCC",
     desc: "Plan de Análisis de Peligros y Puntos de Control Crítico",
     icon: ShieldCheck,
-    iconBg: "bg-gray-100",
-    iconColor: "text-gray-700",
-    btnColor: "bg-black hover:bg-gray-800",
+    iconBg: "bg-secondary",
+    iconColor: "text-[#0A3E47]",
+    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
   },
   {
     id: "limpieza",
     title: "Plan de Limpieza",
     desc: "Protocolo de limpieza y desinfección completo",
     icon: ClipboardList,
-    iconBg: "bg-[#e6f5ed]",
-    iconColor: "text-[#6BB68A]",
-    btnColor: "bg-[#6BB68A] hover:bg-[#5aa377]",
+    iconBg: "bg-secondary",
+    iconColor: "text-[#0A3E47]",
+    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
   },
   {
     id: "plagas",
     title: "Plan de Control de Plagas",
     desc: "Procedimientos y gestión del control de plagas",
     icon: BookOpen,
-    iconBg: "bg-orange-50",
-    iconColor: "text-orange-500",
-    btnColor: "bg-orange-400 hover:bg-orange-500",
+    iconBg: "bg-secondary",
+    iconColor: "text-[#0A3E47]",
+    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
   },
   {
     id: "sanidad",
     title: "Dossier Inspección de Sanidad",
     desc: "Documentación preparada para inspección sanitaria",
     icon: Award,
-    iconBg: "bg-purple-50",
-    iconColor: "text-purple-500",
-    btnColor: "bg-purple-500 hover:bg-purple-600",
+    iconBg: "bg-secondary",
+    iconColor: "text-[#0A3E47]",
+    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
   },
   {
     id: "seguridad",
     title: "Informe Inteligente de Seguridad Alimentaria",
     desc: "Análisis IA de riesgos y estado de seguridad",
     icon: Sparkles,
-    iconBg: "bg-red-50",
-    iconColor: "text-red-400",
-    btnColor: "bg-red-500 hover:bg-red-600",
+    iconBg: "bg-secondary",
+    iconColor: "text-[#0A3E47]",
+    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
   },
   {
     id: "incidencias",
     title: "Informe de Incidencias y No Conformidades",
     desc: "Análisis detallado de incidencias con patrones y recomendaciones",
     icon: BarChart3,
-    iconBg: "bg-blue-50",
-    iconColor: "text-blue-500",
-    btnColor: "bg-blue-500 hover:bg-blue-600",
+    iconBg: "bg-secondary",
+    iconColor: "text-[#0A3E47]",
+    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
   },
 ];
 
@@ -101,7 +101,7 @@ export default function TabDocumentos() {
                 </div>
               </div>
               <button
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold text-sm transition-colors ${doc.btnColor}`}
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors ${doc.btnColor}`}
                 onClick={() => {/* generación pendiente */}}
               >
                 <Download className="w-4 h-4" />

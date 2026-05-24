@@ -186,7 +186,7 @@ export default function TabInformes() {
           </button>
           <button
             onClick={handleGenerarPDF}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#0A3E47] hover:bg-[#0d4f5c] text-white font-semibold text-sm transition-colors"
+            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary hover:bg-secondary/70 text-[#0A3E47] font-semibold text-sm transition-colors"
           >
             <Download className="w-4 h-4" />
             Generar PDF
