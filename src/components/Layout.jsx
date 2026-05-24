@@ -32,6 +32,7 @@ export default function Layout() {
   const { user, businesses, currentBusiness, isLoading } = useBusiness();
   const { esOperario } = useUsuarioInterno();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
 
   const NAV_ITEMS = esOperario
@@ -68,42 +69,64 @@ export default function Layout() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-30 w-60 h-full flex flex-col transition-transform duration-200",
+          "fixed lg:static inset-y-0 left-0 z-30 h-full flex flex-col transition-all duration-300 relative",
           "bg-[#0A3E47] border-r border-[#0d4d5a]",
+          sidebarCollapsed ? "w-[60px]" : "w-52",
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}>
+
+        {/* Toggle collapse button — desktop only */}
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="hidden lg:flex absolute -right-3.5 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full bg-white border border-border shadow-md items-center justify-center text-[#0A3E47] hover:bg-secondary transition-colors"
+          title={sidebarCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={cn("transition-transform duration-300", sidebarCollapsed ? "rotate-180" : "")}>
+            <path d="M7.5 2L4 6l3.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
         
         {/* Logo */}
-        <div className="px-6 pt-7 pb-6 shrink-0 flex items-center justify-center border-b border-white/10">
-          <img
-            src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
-            alt="Qualvia"
-            className="h-16 object-contain rounded-none" />
+        <div className={cn("pt-7 pb-6 shrink-0 flex items-center justify-center border-b border-white/10 transition-all duration-300", sidebarCollapsed ? "px-2" : "px-6")}>
+          {sidebarCollapsed ? (
+            <div className="w-8 h-8 rounded-full overflow-hidden">
+              <img src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg" alt="Q" className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <img
+              src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
+              alt="Qualvia"
+              className="h-16 object-contain rounded-none" />
+          )}
         </div>
 
         {/* Usuario interno */}
-        <div className="px-3 pt-4 pb-2 shrink-0">
-          <SelectorUsuarioInterno />
-        </div>
+        {!sidebarCollapsed && (
+          <div className="px-3 pt-4 pb-2 shrink-0">
+            <SelectorUsuarioInterno />
+          </div>
+        )}
 
         {/* Nav */}
-        <nav className="px-3 pt-4 space-y-0.5">
+        <nav className="px-2 pt-4 space-y-0.5">
           {NAV_ITEMS.map(({ to, label, icon: Icon }) =>
           <NavLink
             key={to}
             to={to}
             end={to === "/"}
             onClick={() => setSidebarOpen(false)}
+            title={sidebarCollapsed ? label : undefined}
             className={({ isActive }) =>
             cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              "flex items-center rounded-lg text-sm font-medium transition-colors",
+              sidebarCollapsed ? "justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5",
               isActive ?
               "bg-[#FAFAF7]/15 text-[#FAFAF7] font-semibold" :
               "text-[#FAFAF7]/60 hover:bg-[#FAFAF7]/10 hover:text-[#FAFAF7]"
             )
             }>
               <Icon className="w-4 h-4 shrink-0" />
-              {label}
+              {!sidebarCollapsed && label}
             </NavLink>
           )}
         </nav>
@@ -111,8 +134,8 @@ export default function Layout() {
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Negocio activo — fondo arena */}
-        {!esOperario && (
+        {/* Negocio activo */}
+        {!esOperario && !sidebarCollapsed && (
           <div className="px-3 pb-4 shrink-0">
             <div className="bg-white/10 rounded-xl px-3 py-2.5">
               <p className="text-[10px] font-semibold text-white/50 mb-1.5 uppercase tracking-wide">Negocio activo</p>
@@ -122,22 +145,33 @@ export default function Layout() {
         )}
 
         {/* Usuario + Cerrar sesión */}
-        <div className="px-3 pb-5 pt-3 shrink-0 border-t border-white/10">
-          <div className="flex items-center gap-2 px-1 py-1">
+        <div className={cn("pb-5 pt-3 shrink-0 border-t border-white/10", sidebarCollapsed ? "px-1" : "px-3")}>
+          <div className={cn("flex items-center gap-2 px-1 py-1", sidebarCollapsed ? "justify-center flex-col gap-1" : "")}>
             <div className="w-8 h-8 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
               {(user?.full_name || user?.email || "?")[0].toUpperCase()}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-white truncate">{user?.full_name || "—"}</p>
-              <p className="text-xs text-white/50 truncate">{user?.email}</p>
-            </div>
-            <button
-              onClick={() => base44.auth.logout()}
-              title="Cerrar sesión"
-              className="shrink-0 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
-              
-              <LogOut className="w-4 h-4" />
-            </button>
+            {!sidebarCollapsed && (
+              <>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-white truncate">{user?.full_name || "—"}</p>
+                  <p className="text-xs text-white/50 truncate">{user?.email}</p>
+                </div>
+                <button
+                  onClick={() => base44.auth.logout()}
+                  title="Cerrar sesión"
+                  className="shrink-0 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </>
+            )}
+            {sidebarCollapsed && (
+              <button
+                onClick={() => base44.auth.logout()}
+                title="Cerrar sesión"
+                className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
       </aside>
