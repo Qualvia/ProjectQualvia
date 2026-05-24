@@ -35,9 +35,9 @@ export default function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
 
-  const NAV_ITEMS = esOperario
-    ? ALL_NAV_ITEMS.filter((item) => !item.soloAdmin)
-    : ALL_NAV_ITEMS;
+  const NAV_ITEMS = esOperario ?
+  ALL_NAV_ITEMS.filter((item) => !item.soloAdmin) :
+  ALL_NAV_ITEMS;
 
   useEffect(() => {
     if (isLoading) return;
@@ -79,33 +79,33 @@ export default function Layout() {
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="hidden lg:flex absolute -right-3.5 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full bg-white border border-border shadow-md items-center justify-center text-[#0A3E47] hover:bg-secondary transition-colors"
-          title={sidebarCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}
-        >
+          title={sidebarCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}>
+          
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={cn("transition-transform duration-300", sidebarCollapsed ? "rotate-180" : "")}>
-            <path d="M7.5 2L4 6l3.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M7.5 2L4 6l3.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
         
         {/* Logo */}
         <div className={cn("pt-7 pb-6 shrink-0 flex items-center justify-center border-b border-white/10 transition-all duration-300", sidebarCollapsed ? "px-2" : "px-6")}>
-          {sidebarCollapsed ? (
-            <div className="w-9 h-9 rounded-full overflow-hidden border border-white/20">
+          {sidebarCollapsed ?
+          <div className="w-9 h-9 rounded-full overflow-hidden border border-white/20">
               <img src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/4bfbe29ea_IconJPEG01-01.jpg" alt="Q" className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <img
-              src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/5c8196497_ChatGPTImage24may202620_29_16.png"
-              alt="Qualvia"
-              className="h-20 w-full object-cover rounded-none" />
-          )}
+            </div> :
+
+          <img
+            src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/5c8196497_ChatGPTImage24may202620_29_16.png"
+            alt="Qualvia"
+            className="h-20 w-full object-cover rounded-none my-1" />
+          }
         </div>
 
         {/* Usuario interno */}
-        {!sidebarCollapsed && (
-          <div className="px-3 pt-4 pb-2 shrink-0">
+        {!sidebarCollapsed &&
+        <div className="px-3 pt-4 pb-2 shrink-0">
             <SelectorUsuarioInterno />
           </div>
-        )}
+        }
 
         {/* Nav */}
         <nav className="px-2 pt-4 space-y-0.5">
@@ -135,14 +135,14 @@ export default function Layout() {
         <div className="flex-1" />
 
         {/* Negocio activo */}
-        {!esOperario && !sidebarCollapsed && (
-          <div className="px-3 pb-4 shrink-0">
+        {!esOperario && !sidebarCollapsed &&
+        <div className="px-3 pb-4 shrink-0">
             <div className="bg-white/10 rounded-xl px-3 py-2.5">
               <p className="text-[10px] font-semibold text-white/50 mb-1.5 uppercase tracking-wide">Negocio activo</p>
               <BusinessSelector />
             </div>
           </div>
-        )}
+        }
 
         {/* Usuario + Cerrar sesión */}
         <div className={cn("pb-5 pt-3 shrink-0 border-t border-white/10", sidebarCollapsed ? "px-1" : "px-3")}>
@@ -150,28 +150,28 @@ export default function Layout() {
             <div className="w-8 h-8 rounded-full bg-[#6BB68A] flex items-center justify-center text-white font-bold text-sm shrink-0">
               {(user?.full_name || user?.email || "?")[0].toUpperCase()}
             </div>
-            {!sidebarCollapsed && (
-              <>
+            {!sidebarCollapsed &&
+            <>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-white truncate">{user?.full_name || "—"}</p>
                   <p className="text-xs text-white/50 truncate">{user?.email}</p>
                 </div>
                 <button
-                  onClick={() => base44.auth.logout()}
-                  title="Cerrar sesión"
-                  className="shrink-0 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+                onClick={() => base44.auth.logout()}
+                title="Cerrar sesión"
+                className="shrink-0 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
                   <LogOut className="w-4 h-4" />
                 </button>
               </>
-            )}
-            {sidebarCollapsed && (
-              <button
-                onClick={() => base44.auth.logout()}
-                title="Cerrar sesión"
-                className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+            }
+            {sidebarCollapsed &&
+            <button
+              onClick={() => base44.auth.logout()}
+              title="Cerrar sesión"
+              className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
                 <LogOut className="w-4 h-4" />
               </button>
-            )}
+            }
           </div>
         </div>
       </aside>
