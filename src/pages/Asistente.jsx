@@ -310,7 +310,7 @@ export default function Asistente() {
       `}</style>
       <div className="flex flex-col h-full bg-[#FAFAF7]">
         {/* Header fijo */}
-        <div className="bg-white border-b border-border px-5 py-3 flex items-center gap-3 shrink-0">
+        <div className="bg-secondary border-b border-border px-5 py-5 flex items-center gap-3 shrink-0">
           <div className="w-10 h-10 rounded-xl bg-[#0A3E47] flex items-center justify-center shrink-0">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
