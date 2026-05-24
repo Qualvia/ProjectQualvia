@@ -94,9 +94,9 @@ export default function Layout() {
             </div>
           ) : (
             <img
-              src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/84a4e48b7_HQJPEG01-01copia.jpg"
+              src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/5c8196497_ChatGPTImage24may202620_29_16.png"
               alt="Qualvia"
-              className="h-16 object-contain rounded-none" />
+              className="h-16 w-full object-cover rounded-none" />
           )}
         </div>
 
