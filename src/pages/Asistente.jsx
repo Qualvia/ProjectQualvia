@@ -311,8 +311,8 @@ export default function Asistente() {
       <div className="flex flex-col h-full bg-[#FAFAF7]">
         {/* Header fijo */}
         <div className="bg-secondary border-b border-border flex items-center gap-3 shrink-0 px-4" style={{minHeight: "116px"}}>
-          <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shrink-0">
-            <Sparkles className="w-7 h-7 text-[#0A3E47]" />
+          <div className="w-14 h-14 rounded-xl bg-[#0A3E47] flex items-center justify-center shrink-0">
+            <Sparkles className="w-7 h-7 text-white" />
           </div>
           <div className="flex-1">
             <p className="font-bold text-[#0A3E47] text-2xl leading-none">Asistente IA</p>
