@@ -23,7 +23,7 @@ const ALL_NAV_ITEMS = [
 { to: "/", label: "Dashboard", icon: LayoutDashboard, soloAdmin: true },
 { to: "/registros", label: "Registros", icon: ClipboardList, soloAdmin: false },
 { to: "/documentos", label: "Documentos", icon: FileText, soloAdmin: true },
-{ to: "/checklist", label: "Checklist", icon: CheckSquare, soloAdmin: false },
+{ to: "/checklist", label: "Checklists y Auditorías", icon: CheckSquare, soloAdmin: false },
 { to: "/asistente", label: "Asistente", icon: Bot, soloAdmin: true },
 { to: "/ajustes", label: "Ajustes", icon: Settings, soloAdmin: true }];
 
