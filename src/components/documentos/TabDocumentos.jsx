@@ -9,7 +9,7 @@ const DOCUMENTOS = [
     icon: ShieldCheck,
     iconBg: "bg-secondary",
     iconColor: "text-[#0A3E47]",
-    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
+    btnColor: "bg-[#6BB68A] hover:bg-[#5aa377] !text-white",
   },
   {
     id: "limpieza",
@@ -18,7 +18,7 @@ const DOCUMENTOS = [
     icon: ClipboardList,
     iconBg: "bg-secondary",
     iconColor: "text-[#0A3E47]",
-    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
+    btnColor: "bg-[#6BB68A] hover:bg-[#5aa377] !text-white",
   },
   {
     id: "plagas",
@@ -27,7 +27,7 @@ const DOCUMENTOS = [
     icon: BookOpen,
     iconBg: "bg-secondary",
     iconColor: "text-[#0A3E47]",
-    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
+    btnColor: "bg-[#6BB68A] hover:bg-[#5aa377] !text-white",
   },
   {
     id: "sanidad",
@@ -36,7 +36,7 @@ const DOCUMENTOS = [
     icon: Award,
     iconBg: "bg-secondary",
     iconColor: "text-[#0A3E47]",
-    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
+    btnColor: "bg-[#6BB68A] hover:bg-[#5aa377] !text-white",
   },
   {
     id: "seguridad",
@@ -45,7 +45,7 @@ const DOCUMENTOS = [
     icon: Sparkles,
     iconBg: "bg-secondary",
     iconColor: "text-[#0A3E47]",
-    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
+    btnColor: "bg-[#6BB68A] hover:bg-[#5aa377] !text-white",
   },
   {
     id: "incidencias",
@@ -54,7 +54,7 @@ const DOCUMENTOS = [
     icon: BarChart3,
     iconBg: "bg-secondary",
     iconColor: "text-[#0A3E47]",
-    btnColor: "bg-secondary hover:bg-secondary/70 !text-[#0A3E47]",
+    btnColor: "bg-[#6BB68A] hover:bg-[#5aa377] !text-white",
   },
 ];
 
