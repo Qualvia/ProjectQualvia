@@ -87,7 +87,7 @@ export default function Layout() {
         </button>
         
         {/* Logo */}
-        <div className={cn("pt-7 pb-6 shrink-0 flex items-center justify-center border-b border-white/10 transition-all duration-300", sidebarCollapsed ? "px-2" : "px-6")}>
+        <div className={cn("pt-3 pb-3 shrink-0 flex items-center justify-center border-b border-white/10 transition-all duration-300", sidebarCollapsed ? "px-2" : "px-4")}>
           {sidebarCollapsed ?
           <div className="w-9 h-9 rounded-full overflow-hidden border border-white/20">
               <img src="https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/4bfbe29ea_IconJPEG01-01.jpg" alt="Q" className="w-full h-full object-cover" />
