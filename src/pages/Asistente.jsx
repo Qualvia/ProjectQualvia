@@ -4,27 +4,27 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { Sparkles, Send, Thermometer, ClipboardList, AlertTriangle, Brush, Leaf, BarChart3 } from "lucide-react";
 
 const SUGERENCIAS = [
-  { icon: Thermometer, texto: "¿Cómo mejorar el control de temperatura?" },
-  { icon: ClipboardList, texto: "¿Qué documentación necesito para una inspección?" },
-  { icon: AlertTriangle, texto: "Resumen de incidencias recientes" },
-  { icon: Brush, texto: "Frecuencia de limpieza recomendada" },
-  { icon: Leaf, texto: "¿Cómo gestionar correctamente los alérgenos?" },
-  { icon: BarChart3, texto: "Resumen de registros últimos 15 días" },
-];
+{ icon: Thermometer, texto: "¿Cómo mejorar el control de temperatura?" },
+{ icon: ClipboardList, texto: "¿Qué documentación necesito para una inspección?" },
+{ icon: AlertTriangle, texto: "Resumen de incidencias recientes" },
+{ icon: Brush, texto: "Frecuencia de limpieza recomendada" },
+{ icon: Leaf, texto: "¿Cómo gestionar correctamente los alérgenos?" },
+{ icon: BarChart3, texto: "Resumen de registros últimos 15 días" }];
+
 
 function detectarIntencion(texto) {
   const t = texto.toLowerCase();
-  if (t.includes("temperatura") || t.includes("registro") || 
-      t.includes("limpieza") || t.includes("recepción") ||
-      t.includes("lote") || t.includes("alérgeno")) return "registros";
-  if (t.includes("incidencia") || t.includes("problema") || 
-      t.includes("no conformidad")) return "incidencias";
-  if (t.includes("semana") || t.includes("mes") || 
-      t.includes("cómo vamos") || t.includes("resumen")) return "resumen";
-  if (t.includes("checklist") || t.includes("apertura") || 
-      t.includes("cierre") || t.includes("lista")) return "checklist";
-  if (t.includes("auditoría") || t.includes("auditoria") || 
-      t.includes("inspección") || t.includes("inspeccion")) return "auditoria";
+  if (t.includes("temperatura") || t.includes("registro") ||
+  t.includes("limpieza") || t.includes("recepción") ||
+  t.includes("lote") || t.includes("alérgeno")) return "registros";
+  if (t.includes("incidencia") || t.includes("problema") ||
+  t.includes("no conformidad")) return "incidencias";
+  if (t.includes("semana") || t.includes("mes") ||
+  t.includes("cómo vamos") || t.includes("resumen")) return "resumen";
+  if (t.includes("checklist") || t.includes("apertura") ||
+  t.includes("cierre") || t.includes("lista")) return "checklist";
+  if (t.includes("auditoría") || t.includes("auditoria") ||
+  t.includes("inspección") || t.includes("inspeccion")) return "auditoria";
   return "general";
 }
 
@@ -43,31 +43,31 @@ function TypingIndicator() {
           <span className="w-2 h-2 bg-[#6BB68A] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 function Mensaje({ msg }) {
   const esUsuario = msg.role === "user";
   return (
     <div className={`flex items-end gap-2 mb-4 ${esUsuario ? "flex-row-reverse" : ""}`}>
-      {!esUsuario && (
-        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border">
+      {!esUsuario &&
+      <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border">
           <img src={QUALVIA_AVATAR} alt="QUALVIA" className="w-full h-full object-cover" />
         </div>
-      )}
+      }
       <div
         className={`max-w-[75%] px-4 py-3 rounded-2xl shadow-sm text-sm leading-relaxed whitespace-pre-wrap ${
-          esUsuario
-            ? "bg-[#0A3E47] text-white rounded-br-sm"
-            : "bg-white border border-border text-foreground rounded-bl-sm"
-        }`}
-        style={{ animation: "fadeInMsg 0.2s ease-out" }}
-      >
+        esUsuario ?
+        "bg-[#0A3E47] text-white rounded-br-sm" :
+        "bg-white border border-border text-foreground rounded-bl-sm"}`
+        }
+        style={{ animation: "fadeInMsg 0.2s ease-out" }}>
+        
         {msg.content}
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export default function Asistente() {
@@ -95,19 +95,19 @@ export default function Asistente() {
 
   // Guardar resumen en memoria
   const guardarResumen = useCallback(async () => {
-    const msgs = mensajesRef.current.filter(m => m.role !== "system");
+    const msgs = mensajesRef.current.filter((m) => m.role !== "system");
     if (!currentBusiness || !user || msgs.length < 2) return;
     const res = await base44.functions.invoke("guardarResumenAsistente", {
       mensajes: msgs,
       business_id: currentBusiness.id,
-      user_id: user.id,
+      user_id: user.id
     });
     if (res?.data?.ok && res?.data?.resumen) {
       const datos = {
         business_id: currentBusiness.id,
         user_id: user.id,
         resumen: res.data.resumen,
-        fecha: new Date().toISOString(),
+        fecha: new Date().toISOString()
       };
       if (memoriaId) {
         await base44.entities.AsistenteMemoria.update(memoriaId, datos);
@@ -143,13 +143,13 @@ export default function Asistente() {
         nombre: currentBusiness.name || "",
         tipo_negocio: perfil.tipo_negocio || "",
         ciudad: perfil.ciudad || "",
-        comunidad_autonoma: perfil.comunidad_autonoma || "",
+        comunidad_autonoma: perfil.comunidad_autonoma || ""
       });
 
       // Cargar memoria previa
       const memorias = await base44.entities.AsistenteMemoria.filter({
         business_id: currentBusiness.id,
-        user_id: user.id,
+        user_id: user.id
       });
       if (memorias.length > 0) {
         setMemoriaId(memorias[0].id);
@@ -160,7 +160,7 @@ export default function Asistente() {
       const nombreNegocio = currentBusiness.name || "tu negocio";
       setMensajes([{
         role: "assistant",
-        content: `¡Hola! 👋 Soy QUALVIA, tu asistente especializada en calidad y seguridad alimentaria. Veo que estás gestionando ${nombreNegocio} — estoy aquí para ayudarte con todo lo que necesites: normativa APPCC, control de registros, preparación de inspecciones o cualquier duda operativa. ¿En qué puedo ayudarte hoy?`,
+        content: `¡Hola! 👋 Soy QUALVIA, tu asistente especializada en calidad y seguridad alimentaria. Veo que estás gestionando ${nombreNegocio} — estoy aquí para ayudarte con todo lo que necesites: normativa APPCC, control de registros, preparación de inspecciones o cualquier duda operativa. ¿En qué puedo ayudarte hoy?`
       }]);
     }
 
@@ -188,9 +188,9 @@ export default function Asistente() {
     setCargando(true);
     resetInactividad();
 
-    const historial = nuevosMensajes
-      .filter(m => m.role === "user" || m.role === "assistant")
-      .map(m => ({ role: m.role, content: m.content }));
+    const historial = nuevosMensajes.
+    filter((m) => m.role === "user" || m.role === "assistant").
+    map((m) => ({ role: m.role, content: m.content }));
 
     const intencion = detectarIntencion(textoFinal);
     let contexto_enriquecido = { ...contextNegocio };
@@ -201,7 +201,7 @@ export default function Asistente() {
           { business_id: currentBusiness.id },
           "-fecha", 5, 0
         );
-        contexto_enriquecido.incidencias = data.map(i => ({
+        contexto_enriquecido.incidencias = data.map((i) => ({
           tipo: i.tipo,
           estado: i.estado,
           descripcion: i.descripcion,
@@ -214,7 +214,7 @@ export default function Asistente() {
           { business_id: currentBusiness.id },
           "-fecha", 10, 0
         );
-        contexto_enriquecido.ultimos_registros = data.map(r => ({
+        contexto_enriquecido.ultimos_registros = data.map((r) => ({
           equipo: r.equipo,
           temperatura: r.temperatura,
           resultado: r.resultado,
@@ -223,18 +223,18 @@ export default function Asistente() {
 
       } else if (intencion === "resumen") {
         const [incidencias, registros] = await Promise.all([
-          base44.entities.Incidencia.filter(
-            { business_id: currentBusiness.id, estado: "abierta" },
-            "-fecha", 5, 0
-          ),
-          base44.entities.RegistroTemperatura.filter(
-            { business_id: currentBusiness.id },
-            "-fecha", 5, 0
-          )
-        ]);
+        base44.entities.Incidencia.filter(
+          { business_id: currentBusiness.id, estado: "abierta" },
+          "-fecha", 5, 0
+        ),
+        base44.entities.RegistroTemperatura.filter(
+          { business_id: currentBusiness.id },
+          "-fecha", 5, 0
+        )]
+        );
         contexto_enriquecido.kpis = {
           incidencias_abiertas: incidencias.length,
-          ultimos_registros_temperatura: registros.map(r => ({
+          ultimos_registros_temperatura: registros.map((r) => ({
             equipo: r.equipo,
             temperatura: r.temperatura,
             resultado: r.resultado,
@@ -247,7 +247,7 @@ export default function Asistente() {
           { business_id: currentBusiness.id },
           "-fecha", 5, 0
         );
-        contexto_enriquecido.checklists = data.map(c => ({
+        contexto_enriquecido.checklists = data.map((c) => ({
           nombre: c.plantilla_nombre,
           puntuacion: c.puntuacion,
           fecha: c.fecha,
@@ -261,7 +261,7 @@ export default function Asistente() {
           { business_id: currentBusiness.id },
           "-fecha", 3, 0
         );
-        contexto_enriquecido.auditorias = data.map(a => ({
+        contexto_enriquecido.auditorias = data.map((a) => ({
           tipo: a.tipo,
           puntuacion: a.puntuacion,
           fecha: a.fecha,
@@ -278,14 +278,14 @@ export default function Asistente() {
         mensajes: historial,
         contexto_negocio: contexto_enriquecido,
         memoria_previa: memoriaPrevia,
-        intencion: intencion,
+        intencion: intencion
       });
       const respuesta = res?.data?.respuesta || "Lo siento, no pude procesar tu consulta en este momento.";
-      setMensajes(prev => [...prev, { role: "assistant", content: respuesta }]);
+      setMensajes((prev) => [...prev, { role: "assistant", content: respuesta }]);
     } catch (error) {
-      setMensajes(prev => [...prev, { 
-        role: "assistant", 
-        content: "Ha ocurrido un error al procesar tu consulta. Por favor inténtalo de nuevo." 
+      setMensajes((prev) => [...prev, {
+        role: "assistant",
+        content: "Ha ocurrido un error al procesar tu consulta. Por favor inténtalo de nuevo."
       }]);
     } finally {
       setCargando(false);
@@ -310,7 +310,7 @@ export default function Asistente() {
       `}</style>
       <div className="flex flex-col h-full bg-[#FAFAF7]">
         {/* Header fijo */}
-        <div className="bg-secondary border-b border-border px-5 pt-7 pb-9 flex items-center gap-3 shrink-0">
+        <div className="bg-secondary border-b border-border flex items-center gap-3 shrink-0 px-4">
           <div className="w-10 h-10 rounded-xl bg-[#0A3E47] flex items-center justify-center shrink-0">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
@@ -330,9 +330,9 @@ export default function Asistente() {
         {/* Área de mensajes */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
           <div className="max-w-3xl mx-auto">
-            {mensajes.map((msg, i) => (
-              <Mensaje key={i} msg={msg} />
-            ))}
+            {mensajes.map((msg, i) =>
+            <Mensaje key={i} msg={msg} />
+            )}
 
 
 
@@ -342,23 +342,23 @@ export default function Asistente() {
 
         {/* Input fijo abajo */}
         <div className="bg-white border-t border-border px-4 pt-3 pb-2 shrink-0">
-          {mostrarSugerencias && (
-            <div className="max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+          {mostrarSugerencias &&
+          <div className="max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
               {SUGERENCIAS.map((s, i) => {
-                const Icon = s.icon;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => enviar(s.texto)}
-                    className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2 text-left text-xs text-foreground hover:bg-green-100 hover:border-green-300 transition-all"
-                  >
+              const Icon = s.icon;
+              return (
+                <button
+                  key={i}
+                  onClick={() => enviar(s.texto)}
+                  className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2 text-left text-xs text-foreground hover:bg-green-100 hover:border-green-300 transition-all">
+                  
                     <Icon className="w-3.5 h-3.5 text-[#6BB68A] shrink-0" />
                     <span className="leading-snug">{s.texto}</span>
-                  </button>
-                );
-              })}
+                  </button>);
+
+            })}
             </div>
-          )}
+          }
           <div className="max-w-3xl mx-auto flex items-center gap-2">
             <input
               type="text"
@@ -367,19 +367,19 @@ export default function Asistente() {
               onKeyDown={handleKeyDown}
               disabled={cargando}
               placeholder="Escribe tu pregunta aquí..."
-              className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-[#6BB68A] bg-[#FAFAF7] disabled:opacity-60"
-            />
+              className="flex-1 rounded-xl border border-border px-4 py-2.5 text-sm focus:outline-none focus:border-[#6BB68A] bg-[#FAFAF7] disabled:opacity-60" />
+            
             <button
               onClick={() => enviar()}
               disabled={cargando || !input.trim()}
-              className="w-10 h-10 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] disabled:opacity-50 flex items-center justify-center transition-colors shrink-0"
-            >
+              className="w-10 h-10 rounded-xl bg-[#6BB68A] hover:bg-[#5aa377] disabled:opacity-50 flex items-center justify-center transition-colors shrink-0">
+              
               <Send className="w-4 h-4 text-white" />
             </button>
           </div>
           <p className="text-center text-xs text-muted-foreground mt-2">QUALVIA es una herramienta de apoyo basada en IA. No sustituye asesoramiento oficial.</p>
         </div>
       </div>
-    </>
-  );
+    </>);
+
 }
