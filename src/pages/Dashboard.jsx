@@ -1,6 +1,6 @@
 import React from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { AlertTriangle, CheckCircle2, Flame, Sparkles, Lightbulb, Bot } from "lucide-react";
+import { AlertCircle, ClipboardCheck, Flame, Clock, TrendingUp, Sparkles, Lightbulb, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -44,58 +44,50 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
         {/* KPI 1 — Incidencias activas */}
-        <div className="bg-white rounded-2xl border border-border p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground tracking-widest uppercase">Incidencias activas</span>
-            <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
-              <AlertTriangle className="w-4.5 h-4.5 text-red-500" />
+        <div className="bg-white rounded-2xl border border-border border-l-[3px] p-5 flex items-center gap-4" style={{ borderLeftColor: "#A32D2D" }}>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEE8E8" }}>
+            <AlertCircle className="w-5 h-5" style={{ color: "#A32D2D" }} />
+          </div>
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="text-[11px] font-medium" style={{ color: "#8A8278" }}>Incidencias activas</span>
+            <span className="font-medium leading-none" style={{ fontSize: "32px", letterSpacing: "-0.02em", color: "#A32D2D" }}>1</span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "#A32D2D" }} />
+              <span className="text-[10px]" style={{ color: "#A32D2D" }}>1 de prioridad crítica</span>
             </div>
-          </div>
-          <div className="flex items-end gap-2">
-            <span className="text-5xl font-bold text-foreground leading-none">—</span>
-          </div>
-          <div className="mt-auto pt-2 border-t border-border flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
-            <span className="text-xs text-muted-foreground">Abiertas o en seguimiento</span>
           </div>
         </div>
 
         {/* KPI 2 — Tareas completadas hoy */}
-        <div className="bg-white rounded-2xl border border-border p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground tracking-widest uppercase">Tareas completadas hoy</span>
-            <div className="w-9 h-9 rounded-xl bg-[#6BB68A]/10 flex items-center justify-center">
-              <CheckCircle2 className="w-4.5 h-4.5 text-[#6BB68A]" />
+        <div className="bg-white rounded-2xl border border-border border-l-[3px] p-5 flex items-center gap-4" style={{ borderLeftColor: "#D97706" }}>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEF3DC" }}>
+            <ClipboardCheck className="w-5 h-5" style={{ color: "#8A5C00" }} />
+          </div>
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            <span className="text-[11px] font-medium" style={{ color: "#8A8278" }}>Tareas completadas hoy</span>
+            <span className="font-medium leading-none" style={{ fontSize: "28px", letterSpacing: "-0.02em", color: "#8A5C00" }}>3 / 7</span>
+            <div className="h-[3px] rounded-full my-1" style={{ background: "#DDD5C8" }}>
+              <div className="h-full rounded-full" style={{ width: "43%", background: "#D97706" }} />
             </div>
-          </div>
-          <div className="flex items-end gap-2">
-            <span className="text-5xl font-bold text-foreground leading-none">—</span>
-            <span className="text-lg text-muted-foreground font-medium mb-1">/ —</span>
-          </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-[#6BB68A] w-0 transition-all duration-500" />
-          </div>
-          <div className="mt-auto pt-2 border-t border-border flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#6BB68A] shrink-0" />
-            <span className="text-xs text-muted-foreground">Tareas completadas hoy</span>
+            <div className="flex items-center gap-1">
+              <Clock className="w-[10px] h-[10px] shrink-0" style={{ color: "#8A5C00" }} />
+              <span className="text-[10px]" style={{ color: "#8A5C00" }}>4 pendientes esta tarde</span>
+            </div>
           </div>
         </div>
 
-        {/* KPI 3 — Racha de días consecutivos */}
-        <div className="bg-white rounded-2xl border border-border p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground tracking-widest uppercase">Racha de días</span>
-            <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
-              <Flame className="w-4.5 h-4.5 text-orange-400" />
+        {/* KPI 3 — Racha de días */}
+        <div className="bg-white rounded-2xl border border-border border-l-[3px] p-5 flex items-center gap-4" style={{ borderLeftColor: "#2E7D52" }}>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#E4F2EC" }}>
+            <Flame className="w-5 h-5" style={{ color: "#2E7D52" }} />
+          </div>
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="text-[11px] font-medium" style={{ color: "#8A8278" }}>Días consecutivos al día</span>
+            <span className="font-medium leading-none" style={{ fontSize: "32px", letterSpacing: "-0.02em", color: "#2E7D52" }}>14</span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <TrendingUp className="w-[10px] h-[10px] shrink-0" style={{ color: "#2E7D52" }} />
+              <span className="text-[10px]" style={{ color: "#2E7D52" }}>Tu mejor racha este mes</span>
             </div>
-          </div>
-          <div className="flex items-end gap-2">
-            <span className="text-5xl font-bold text-foreground leading-none">—</span>
-            <span className="text-lg text-muted-foreground font-medium mb-1">días</span>
-          </div>
-          <div className="mt-auto pt-2 border-t border-border flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-orange-400 shrink-0" />
-            <span className="text-xs text-muted-foreground">Días consecutivos ≥80% tareas</span>
           </div>
         </div>
 
