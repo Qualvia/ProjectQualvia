@@ -11,7 +11,8 @@ const TABS = [
 ];
 
 export default function Documentos() {
-  const [activeTab, setActiveTab] = useState("documentos");
+  const params = new URLSearchParams(window.location.search);
+  const [activeTab, setActiveTab] = useState(params.get("tab") || "documentos");
 
   return (
     <div className="p-6 md:p-10 space-y-6">

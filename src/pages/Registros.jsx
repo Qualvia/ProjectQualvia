@@ -76,7 +76,10 @@ export default function Registros() {
   });
   const [showGestionar, setShowGestionar] = useState(false);
   const [gestionarTab, setGestionarTab] = useState("equipos");
-  const [showProveedores, setShowProveedores] = useState(false);
+  const [showProveedores, setShowProveedores] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("accion") === "proveedores";
+  });
   const [showSuministroAgua, setShowSuministroAgua] = useState(false);
   const [showGestorPlagas, setShowGestorPlagas] = useState(false);
   const [showEmpresaMantenimiento, setShowEmpresaMantenimiento] = useState(false);

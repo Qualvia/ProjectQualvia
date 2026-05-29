@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { AlertCircle, ClipboardCheck, Flame, Sparkles, Lightbulb, Bot, Clock, BarChart2, Activity } from "lucide-react";
+import { AlertCircle, ClipboardCheck, Flame, Sparkles, Lightbulb, Bot, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import DashboardBloque from "@/components/dashboard/DashboardBloque";
@@ -33,6 +34,7 @@ const BLOQUES_INICIALES = [
 
 export default function Dashboard() {
   const { user } = useBusiness();
+  const navigate = useNavigate();
   const nombre = user?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "usuario";
   const [bloques, setBloques] = useState(BLOQUES_INICIALES);
 
@@ -167,6 +169,47 @@ export default function Dashboard() {
         </Droppable>
       </DragDropContext>
 
+      {/* Acciones rápidas */}
+      <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="flex items-center gap-2.5 px-5 py-4" style={{ background: "#EDE6DA" }}>
+          <Sparkles className="w-5 h-5 text-[#0A3E47] shrink-0" />
+          <h2 className="text-lg font-semibold text-[#0A3E47]">Acciones rápidas</h2>
+        </div>
+        <div className="px-5 py-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <button
+            onClick={() => navigate("/checklist?tab=auditorias")}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#0A3E47] hover:bg-[#0A3E47]/5 transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-[#EDE6DA] flex items-center justify-center group-hover:bg-[#0A3E47]/10 transition-colors">
+              <ClipboardList className="w-5 h-5 text-[#0A3E47]" />
+            </div>
+            <span className="text-sm font-medium text-foreground">Auditorías</span>
+          </button>
+          <button
+            onClick={() => navigate("/documentos")}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#0A3E47] hover:bg-[#0A3E47]/5 transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-[#EDE6DA] flex items-center justify-center group-hover:bg-[#0A3E47]/10 transition-colors">
+              <FileText className="w-5 h-5 text-[#0A3E47]" />
+            </div>
+            <span className="text-sm font-medium text-foreground">APPCC</span>
+          </button>
+          <button
+            onClick={() => navigate("/registros?accion=proveedores")}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#0A3E47] hover:bg-[#0A3E47]/5 transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-[#EDE6DA] flex items-center justify-center group-hover:bg-[#0A3E47]/10 transition-colors">
+              <Users className="w-5 h-5 text-[#0A3E47]" />
+            </div>
+            <span className="text-sm font-medium text-foreground">Proveedores</span>
+          </button>
+          <button
+            onClick={() => navigate("/documentos?tab=informes")}
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#0A3E47] hover:bg-[#0A3E47]/5 transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-[#EDE6DA] flex items-center justify-center group-hover:bg-[#0A3E47]/10 transition-colors">
+              <BarChart className="w-5 h-5 text-[#0A3E47]" />
+            </div>
+            <span className="text-sm font-medium text-foreground">Informes</span>
+          </button>
+        </div>
+      </div>
 
     </div>
   );

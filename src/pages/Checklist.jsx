@@ -14,7 +14,8 @@ const TABS = [
 ];
 
 export default function Checklist() {
-  const [activeTab, setActiveTab] = useState("checklists");
+  const params = new URLSearchParams(window.location.search);
+  const [activeTab, setActiveTab] = useState(params.get("tab") || "checklists");
   const [historicoKey, setHistoricoKey] = useState(0);
   const [showNuevo, setShowNuevo] = useState(false);
   const [checklistsKey, setChecklistsKey] = useState(0);
