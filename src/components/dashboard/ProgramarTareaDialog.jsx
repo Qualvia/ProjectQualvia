@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RefreshCw, Info } from "lucide-react";
 
 const TIPOS_REGISTRO = [
   "Temperatura", "Limpieza", "Recepción", "Agua", "Plagas",
-  "Mantenimiento", "Formación", "Alérgenos", "Lotes", "Congelación", "Residuos"
+  "Mantenimiento", "Formación", "Alérgenos", "Lotes", "Congelación", "Residuos", "Otro"
 ];
 
 const PRIORIDADES = ["Baja", "Media", "Alta", "Crítica"];
-const FRECUENCIAS = ["Diaria", "Semanal", "Mensual"];
+const FRECUENCIAS = ["Diaria", "Semanal", "Mensual", "Trimestral", "Semestral", "Anual"];
 const DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
 export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
@@ -53,12 +54,14 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
           {/* Tipo de registro */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Tipo de registro a completar <span className="text-red-500">*</span></label>
-            <select
-              value={form.tipo}
-              onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-              className="w-full border border-input rounded-lg px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-[#0A3E47]">
-              {TIPOS_REGISTRO.map((t) => <option key={t}>{t}</option>)}
-            </select>
+            <Select value={form.tipo} onValueChange={(v) => setForm({ ...form, tipo: v })}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TIPOS_REGISTRO.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Título */}
@@ -89,12 +92,14 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">Prioridad</label>
-              <select
-                value={form.prioridad}
-                onChange={(e) => setForm({ ...form, prioridad: e.target.value })}
-                className="w-full border border-input rounded-lg px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-[#0A3E47]">
-                {PRIORIDADES.map((p) => <option key={p}>{p}</option>)}
-              </select>
+              <Select value={form.prioridad} onValueChange={(v) => setForm({ ...form, prioridad: v })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRIORIDADES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">Hora de programación</label>
@@ -110,12 +115,14 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
           {/* Frecuencia */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Frecuencia <span className="text-red-500">*</span></label>
-            <select
-              value={form.frecuencia}
-              onChange={(e) => setForm({ ...form, frecuencia: e.target.value })}
-              className="w-full border border-input rounded-lg px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-[#0A3E47]">
-              {FRECUENCIAS.map((f) => <option key={f}>{f}</option>)}
-            </select>
+            <Select value={form.frecuencia} onValueChange={(v) => setForm({ ...form, frecuencia: v })}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FRECUENCIAS.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Días semana (si semanal) */}
