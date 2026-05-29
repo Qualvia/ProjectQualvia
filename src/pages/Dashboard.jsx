@@ -4,11 +4,18 @@ import { AlertCircle, ClipboardCheck, Flame, Clock, TrendingUp, Sparkles, Lightb
 import { Button } from "@/components/ui/button";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-const MONTHS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
 function today() {
   const d = new Date();
-  return `${DAYS[d.getDay()]}, ${d.getDate()} De ${MONTHS[d.getMonth()]}`;
+  return `${DAYS[d.getDay()]}, ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+}
+
+function saludo() {
+  const h = new Date().getHours();
+  if (h >= 6 && h < 13) return "Buenos días";
+  if (h >= 13 && h < 20) return "Buenas tardes";
+  return "Buenas noches";
 }
 
 
@@ -24,9 +31,9 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-[#0A3E47]">Hola, {nombre} 👋</h1>
-          <p className="text-sm text-[#6BB68A] font-medium mt-0.5">Sigamos cuidando la calidad juntos.</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{today()}</p>
+          <h1 className="text-3xl font-bold text-[#0A3E47]">{saludo()}, {nombre}</h1>
+          <p className="text-base text-[#6BB68A] font-medium mt-0.5">Sigamos cuidando la calidad juntos.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{today()}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2">
