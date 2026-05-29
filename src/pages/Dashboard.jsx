@@ -134,7 +134,7 @@ export default function Dashboard() {
           <Bot className="w-5 h-5 text-white" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-white mb-1">Consejo del día</p>
+          <p className="text-sm font-semibold text-white mb-1">Consejo inteligente del día</p>
           <p className="text-sm text-white/85 leading-relaxed">{CONSEJO}</p>
         </div>
       </div>
@@ -178,33 +178,33 @@ export default function Dashboard() {
         <div className="px-5 py-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
           <button
             onClick={() => navigate("/checklist?tab=auditorias")}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#0A3E47] hover:bg-[#0A3E47]/5 transition-all group">
-            <div className="w-10 h-10 rounded-xl bg-[#EDE6DA] flex items-center justify-center group-hover:bg-[#0A3E47]/10 transition-colors">
-              <ClipboardList className="w-5 h-5 text-[#0A3E47]" />
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#6BB68A] hover:bg-[#6BB68A]/5 transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-[#E4F2EC] flex items-center justify-center group-hover:bg-[#6BB68A]/20 transition-colors">
+              <ClipboardList className="w-5 h-5 text-[#6BB68A]" />
             </div>
             <span className="text-sm font-medium text-foreground">Auditorías</span>
           </button>
           <button
             onClick={() => navigate("/documentos")}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#0A3E47] hover:bg-[#0A3E47]/5 transition-all group">
-            <div className="w-10 h-10 rounded-xl bg-[#EDE6DA] flex items-center justify-center group-hover:bg-[#0A3E47]/10 transition-colors">
-              <FileText className="w-5 h-5 text-[#0A3E47]" />
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#6BB68A] hover:bg-[#6BB68A]/5 transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-[#E4F2EC] flex items-center justify-center group-hover:bg-[#6BB68A]/20 transition-colors">
+              <FileText className="w-5 h-5 text-[#6BB68A]" />
             </div>
             <span className="text-sm font-medium text-foreground">APPCC</span>
           </button>
           <button
             onClick={() => navigate("/registros?accion=proveedores")}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#0A3E47] hover:bg-[#0A3E47]/5 transition-all group">
-            <div className="w-10 h-10 rounded-xl bg-[#EDE6DA] flex items-center justify-center group-hover:bg-[#0A3E47]/10 transition-colors">
-              <Users className="w-5 h-5 text-[#0A3E47]" />
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#6BB68A] hover:bg-[#6BB68A]/5 transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-[#E4F2EC] flex items-center justify-center group-hover:bg-[#6BB68A]/20 transition-colors">
+              <Users className="w-5 h-5 text-[#6BB68A]" />
             </div>
             <span className="text-sm font-medium text-foreground">Proveedores</span>
           </button>
           <button
             onClick={() => navigate("/documentos?tab=informes")}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#0A3E47] hover:bg-[#0A3E47]/5 transition-all group">
-            <div className="w-10 h-10 rounded-xl bg-[#EDE6DA] flex items-center justify-center group-hover:bg-[#0A3E47]/10 transition-colors">
-              <BarChart className="w-5 h-5 text-[#0A3E47]" />
+            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#6BB68A] hover:bg-[#6BB68A]/5 transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-[#E4F2EC] flex items-center justify-center group-hover:bg-[#6BB68A]/20 transition-colors">
+              <BarChart className="w-5 h-5 text-[#6BB68A]" />
             </div>
             <span className="text-sm font-medium text-foreground">Informes</span>
           </button>
