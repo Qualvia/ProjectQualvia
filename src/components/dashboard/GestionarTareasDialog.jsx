@@ -104,22 +104,21 @@ export default function GestionarTareasDialog({ open, onClose }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl w-full max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-[#0A3E47] text-xl">
-            <Settings className="w-5 h-5" />
-            Gestionar tareas programadas
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="mt-2 space-y-3">
-          {/* Botón nueva */}
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between pr-6">
+            <DialogTitle className="flex items-center gap-2 text-[#0A3E47] text-xl">
+              <Settings className="w-5 h-5" />
+              Gestionar tareas programadas
+            </DialogTitle>
             <button
               onClick={() => { setEditando(null); setShowProgramar(true); }}
-              className="flex items-center gap-1.5 text-sm font-medium rounded-lg px-4 py-2 bg-[#6BB68A] text-white hover:bg-[#5aa377] transition-all">
+              className="flex items-center gap-1.5 text-sm font-medium rounded-lg px-4 py-2 bg-[#6BB68A] text-white hover:bg-[#5aa377] transition-all shrink-0">
               <Plus className="w-4 h-4" />
               Nueva tarea recurrente
             </button>
           </div>
+        </DialogHeader>
+
+        <div className="mt-2 space-y-3">
 
           {/* Lista */}
           {loading ? (
