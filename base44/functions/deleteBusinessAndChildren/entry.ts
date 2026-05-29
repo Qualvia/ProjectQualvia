@@ -24,6 +24,14 @@ const CHILD_ENTITIES = [
   "RegistroResiduo",
   "GestorResiduos",
   "Incidencia",
+  // Entidades previamente ausentes (GAP 6)
+  "TareaProgramada",
+  "TareaEjecucion",
+  "ChecklistPlantilla",
+  "ChecklistEjecucion",
+  "AuditoriaInterna",
+  "UsuarioInterno",
+  "AsistenteMemoria",
 ];
 
 Deno.serve(async (req) => {
