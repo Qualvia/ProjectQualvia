@@ -48,6 +48,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
   const { user, currentBusiness } = useBusiness();
   const [data, setData] = useState([]);
   const [equipos, setEquipos] = useState([]);
+  const [todosEquipos, setTodosEquipos] = useState([]); // todos los configurados
   const [limites, setLimites] = useState({});
   const [filtroEquipo, setFiltroEquipo] = useState("todos");
   const [resumen, setResumen] = useState([]);
@@ -76,6 +77,11 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     const limitesMap = {};
     eqs.forEach(eq => { limitesMap[eq.id] = { nombre: eq.nombre, min: eq.temp_min, max: eq.temp_max }; });
 
+    // Todos los equipos configurados (para el selector)
+    const todosEqs = eqs.map((eq, i) => ({ id: eq.id, nombre: eq.nombre, color: LINE_COLORS[i % LINE_COLORS.length] }));
+    setTodosEquipos(todosEqs);
+
+    // Equipos que tienen registros recientes (para las líneas del gráfico)
     const equiposIds = [...new Set(recientes.map(r => r.equipo_id))];
     setEquipos(equiposIds.map((id, i) => ({ id, nombre: limitesMap[id]?.nombre || id, color: LINE_COLORS[i % LINE_COLORS.length] })));
     setLimites(limitesMap);
@@ -112,6 +118,15 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
   const equiposMostrar = filtroEquipo === "todos" ? equipos : equipos.filter(e => e.id === filtroEquipo);
   const hayDatos = !loading && equipos.length > 0 && data.some(d => equipos.some(eq => d[eq.nombre] != null));
 
+  // Calcular dominio Y dinámico según el equipo seleccionado
+  function getYDomain() {
+    if (filtroEquipo === "todos") return ["auto", "auto"];
+    const lim = limites[filtroEquipo];
+    if (!lim || lim.min == null || lim.max == null) return ["auto", "auto"];
+    const margen = Math.max(3, Math.abs(lim.max - lim.min) * 0.5);
+    return [Math.floor(lim.min - margen), Math.ceil(lim.max + margen)];
+  }
+
   if (expandido) {
     return (
       <div className="p-6 space-y-4">
@@ -122,9 +137,9 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           <select
             value={filtroEquipo}
             onChange={e => setFiltroEquipo(e.target.value)}
-            className="text-xs border border-border rounded-lg px-2 py-1 bg-white text-foreground">
+            className="text-xs border border-border rounded-lg px-2 py-1 bg-white text-foreground appearance-none cursor-pointer">
             <option value="todos">Todos los equipos</option>
-            {equipos.map(eq => <option key={eq.id} value={eq.id}>{eq.nombre}</option>)}
+            {todosEquipos.map(eq => <option key={eq.id} value={eq.id}>{eq.nombre}</option>)}
           </select>
         </div>
         <h3 className="text-base font-semibold text-[#0A3E47]">Temperatura equipos · Últimos 7 días</h3>
@@ -139,7 +154,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
             <LineChart data={data} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F0EBE3" />
               <XAxis dataKey="fecha" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${v}°`} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${v}°`} domain={getYDomain()} />
               <Tooltip content={<CustomTooltipTemp />} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
               {equiposMostrar.map(eq => (
