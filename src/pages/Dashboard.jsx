@@ -42,6 +42,13 @@ export default function Dashboard() {
   const [tareasStats, setTareasStats] = useState({ completadas: 0, total: 0 });
   const [incidenciasStats, setIncidenciasStats] = useState({ total: 0, criticas: 0, maxHoras: 0 });
 
+  // Resetear stats y orden de bloques al cambiar de negocio o usuario
+  useEffect(() => {
+    setTareasStats({ completadas: 0, total: 0 });
+    setIncidenciasStats({ total: 0, criticas: 0, maxHoras: 0 });
+    setBloques(BLOQUES_INICIALES);
+  }, [user?.id, currentBusiness?.id]);
+
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
     base44.entities.Incidencia.filter({
