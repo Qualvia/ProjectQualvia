@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-// user viene como prop desde AuthContext — no se llama a base44.auth.me() aquí
 
 const BusinessContext = createContext(null);
 
@@ -8,18 +7,23 @@ const STORAGE_KEY = "qualvia_active_business_id";
 
 export function BusinessProvider({ children, authenticatedUser }) {
   const [user, setUser] = useState(authenticatedUser || null);
-  const [businesses, setBusinesses] = useState([]);
-  const [currentBusiness, setCurrentBusinessState] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+
+  // Un único objeto de estado para evitar renders intermedios entre setBusinesses / setCurrentBusiness / setIsLoading
+  const [state, setState] = useState({
+    businesses: [],
+    currentBusiness: null,
+    isLoading: true,
+  });
 
   const loadBusinesses = useCallback(async (currentUser) => {
     const me = currentUser || user;
     if (!me) {
-      setIsLoading(false);
+      setState({ businesses: [], currentBusiness: null, isLoading: false });
       return;
     }
 
-    setIsLoading(true);
+    // Marcar como loading (sin tocar businesses/currentBusiness anteriores para no parpadear)
+    setState((prev) => ({ ...prev, isLoading: true }));
 
     // Cargar solo los negocios donde user_id == ID real del usuario
     let list = await base44.entities.Business.filter({ user_id: me.id });
@@ -32,22 +36,18 @@ export function BusinessProvider({ children, authenticatedUser }) {
       list = await base44.entities.Business.filter({ user_id: me.id });
     }
 
-    setBusinesses(list);
-
     // Resolver negocio activo desde localStorage, validando contra lista real
-    const match = list.find((b) => b.id === savedId);
-
-    if (match) {
-      setCurrentBusinessState(match);
-    } else if (list.length > 0) {
-      setCurrentBusinessState(list[0]);
-      localStorage.setItem(STORAGE_KEY, list[0].id);
+    let current = null;
+    if (list.length > 0) {
+      const match = list.find((b) => b.id === savedId);
+      current = match || list[0];
+      localStorage.setItem(STORAGE_KEY, current.id);
     } else {
-      setCurrentBusinessState(null);
       localStorage.removeItem(STORAGE_KEY);
     }
 
-    setIsLoading(false);
+    // Actualización ATÓMICA — un solo render, sin estados intermedios
+    setState({ businesses: list, currentBusiness: current, isLoading: false });
   }, []);
 
   useEffect(() => {
@@ -55,13 +55,13 @@ export function BusinessProvider({ children, authenticatedUser }) {
       setUser(authenticatedUser);
       loadBusinesses(authenticatedUser);
     } else {
-      setIsLoading(false);
+      setState({ businesses: [], currentBusiness: null, isLoading: false });
     }
   }, [authenticatedUser]);
 
-  // Cambiar negocio activo — permite pasar uno recién creado (no validado contra lista)
+  // Cambiar negocio activo
   const setCurrentBusiness = useCallback((business) => {
-    setCurrentBusinessState(business);
+    setState((prev) => ({ ...prev, currentBusiness: business }));
     localStorage.setItem(STORAGE_KEY, business.id);
   }, []);
 
@@ -70,40 +70,44 @@ export function BusinessProvider({ children, authenticatedUser }) {
       name,
       user_id: user.id,
     });
-    const updated = [...businesses, newBiz];
-    setBusinesses(updated);
-    setCurrentBusinessState(newBiz);
+    setState((prev) => ({
+      ...prev,
+      businesses: [...prev.businesses, newBiz],
+      currentBusiness: newBiz,
+    }));
     localStorage.setItem(STORAGE_KEY, newBiz.id);
     return newBiz;
-  }, [user, businesses]);
+  }, [user]);
 
   const deleteBusiness = useCallback(async (id) => {
     try {
       await base44.functions.invoke('deleteBusinessAndChildren', { business_id: id });
-      const updated = businesses.filter((b) => b.id !== id);
-      setBusinesses(updated);
-      if (currentBusiness?.id === id) {
-        const next = updated[0] || null;
-        setCurrentBusinessState(next);
-        if (next) localStorage.setItem(STORAGE_KEY, next.id);
-        else localStorage.removeItem(STORAGE_KEY);
-      }
+      setState((prev) => {
+        const updated = prev.businesses.filter((b) => b.id !== id);
+        let next = prev.currentBusiness;
+        if (prev.currentBusiness?.id === id) {
+          next = updated[0] || null;
+          if (next) localStorage.setItem(STORAGE_KEY, next.id);
+          else localStorage.removeItem(STORAGE_KEY);
+        }
+        return { ...prev, businesses: updated, currentBusiness: next };
+      });
     } catch (error) {
       // Si falla, recargar lista desde servidor para mantener sincronización
       await loadBusinesses(user);
       throw error;
     }
-  }, [businesses, currentBusiness, user, loadBusinesses]);
+  }, [user, loadBusinesses]);
 
   return (
     <BusinessContext.Provider
       value={{
         user,
-        businesses,
-        setBusinesses,
-        currentBusiness,
+        businesses: state.businesses,
+        setBusinesses: (list) => setState((prev) => ({ ...prev, businesses: list })),
+        currentBusiness: state.currentBusiness,
         setCurrentBusiness,
-        isLoading,
+        isLoading: state.isLoading,
         createBusiness,
         deleteBusiness,
         reloadBusinesses: loadBusinesses,
