@@ -3,6 +3,7 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { base44 } from "@/api/base44Client";
 import { AlertCircle, ClipboardCheck, Flame, Sparkles, Lightbulb, Bot, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
 import TareasIncidenciasBloque from "@/components/dashboard/TareasIncidenciasBloque";
+import GraficosBloque from "@/components/dashboard/GraficosBloque";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -193,6 +194,8 @@ export default function Dashboard() {
                         dragHandleProps={provided.dragHandleProps}>
                         {bloque.id === "tareas" ? (
                           <TareasIncidenciasBloque onEjecucionesChange={(ej) => setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length })} />
+                        ) : bloque.id === "graficos" ? (
+                          <GraficosBloque />
                         ) : (
                           <div className="px-5 py-4">
                             <p className="text-sm text-muted-foreground">Contenido próximamente...</p>
