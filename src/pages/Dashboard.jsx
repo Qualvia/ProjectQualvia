@@ -44,49 +44,55 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
         {/* KPI 1 — Incidencias activas */}
-        <div className="bg-white rounded-2xl border border-border border-l-[3px] p-5 flex items-center gap-4" style={{ borderLeftColor: "#A32D2D" }}>
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEE8E8" }}>
-            <AlertCircle className="w-5 h-5" style={{ color: "#A32D2D" }} />
-          </div>
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-[11px] font-medium" style={{ color: "#8A8278" }}>Incidencias activas</span>
-            <span className="font-medium leading-none" style={{ fontSize: "32px", letterSpacing: "-0.02em", color: "#A32D2D" }}>1</span>
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "#A32D2D" }} />
-              <span className="text-[10px]" style={{ color: "#A32D2D" }}>1 de prioridad crítica</span>
+        <div className="bg-white rounded-2xl border border-border p-5 flex flex-col gap-3" style={{ borderLeft: "5px solid #A32D2D" }}>
+          <span className="text-[13px] font-semibold" style={{ color: "#8A8278" }}>Incidencias activas</span>
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEE8E8" }}>
+              <AlertCircle className="w-5 h-5" style={{ color: "#A32D2D" }} />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="font-medium leading-none" style={{ fontSize: "32px", letterSpacing: "-0.02em", color: "#A32D2D" }}>1</span>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "#A32D2D" }} />
+                <span className="text-[10px]" style={{ color: "#A32D2D" }}>1 de prioridad crítica</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* KPI 2 — Tareas completadas hoy */}
-        <div className="bg-white rounded-2xl border border-border border-l-[3px] p-5 flex items-center gap-4" style={{ borderLeftColor: "#D97706" }}>
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEF3DC" }}>
-            <ClipboardCheck className="w-5 h-5" style={{ color: "#8A5C00" }} />
-          </div>
-          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-            <span className="text-[11px] font-medium" style={{ color: "#8A8278" }}>Tareas completadas hoy</span>
-            <span className="font-medium leading-none" style={{ fontSize: "28px", letterSpacing: "-0.02em", color: "#8A5C00" }}>3 / 7</span>
-            <div className="h-[3px] rounded-full my-1" style={{ background: "#DDD5C8" }}>
-              <div className="h-full rounded-full" style={{ width: "43%", background: "#D97706" }} />
+        <div className="bg-white rounded-2xl border border-border p-5 flex flex-col gap-3" style={{ borderLeft: "5px solid #D97706" }}>
+          <span className="text-[13px] font-semibold" style={{ color: "#8A8278" }}>Tareas completadas hoy</span>
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEF3DC" }}>
+              <ClipboardCheck className="w-5 h-5" style={{ color: "#8A5C00" }} />
             </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-[10px] h-[10px] shrink-0" style={{ color: "#8A5C00" }} />
-              <span className="text-[10px]" style={{ color: "#8A5C00" }}>4 pendientes esta tarde</span>
+            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+              <span className="font-medium leading-none" style={{ fontSize: "28px", letterSpacing: "-0.02em", color: "#8A5C00" }}>3 / 7</span>
+              <div className="h-[3px] rounded-full my-1" style={{ background: "#DDD5C8" }}>
+                <div className="h-full rounded-full" style={{ width: "43%", background: "#D97706" }} />
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="w-[10px] h-[10px] shrink-0" style={{ color: "#8A5C00" }} />
+                <span className="text-[10px]" style={{ color: "#8A5C00" }}>4 pendientes esta tarde</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* KPI 3 — Racha de días */}
-        <div className="bg-white rounded-2xl border border-border border-l-[3px] p-5 flex items-center gap-4" style={{ borderLeftColor: "#2E7D52" }}>
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#E4F2EC" }}>
-            <Flame className="w-5 h-5" style={{ color: "#2E7D52" }} />
-          </div>
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-[11px] font-medium" style={{ color: "#8A8278" }}>Días consecutivos al día</span>
-            <span className="font-medium leading-none" style={{ fontSize: "32px", letterSpacing: "-0.02em", color: "#2E7D52" }}>14</span>
-            <div className="flex items-center gap-1 mt-0.5">
-              <TrendingUp className="w-[10px] h-[10px] shrink-0" style={{ color: "#2E7D52" }} />
-              <span className="text-[10px]" style={{ color: "#2E7D52" }}>Tu mejor racha este mes</span>
+        <div className="bg-white rounded-2xl border border-border p-5 flex flex-col gap-3" style={{ borderLeft: "5px solid #2E7D52" }}>
+          <span className="text-[13px] font-semibold" style={{ color: "#8A8278" }}>Días consecutivos al día</span>
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#E4F2EC" }}>
+              <Flame className="w-5 h-5" style={{ color: "#2E7D52" }} />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="font-medium leading-none" style={{ fontSize: "32px", letterSpacing: "-0.02em", color: "#2E7D52" }}>14</span>
+              <div className="flex items-center gap-1 mt-0.5">
+                <TrendingUp className="w-[10px] h-[10px] shrink-0" style={{ color: "#2E7D52" }} />
+                <span className="text-[10px]" style={{ color: "#2E7D52" }}>Tu mejor racha este mes</span>
+              </div>
             </div>
           </div>
         </div>
