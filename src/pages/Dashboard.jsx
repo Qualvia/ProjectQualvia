@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { AlertCircle, ClipboardCheck, Flame, Clock, TrendingUp, Sparkles, Lightbulb, Bot } from "lucide-react";
+import { AlertCircle, ClipboardCheck, Flame, Sparkles, Lightbulb, Bot, ListTodo, BarChart2, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import DashboardBloque from "@/components/dashboard/DashboardBloque";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -22,9 +24,24 @@ function saludo() {
 
 const CONSEJO = "Establece un sistema de codificación para los ingredientes y productos en tu cocina, asignando un lote y fecha de ingreso a cada uno. Esto facilitará la gestión de inventario y asegurará el seguimiento en caso de cualquier incidencia, mejorando la trazabilidad de los alimentos.";
 
+const BLOQUES_INICIALES = [
+  { id: "tareas", title: "Tareas e Incidencias", icon: ListTodo },
+  { id: "graficos", title: "Gráficos y evolución", icon: BarChart2 },
+  { id: "actividad", title: "Actividad reciente", icon: Activity },
+];
+
 export default function Dashboard() {
   const { user } = useBusiness();
   const nombre = user?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "usuario";
+  const [bloques, setBloques] = useState(BLOQUES_INICIALES);
+
+  function onDragEnd(result) {
+    if (!result.destination) return;
+    const items = Array.from(bloques);
+    const [moved] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, moved);
+    setBloques(items);
+  }
 
   return (
     <div className="p-6 md:p-10 space-y-6">
@@ -107,6 +124,36 @@ export default function Dashboard() {
         </div>
 
       </div>
+
+      {/* Bloques drag & drop */}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="dashboard-bloques">
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="space-y-4">
+              {bloques.map((bloque, index) => (
+                <Draggable key={bloque.id} draggableId={bloque.id} index={index}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}>
+                      <DashboardBloque
+                        title={bloque.title}
+                        icon={bloque.icon}
+                        dragHandleProps={provided.dragHandleProps}>
+                        <p className="text-sm text-muted-foreground">Contenido próximamente...</p>
+                      </DashboardBloque>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {/* Consejo QUALVIA */}
       <div className="bg-gradient-to-b from-[#1a6b5a] to-[#6BB68A] rounded-2xl p-5 flex gap-4 items-start">
