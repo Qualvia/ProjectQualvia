@@ -50,6 +50,15 @@ export default function GestionarTareasDialog({ open, onClose }) {
   }
 
   async function eliminar(id) {
+    // Borrar también las ejecuciones de hoy vinculadas a esta tarea programada
+    const hoy = new Date().toISOString().split("T")[0];
+    const ejecucionesHoy = await base44.entities.TareaEjecucion.filter({
+      tarea_id: id,
+      fecha_dia: hoy,
+    });
+    for (const ej of ejecucionesHoy) {
+      await base44.entities.TareaEjecucion.delete(ej.id);
+    }
     await base44.entities.TareaProgramada.delete(id);
     setTareas((prev) => prev.filter((t) => t.id !== id));
     setConfirmDelete(null);
