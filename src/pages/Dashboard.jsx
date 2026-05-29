@@ -90,7 +90,6 @@ export default function Dashboard() {
             <div className="flex flex-col gap-0.5">
               <div className="flex items-baseline gap-1.5">
                 <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>14</span>
-                <span className="text-[14px] font-medium" style={{ color: "#8A8278" }}>días</span>
               </div>
               <span className="text-[12px] font-medium" style={{ color: "#8A8278" }}>Días consecutivos al día</span>
             </div>
@@ -103,7 +102,7 @@ export default function Dashboard() {
       </div>
 
       {/* Consejo QUALVIA */}
-      <div className="bg-gradient-to-r from-[#0A3E47] to-[#6BB68A] rounded-2xl p-5 flex gap-4 items-start">
+      <div className="bg-gradient-to-b from-[#0A3E47] to-[#6BB68A] rounded-2xl p-5 flex gap-4 items-start">
         <div className="bg-white/20 rounded-xl p-2.5 shrink-0">
           <Bot className="w-5 h-5 text-white" />
         </div>
