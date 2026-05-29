@@ -169,7 +169,7 @@ export default function Registros() {
         <div className="space-y-4">
           <div className="bg-secondary rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              {ActiveIcon && <ActiveIcon className="w-5 h-5 text-[#0A3E47]" strokeWidth={1.5} />}
+              {ActiveIcon && <ActiveIcon className="w-5 h-5 text-[#0A3E47]" strokeWidth={2.5} />}
               <span className="font-semibold text-[#0A3E47]">
                 {active === "incidencias" ? "Gestión de Incidencias" : active === "congelacion" ? "Control de congelación/descongelación" : `Control de ${activeRegistro.label}${active === "temperatura" ? " (°C)" : ""}`}
               </span>

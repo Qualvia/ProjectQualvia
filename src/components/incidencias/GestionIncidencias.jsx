@@ -171,7 +171,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
+        <div className="bg-white rounded-2xl border-2 border-border p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
             <AlertTriangle className="w-5 h-5 text-red-500" />
           </div>
@@ -180,7 +180,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
             <p className="text-xs text-muted-foreground">Abiertas</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
+        <div className="bg-white rounded-2xl border-2 border-border p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
             <Eye className="w-5 h-5 text-blue-500" />
           </div>
@@ -189,7 +189,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
             <p className="text-xs text-muted-foreground">En Seguimiento</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
+        <div className="bg-white rounded-2xl border-2 border-border p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
             <CheckCircle2 className="w-5 h-5 text-[#6BB68A]" />
           </div>
@@ -198,7 +198,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
             <p className="text-xs text-muted-foreground">Cerradas</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
+        <div className="bg-white rounded-2xl border-2 border-border p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-[#6BB68A]" />
           </div>
@@ -211,7 +211,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
+        <div className="bg-white rounded-2xl border-2 border-border p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
             <AlertCircle className="w-5 h-5 text-red-500" />
           </div>
@@ -220,7 +220,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
             <p className="text-xs text-muted-foreground">Prioridad Crítica</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
+        <div className="bg-white rounded-2xl border-2 border-border p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
             <AlertCircle className="w-5 h-5 text-orange-500" />
           </div>
@@ -229,7 +229,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
             <p className="text-xs text-muted-foreground">Prioridad Alta</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-3">
+        <div className="bg-white rounded-2xl border-2 border-border p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
             <Clock className="w-5 h-5 text-[#0A3E47]" />
           </div>
