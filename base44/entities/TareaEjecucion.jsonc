@@ -1,0 +1,62 @@
+{
+  "name": "TareaEjecucion",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "business_id": {
+      "type": "string"
+    },
+    "tarea_id": {
+      "type": "string",
+      "description": "ID de TareaProgramada, o null si es puntual"
+    },
+    "titulo": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string"
+    },
+    "hora": {
+      "type": "string"
+    },
+    "prioridad": {
+      "type": "string",
+      "default": "Media"
+    },
+    "completada": {
+      "type": "boolean",
+      "default": false
+    },
+    "es_puntual": {
+      "type": "boolean",
+      "default": false
+    },
+    "fecha_dia": {
+      "type": "string",
+      "description": "Formato YYYY-MM-DD del d\u00eda al que pertenece"
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "titulo",
+    "tipo",
+    "fecha_dia"
+  ],
+  "rls": {
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "read": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "data.user_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.user_id": "{{user.id}}"
+    }
+  }
+}

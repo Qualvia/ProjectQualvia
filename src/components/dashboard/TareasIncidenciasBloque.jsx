@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { useBusiness } from "@/contexts/BusinessContext";
 import ProgramarTareaDialog from "./ProgramarTareaDialog";
 import AnadirTareaPuntualDialog from "./AnadirTareaPuntualDialog";
 
@@ -15,39 +17,206 @@ const MODULE_COLORS = {
   "Alérgenos":   "bg-[#E4F2EC] text-[#0A3E47]",
   "Congelación": "bg-[#E4F2EC] text-[#0A3E47]",
   "Residuos":    "bg-[#E4F2EC] text-[#0A3E47]",
+  "Mantenimiento": "bg-[#E4F2EC] text-[#0A3E47]",
+  "Otro":        "bg-[#E4F2EC] text-[#0A3E47]",
 };
 
-const TAREAS_INICIALES = [
-  { id: 1, nombre: "Control temperatura apertura",   modulo: "Temperatura", hora: "08:15", completada: true },
-  { id: 2, nombre: "Limpieza superficies cocina",     modulo: "Limpieza",    hora: "08:40", completada: true },
-  { id: 3, nombre: "Control temperatura neveras",     modulo: "Temperatura", hora: "Diaria", completada: false },
-  { id: 4, nombre: "Realizar control de plagas",      modulo: "Plagas",      hora: "Semanal", completada: false },
-  { id: 5, nombre: "Control de la recepción",         modulo: "Recepción",   hora: "Diaria", completada: false },
-  { id: 6, nombre: "Control cloro y pH agua",         modulo: "Agua",        hora: "Diaria", completada: false },
-];
+// Devuelve "YYYY-MM-DD" para hoy (local)
+function hoyISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
-const INCIDENCIAS = [
-  {
-    id: 1,
-    descripcion: "Temperatura fuera de rango en Congelador: 5,0°C (Permitido: -18°C / -15°C)",
-    modulo: "Temperatura",
-    fecha: "8 ene",
-    tiempo: "48h sin resolver",
-  },
-];
+// Mapa: "Lun"→1, "Mar"→2, ... (getDay() devuelve 0=Dom)
+const DIA_MAP = { Lun: 1, Mar: 2, Mié: 3, Jue: 4, Vie: 5, Sáb: 6, Dom: 0 };
+
+function tareaProgramadaCorrespondeHoy(tarea) {
+  const hoy = new Date();
+  const diaSemana = hoy.getDay(); // 0=Dom … 6=Sáb
+  const diaMes = hoy.getDate();
+  const mes = hoy.getMonth() + 1; // 1-12
+
+  switch (tarea.frecuencia) {
+    case "Diaria":
+      return true;
+    case "Semanal": {
+      if (!tarea.dias_semana || tarea.dias_semana.length === 0) return true;
+      return tarea.dias_semana.some((d) => DIA_MAP[d] === diaSemana);
+    }
+    case "Mensual":
+      return diaMes === (tarea.dia_mes || 1);
+    case "Trimestral":
+      return [1, 4, 7, 10].includes(mes) && diaMes === 1;
+    case "Semestral":
+      return [1, 7].includes(mes) && diaMes === 1;
+    case "Anual":
+      return mes === 1 && diaMes === 1;
+    default:
+      return false;
+  }
+}
 
 export default function TareasIncidenciasBloque() {
-  const [tareas, setTareas] = useState(TAREAS_INICIALES);
+  const { user, currentBusiness } = useBusiness();
+  const navigate = useNavigate();
+
+  const [ejecuciones, setEjecuciones] = useState([]);
+  const [incidencias, setIncidencias] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [verTodasIncidencias, setVerTodasIncidencias] = useState(false);
   const [showProgramar, setShowProgramar] = useState(false);
   const [showPuntual, setShowPuntual] = useState(false);
-  const navigate = useNavigate();
 
-  function toggleTarea(id) {
-    setTareas((prev) => prev.map((t) => t.id === id ? { ...t, completada: !t.completada } : t));
+  const hoy = hoyISO();
+
+  // ── Carga principal ──────────────────────────────────────────────────────
+  const cargarTareas = useCallback(async () => {
+    if (!user?.id || !currentBusiness?.id) return;
+    setLoading(true);
+
+    const uid = user.id;
+    const bid = currentBusiness.id;
+
+    // 1. Ejecuciones ya existentes hoy para este user+business
+    const existentes = await base44.entities.TareaEjecucion.filter({
+      user_id: uid,
+      business_id: bid,
+      fecha_dia: hoy,
+    });
+
+    const idsYaCreados = new Set(existentes.map((e) => e.tarea_id).filter(Boolean));
+
+    // 2. Tareas programadas activas de este user+business
+    const programadas = await base44.entities.TareaProgramada.filter({
+      user_id: uid,
+      business_id: bid,
+      activa: true,
+    });
+
+    // 3. Generar ejecuciones para las que corresponden hoy y aún no existen
+    const nuevas = [];
+    for (const tp of programadas) {
+      if (!idsYaCreados.has(tp.id) && tareaProgramadaCorrespondeHoy(tp)) {
+        const nueva = await base44.entities.TareaEjecucion.create({
+          user_id: uid,
+          business_id: bid,
+          tarea_id: tp.id,
+          titulo: tp.titulo,
+          tipo: tp.tipo,
+          hora: tp.hora || "",
+          prioridad: tp.prioridad || "Media",
+          completada: false,
+          es_puntual: false,
+          fecha_dia: hoy,
+        });
+        nuevas.push(nueva);
+      }
+    }
+
+    setEjecuciones([...existentes, ...nuevas]);
+    setLoading(false);
+  }, [user?.id, currentBusiness?.id, hoy]);
+
+  // ── Carga de incidencias ─────────────────────────────────────────────────
+  const cargarIncidencias = useCallback(async () => {
+    if (!user?.id || !currentBusiness?.id) return;
+    const todas = await base44.entities.Incidencia.filter({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+    });
+    setIncidencias(todas.filter((i) => i.estado !== "cerrada"));
+  }, [user?.id, currentBusiness?.id]);
+
+  useEffect(() => {
+    cargarTareas();
+    cargarIncidencias();
+  }, [cargarTareas, cargarIncidencias]);
+
+  // ── Toggle completada ────────────────────────────────────────────────────
+  async function toggleTarea(ejecucion) {
+    const nuevo = !ejecucion.completada;
+    // Optimistic update
+    setEjecuciones((prev) =>
+      prev.map((e) => e.id === ejecucion.id ? { ...e, completada: nuevo } : e)
+    );
+    await base44.entities.TareaEjecucion.update(ejecucion.id, { completada: nuevo });
   }
 
-  const completadas = tareas.filter((t) => t.completada).length;
+  // ── Crear tarea programada ───────────────────────────────────────────────
+  async function handleCrearProgramada(form) {
+    if (!user?.id || !currentBusiness?.id) return;
+    const uid = user.id;
+    const bid = currentBusiness.id;
+
+    const tp = await base44.entities.TareaProgramada.create({
+      user_id: uid,
+      business_id: bid,
+      titulo: form.titulo,
+      descripcion: form.descripcion || "",
+      tipo: form.tipo,
+      prioridad: form.prioridad || "Media",
+      hora: form.hora || "",
+      frecuencia: form.frecuencia,
+      dias_semana: form.diasSemana || [],
+      dia_mes: form.diaMes || 1,
+      activa: true,
+    });
+
+    // Si corresponde hoy, crear ejecución inmediatamente
+    if (tareaProgramadaCorrespondeHoy(tp)) {
+      const nueva = await base44.entities.TareaEjecucion.create({
+        user_id: uid,
+        business_id: bid,
+        tarea_id: tp.id,
+        titulo: tp.titulo,
+        tipo: tp.tipo,
+        hora: tp.hora,
+        prioridad: tp.prioridad,
+        completada: false,
+        es_puntual: false,
+        fecha_dia: hoy,
+      });
+      setEjecuciones((prev) => [...prev, nueva]);
+    }
+  }
+
+  // ── Crear tarea puntual ──────────────────────────────────────────────────
+  async function handleCrearPuntual(form) {
+    if (!user?.id || !currentBusiness?.id) return;
+    const nueva = await base44.entities.TareaEjecucion.create({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tarea_id: null,
+      titulo: form.titulo,
+      tipo: form.tipo,
+      hora: form.hora || "",
+      prioridad: form.prioridad || "Media",
+      completada: false,
+      es_puntual: true,
+      fecha_dia: hoy,
+    });
+    setEjecuciones((prev) => [...prev, nueva]);
+  }
+
+  // ── Helpers UI ───────────────────────────────────────────────────────────
+  const completadas = ejecuciones.filter((e) => e.completada).length;
+
+  function formatHora(e) {
+    if (e.hora) return e.hora;
+    return e.es_puntual ? "Hoy" : "—";
+  }
+
+  function formatFechaInc(inc) {
+    const d = new Date(inc.fecha || inc.created_date);
+    return `${d.getDate()} ${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][d.getMonth()]}`;
+  }
+
+  function tiempoSinResolver(inc) {
+    const d = new Date(inc.fecha || inc.created_date);
+    const horas = Math.floor((Date.now() - d.getTime()) / 3600000);
+    if (horas < 24) return `${horas}h sin resolver`;
+    return `${Math.floor(horas / 24)}d sin resolver`;
+  }
 
   return (
     <>
@@ -55,7 +224,6 @@ export default function TareasIncidenciasBloque() {
 
       {/* COLUMNA IZQUIERDA — Tareas del día */}
       <div className="p-5 space-y-4">
-        {/* Cabecera */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-[#0A3E47]" />
@@ -70,47 +238,57 @@ export default function TareasIncidenciasBloque() {
         </div>
 
         {/* Lista */}
-        <div className="space-y-0">
-          {tareas.map((tarea, i) => (
-            <div key={tarea.id}>
-              <div className="flex items-center gap-3 py-2.5">
-                {/* Checkbox */}
-                <button
-                  onClick={() => toggleTarea(tarea.id)}
-                  className={`w-5 h-5 rounded flex items-center justify-center border-2 shrink-0 transition-all ${
-                    tarea.completada
-                      ? "bg-[#6BB68A] border-[#6BB68A]"
-                      : "border-border hover:border-[#6BB68A]"
-                  }`}
-                >
-                  {tarea.completada && (
-                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
-                      <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
-                </button>
-
-                {/* Nombre */}
-                <span className={`flex-1 text-sm leading-tight ${tarea.completada ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                  {tarea.nombre}
-                </span>
-
-                {/* Módulo pill */}
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${MODULE_COLORS[tarea.modulo] || "bg-secondary text-foreground"}`}>
-                  {tarea.modulo}
-                </span>
-
-                {/* Hora/Frecuencia */}
-                <span className="text-[11px] text-muted-foreground shrink-0 w-14 text-right">{tarea.hora}</span>
-              </div>
-              {i < tareas.length - 1 && <div className="border-t border-border/50" />}
+        {loading ? (
+          <div className="space-y-2">
+            {[1,2,3].map((i) => (
+              <div key={i} className="h-10 rounded-lg bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : ejecuciones.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 gap-3">
+            <div className="w-12 h-12 rounded-xl bg-[#E4F2EC] flex items-center justify-center">
+              <Clock className="w-6 h-6 text-[#6BB68A]" />
             </div>
-          ))}
-        </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-foreground">Sin tareas para hoy</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Programa tareas recurrentes o añade una puntual.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-0">
+            {ejecuciones.map((tarea, i) => (
+              <div key={tarea.id}>
+                <div className="flex items-center gap-3 py-2.5">
+                  <button
+                    onClick={() => toggleTarea(tarea)}
+                    className={`w-5 h-5 rounded flex items-center justify-center border-2 shrink-0 transition-all ${
+                      tarea.completada
+                        ? "bg-[#6BB68A] border-[#6BB68A]"
+                        : "border-border hover:border-[#6BB68A]"
+                    }`}>
+                    {tarea.completada && (
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
+                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </button>
+                  <span className={`flex-1 text-sm leading-tight ${tarea.completada ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                    {tarea.titulo}
+                  </span>
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${MODULE_COLORS[tarea.tipo] || "bg-secondary text-foreground"}`}>
+                    {tarea.tipo}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground shrink-0 w-14 text-right">{formatHora(tarea)}</span>
+                </div>
+                {i < ejecuciones.length - 1 && <div className="border-t border-border/50" />}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Pie */}
         <div className="flex items-center justify-between pt-1">
-          <span className="text-xs text-muted-foreground">{completadas} de {tareas.length} tareas completadas hoy</span>
+          <span className="text-xs text-muted-foreground">{completadas} de {ejecuciones.length} tareas completadas hoy</span>
           <button
             onClick={() => setShowPuntual(true)}
             className="text-[11px] text-[#6BB68A] hover:underline flex items-center gap-0.5">
@@ -122,7 +300,6 @@ export default function TareasIncidenciasBloque() {
 
       {/* COLUMNA DERECHA — Incidencias activas */}
       <div className="p-5 space-y-4">
-        {/* Cabecera */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-[#0A3E47]" />
@@ -136,8 +313,7 @@ export default function TareasIncidenciasBloque() {
           </button>
         </div>
 
-        {/* Lista o estado vacío */}
-        {INCIDENCIAS.length === 0 ? (
+        {incidencias.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 gap-3">
             <div className="w-12 h-12 rounded-xl bg-[#E4F2EC] flex items-center justify-center">
               <ShieldCheck className="w-6 h-6 text-[#6BB68A]" />
@@ -149,7 +325,7 @@ export default function TareasIncidenciasBloque() {
           </div>
         ) : (
           <div className="space-y-3">
-            {(verTodasIncidencias ? INCIDENCIAS : INCIDENCIAS.slice(0, 4)).map((inc) => (
+            {(verTodasIncidencias ? incidencias : incidencias.slice(0, 4)).map((inc) => (
               <div
                 key={inc.id}
                 onClick={() => navigate("/registros?tab=incidencias")}
@@ -157,16 +333,16 @@ export default function TareasIncidenciasBloque() {
                 <p className="text-sm text-foreground leading-snug">{inc.descripcion}</p>
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-muted-foreground">
-                    {inc.modulo} · {inc.fecha} · <span className="text-red-500 font-medium">{inc.tiempo}</span>
+                    {inc.tipo} · {formatFechaInc(inc)} · <span className="text-red-500 font-medium">{tiempoSinResolver(inc)}</span>
                   </span>
                 </div>
               </div>
             ))}
-            {INCIDENCIAS.length > 4 && (
+            {incidencias.length > 4 && (
               <button
                 onClick={() => setVerTodasIncidencias(!verTodasIncidencias)}
                 className="w-full text-xs font-medium text-[#6BB68A] border border-[#6BB68A]/40 rounded-lg py-2 hover:bg-[#6BB68A]/5 transition-colors">
-                {verTodasIncidencias ? "Ver menos ▲" : `Ver ${INCIDENCIAS.length - 4} más ▼`}
+                {verTodasIncidencias ? "Ver menos ▲" : `Ver ${incidencias.length - 4} más ▼`}
               </button>
             )}
           </div>
@@ -178,28 +354,12 @@ export default function TareasIncidenciasBloque() {
     <AnadirTareaPuntualDialog
       open={showPuntual}
       onClose={() => setShowPuntual(false)}
-      onCrear={(form) => {
-        setTareas((prev) => [...prev, {
-          id: Date.now(),
-          nombre: form.titulo,
-          modulo: form.tipo,
-          hora: form.hora || "Hoy",
-          completada: false,
-        }]);
-      }}
+      onCrear={handleCrearPuntual}
     />
     <ProgramarTareaDialog
       open={showProgramar}
       onClose={() => setShowProgramar(false)}
-      onCrear={(form) => {
-        setTareas((prev) => [...prev, {
-          id: Date.now(),
-          nombre: form.titulo,
-          modulo: form.tipo,
-          hora: form.hora,
-          completada: false,
-        }]);
-      }}
+      onCrear={handleCrearProgramada}
     />
     </>
   );

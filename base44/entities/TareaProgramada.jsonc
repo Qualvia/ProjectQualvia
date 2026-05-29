@@ -1,0 +1,74 @@
+{
+  "name": "TareaProgramada",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "business_id": {
+      "type": "string"
+    },
+    "titulo": {
+      "type": "string"
+    },
+    "descripcion": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string"
+    },
+    "prioridad": {
+      "type": "string",
+      "default": "Media"
+    },
+    "hora": {
+      "type": "string"
+    },
+    "frecuencia": {
+      "type": "string",
+      "enum": [
+        "Diaria",
+        "Semanal",
+        "Mensual",
+        "Trimestral",
+        "Semestral",
+        "Anual"
+      ],
+      "default": "Diaria"
+    },
+    "dias_semana": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dia_mes": {
+      "type": "number"
+    },
+    "activa": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "titulo",
+    "tipo",
+    "frecuencia"
+  ],
+  "rls": {
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "read": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "data.user_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.user_id": "{{user.id}}"
+    }
+  }
+}
