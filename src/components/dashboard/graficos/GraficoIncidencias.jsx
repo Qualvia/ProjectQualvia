@@ -70,21 +70,16 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
     setDataExpandido(dataExp);
     setDataCompacto(dataExp.map(d => ({ label: d.label, total: d.total })));
 
-    // Tendencia: compara primer mitad vs segunda mitad
     const primera = dataExp.slice(0, 3).reduce((s, d) => s + d.total, 0);
     const segunda = dataExp.slice(3).reduce((s, d) => s + d.total, 0);
     if (segunda < primera) setTendencia("baja");
     else if (segunda > primera) setTendencia("sube");
     else setTendencia("igual");
 
-    // Resumen
     const mesPico = dataExp.reduce((max, d) => d.total > (max?.total ?? 0) ? d : max, null);
     const totalConFecha = todas.filter(i => i.fecha_cierre && i.fecha);
     const tiempoMedio = totalConFecha.length > 0
-      ? Math.round(totalConFecha.reduce((s, i) => {
-          const diff = new Date(i.fecha_cierre) - new Date(i.fecha);
-          return s + diff / (1000 * 3600 * 24);
-        }, 0) / totalConFecha.length)
+      ? Math.round(totalConFecha.reduce((s, i) => s + (new Date(i.fecha_cierre) - new Date(i.fecha)) / (1000 * 3600 * 24), 0) / totalConFecha.length)
       : null;
     const cerradasTotal = todas.filter(i => i.estado === "cerrada").length;
     const tasaResolucion = todas.length > 0 ? Math.round((cerradasTotal / todas.length) * 100) : 0;
@@ -121,7 +116,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip content={<CustomTooltipInc />} />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} formatter={(v) => v === "cerradas" ? "Cerradas" : "Abiertas"} />
+                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} formatter={(v) => v === "cerradas" ? "Cerradas" : v === "abiertas" ? "Abiertas" : v} />
                 <Bar dataKey="cerradas" stackId="a" fill="#6BB68A" radius={[0, 0, 0, 0]} />
                 <Bar dataKey="abiertas" stackId="a" fill="#FECACA" radius={[4, 4, 0, 0]} />
                 <Line type="monotone" dataKey="total" stroke="#9CA3AF" strokeDasharray="5 3" strokeWidth={1.5} dot={false} legendType="none" />
@@ -167,7 +162,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
       </div>
       {!hayDatos ? (
         <div className="flex items-center justify-center h-[120px]">
-          <p className="text-[11px] text-muted-foreground text-center">Sin incidencias<br/>registradas</p>
+          <p className="text-[11px] text-muted-foreground text-center">Sin incidencias<br />registradas</p>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={120}>

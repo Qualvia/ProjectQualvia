@@ -65,25 +65,22 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     const fin = endOfMonth().toISOString();
     const totalDias = daysInMonth();
 
-    // A) Tareas del mes
     const [todasEj, todasInc, todosReg] = await Promise.all([
       base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }),
       base44.entities.Incidencia.filter({ user_id: uid, business_id: bid }),
       base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
     ]);
 
-    const ejMes = todasEj.filter(e => e.fecha_dia && e.fecha_dia.startsWith(mesActual.replace("-", "-")));
+    const ejMes = todasEj.filter(e => e.fecha_dia && e.fecha_dia.startsWith(mesActual));
     const tareasTotal = ejMes.length;
     const tareasComp = ejMes.filter(e => e.completada).length;
     const tareasPorc = tareasTotal > 0 ? Math.round((tareasComp / tareasTotal) * 100) : 0;
     const puntajeA = tareasTotal > 0 ? Math.round((tareasComp / tareasTotal) * 40) : 0;
 
-    // B) Registros de temperatura del mes
     const regMes = todosReg.filter(r => r.fecha && r.fecha >= inicio && r.fecha <= fin);
     const diasConReg = new Set(regMes.map(r => r.fecha?.slice(0, 10))).size;
     const puntajeB = Math.round((diasConReg / totalDias) * 30);
 
-    // C) Incidencias del mes
     const incMes = todasInc.filter(i => (i.fecha || i.created_date) >= inicio && (i.fecha || i.created_date) <= fin);
     const incCerradas = incMes.filter(i => i.estado === "cerrada").length;
     const incTotal = incMes.length;
@@ -94,14 +91,11 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     setScore(scoreTotal);
     setMetricas({ tareasPorc, diasConRegistros: diasConReg, totalDias, incCerradas, incTotal });
 
-    // Semanas del mes
     const semanaMap = {};
     for (let dia = 1; dia <= totalDias; dia++) {
-      const fecha = new Date(ahora.getFullYear(), ahora.getMonth(), dia);
       const sem = Math.ceil((dia + new Date(ahora.getFullYear(), ahora.getMonth(), 1).getDay()) / 7);
-      if (!semanaMap[sem]) semanaMap[sem] = { tareas: [], registros: [], incidencias: [], dias: 0 };
+      if (!semanaMap[sem]) semanaMap[sem] = { tareas: [], registros: [], dias: 0 };
       semanaMap[sem].dias++;
-
       const diaISO = `${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
       const ejDia = ejMes.filter(e => e.fecha_dia === diaISO);
       if (ejDia.length > 0) semanaMap[sem].tareas.push(ejDia.filter(e => e.completada).length / ejDia.length);
@@ -111,10 +105,9 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     const semanasData = Object.entries(semanaMap).map(([s, data]) => {
       const tP = data.tareas.length > 0 ? Math.round((data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length)*40) : 0;
       const rP = Math.round((data.registros.length / data.dias) * 30);
-      const iP = puntajeC;
       return {
         name: `Sem ${s}`,
-        score: Math.min(100, tP + rP + iP),
+        score: Math.min(100, tP + rP + puntajeC),
         tareas: Math.round((data.tareas.length > 0 ? data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length : 0) * 100),
         registros: Math.round((data.registros.length / data.dias) * 100),
         incidencias: Math.round((puntajeC / 30) * 100),
@@ -139,23 +132,21 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         <h3 className="text-base font-semibold text-[#0A3E47]">Cumplimiento APPCC · Mes actual</h3>
 
         <div className="flex flex-col md:flex-row gap-6 items-start">
-          {/* Rosco grande */}
-          <div className="flex flex-col items-center shrink-0">
-            <PieChart width={200} height={200}>
-              <Pie data={pieData} cx={100} cy={100} innerRadius={65} outerRadius={90} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
-                <Cell fill="#6BB68A" />
-                <Cell fill="#EDE6DA" />
-              </Pie>
-            </PieChart>
-            <div className="relative" style={{ marginTop: -112 }}>
-              <div className="flex flex-col items-center justify-center h-[56px]">
+          <div className="flex flex-col items-center shrink-0" style={{ width: 200 }}>
+            <div className="relative">
+              <PieChart width={200} height={200}>
+                <Pie data={pieData} cx={100} cy={100} innerRadius={65} outerRadius={90} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
+                  <Cell fill="#6BB68A" />
+                  <Cell fill="#EDE6DA" />
+                </Pie>
+              </PieChart>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span className="text-3xl font-bold text-[#0A3E47]">{loading ? "—" : `${score}%`}</span>
               </div>
             </div>
-            <div style={{ marginTop: 56 }} className="text-xs text-muted-foreground">Mes actual</div>
+            <p className="text-xs text-muted-foreground -mt-2">Mes actual</p>
           </div>
 
-          {/* Barras semanales */}
           <div className="flex-1 min-w-0">
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={semanas} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
@@ -173,7 +164,6 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
           </div>
         </div>
 
-        {/* Métricas */}
         <div className="grid grid-cols-3 gap-3 pt-2">
           {[
             { label: "Tareas completadas", value: `${metricas.tareasPorc}%` },

@@ -30,9 +30,7 @@ const CustomTooltipTemp = ({ active, payload, label }) => {
     <div className="bg-white border border-border rounded-xl shadow-lg p-3 text-xs space-y-1 min-w-[180px]">
       <p className="font-semibold text-[#0A3E47]">{label}</p>
       {payload.map((p) => {
-        const d = p.payload;
-        const equipoData = d[`_meta_${p.dataKey}`];
-        const fuera = equipoData?.fuera;
+        const fuera = p.payload[`_meta_${p.dataKey}`]?.fuera;
         return (
           <div key={p.dataKey} className="flex items-center gap-1.5">
             <span style={{ color: p.color }}>●</span>
@@ -75,17 +73,13 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     const recientes = registros.filter(r => r.fecha && new Date(r.fecha) >= hace7);
     const dias = getLast7Days();
 
-    // Construir mapa de límites por equipo
     const limitesMap = {};
     eqs.forEach(eq => { limitesMap[eq.id] = { nombre: eq.nombre, min: eq.temp_min, max: eq.temp_max }; });
 
-    // Equipos únicos en los registros
     const equiposIds = [...new Set(recientes.map(r => r.equipo_id))];
-    const equiposNombres = equiposIds.map(id => limitesMap[id]?.nombre || id);
     setEquipos(equiposIds.map((id, i) => ({ id, nombre: limitesMap[id]?.nombre || id, color: LINE_COLORS[i % LINE_COLORS.length] })));
     setLimites(limitesMap);
 
-    // Agrupar por día → promedio por equipo
     const chartData = dias.map(dia => {
       const row = { fecha: formatDD_MM(dia + "T12:00:00") };
       equiposIds.forEach(eqId => {
@@ -103,7 +97,6 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     });
     setData(chartData);
 
-    // Resumen
     const res = equiposIds.map((eqId, i) => {
       const regsEq = recientes.filter(r => r.equipo_id === eqId);
       const media = regsEq.length > 0 ? Math.round((regsEq.reduce((s, r) => s + r.temperatura, 0) / regsEq.length) * 10) / 10 : null;
@@ -116,10 +109,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     setLoading(false);
   }
 
-  const equiposMostrar = filtroEquipo === "todos"
-    ? equipos
-    : equipos.filter(e => e.id === filtroEquipo);
-
+  const equiposMostrar = filtroEquipo === "todos" ? equipos : equipos.filter(e => e.id === filtroEquipo);
   const hayDatos = data.some(d => equipos.some(eq => d[eq.nombre] != null));
 
   if (expandido) {
@@ -153,13 +143,14 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               <Tooltip content={<CustomTooltipTemp />} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
               {equiposMostrar.map(eq => (
-                <Line key={eq.id} type="monotone" dataKey={eq.nombre} stroke={eq.color} strokeWidth={2} dot={(props) => {
-                  const meta = props.payload[`_meta_${eq.nombre}`];
-                  if (meta?.fuera) return <circle key={`dot-${props.index}`} cx={props.cx} cy={props.cy} r={5} fill="#DC2626" stroke="white" strokeWidth={1.5} />;
-                  return <circle key={`dot-${props.index}`} cx={props.cx} cy={props.cy} r={3} fill={eq.color} />;
-                }} connectNulls={false} />
+                <Line key={eq.id} type="monotone" dataKey={eq.nombre} stroke={eq.color} strokeWidth={2}
+                  dot={(props) => {
+                    const fuera = props.payload[`_meta_${eq.nombre}`]?.fuera;
+                    if (fuera) return <circle key={props.index} cx={props.cx} cy={props.cy} r={5} fill="#DC2626" stroke="white" strokeWidth={1.5} />;
+                    return <circle key={props.index} cx={props.cx} cy={props.cy} r={3} fill={eq.color} />;
+                  }}
+                  connectNulls={false} />
               ))}
-              {/* Líneas de límites */}
               {equiposMostrar.flatMap(eq => {
                 const lim = limites[eq.id];
                 if (!lim) return [];
@@ -172,7 +163,6 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           </ResponsiveContainer>
         )}
 
-        {/* Resumen */}
         {resumen.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
             {resumen.map(r => (
@@ -204,7 +194,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
       </div>
       {!hayDatos ? (
         <div className="flex items-center justify-center h-[120px]">
-          <p className="text-[11px] text-muted-foreground text-center">Sin registros<br/>esta semana</p>
+          <p className="text-[11px] text-muted-foreground text-center">Sin registros<br />esta semana</p>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={120}>
