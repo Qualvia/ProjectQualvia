@@ -123,6 +123,8 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     { value: 100 - (score ?? 0) },
   ];
 
+  const donutColor = score >= 70 ? "#6BB68A" : score >= 40 ? "#F59E0B" : "#F87171";
+
   if (expandido) {
     return (
       <div className="p-6 space-y-4">
@@ -136,11 +138,11 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
             <div className="relative" style={{ width: 200, height: 200 }}>
               <PieChart width={200} height={200}>
                 <Pie data={pieData} cx={100} cy={100} innerRadius={65} outerRadius={90} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
-                  <Cell fill="#6BB68A" />
+                  <Cell fill={donutColor} />
                   <Cell fill="#EDE6DA" />
                 </Pie>
               </PieChart>
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ paddingLeft: 6 }}>
                 <span className="text-3xl font-bold text-[#0A3E47]">{loading ? "—" : `${score}%`}</span>
               </div>
             </div>
@@ -203,11 +205,11 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         <div className="relative flex flex-col items-center">
           <PieChart width={120} height={120}>
             <Pie data={pieData} cx={60} cy={60} innerRadius={38} outerRadius={54} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
-              <Cell fill="#6BB68A" />
+              <Cell fill={donutColor} />
               <Cell fill="#EDE6DA" />
             </Pie>
           </PieChart>
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ paddingLeft: 4 }}>
             <span className="text-2xl font-bold text-[#0A3E47]">{`${score}%`}</span>
           </div>
         </div>
