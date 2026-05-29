@@ -225,7 +225,7 @@ export default function TareasIncidenciasBloque() {
     <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
 
       {/* COLUMNA IZQUIERDA — Tareas del día */}
-      <div className="p-5 space-y-4">
+      <div className="p-5 flex flex-col min-h-[220px]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-[#0A3E47]" />
@@ -248,6 +248,7 @@ export default function TareasIncidenciasBloque() {
         </div>
 
         {/* Lista */}
+        <div className="mt-4 flex-1">
         {loading ? (
           <div className="space-y-2">
             {[1,2,3].map((i) => (
@@ -296,8 +297,9 @@ export default function TareasIncidenciasBloque() {
           </div>
         )}
 
+        </div>
         {/* Pie */}
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center justify-between pt-1 mt-auto">
           <span className="text-xs text-muted-foreground">{completadas} de {ejecuciones.length} tareas completadas hoy</span>
           <button
             onClick={() => setShowPuntual(true)}
