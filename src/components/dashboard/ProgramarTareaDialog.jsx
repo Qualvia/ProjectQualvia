@@ -107,7 +107,7 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
                 type="time"
                 value={form.hora}
                 onChange={(e) => setForm({ ...form, hora: e.target.value })}
-                className="w-full border border-input rounded-lg px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-[#0A3E47]"
+                className="w-full h-9 border border-input rounded-lg px-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-[#0A3E47]"
               />
             </div>
           </div>
