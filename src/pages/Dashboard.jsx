@@ -73,7 +73,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
         {/* KPI 1 — Incidencias activas */}
-        <div className="bg-white rounded-2xl border-2 border-border shadow-sm px-5 py-3.5 flex flex-col" style={{ borderLeft: "8px solid #EDE6DA" }}>
+        <div className="bg-white rounded-2xl border-2 border-border shadow-sm px-5 py-3.5 flex flex-col animate-kpi-1" style={{ borderLeft: "8px solid #EDE6DA" }}>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEE8E8" }}>
               <AlertCircle className="w-6 h-6" style={{ color: "#C0392B" }} />
@@ -89,7 +89,7 @@ export default function Dashboard() {
         </div>
 
         {/* KPI 2 — Tareas completadas hoy */}
-        <div className="bg-white rounded-2xl border-2 border-border shadow-sm px-5 py-3.5 flex flex-col" style={{ borderLeft: "8px solid #EDE6DA" }}>
+        <div className="bg-white rounded-2xl border-2 border-border shadow-sm px-5 py-3.5 flex flex-col animate-kpi-2" style={{ borderLeft: "8px solid #EDE6DA" }}>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEF3DC" }}>
               <ClipboardCheck className="w-6 h-6" style={{ color: "#D97706" }} />
@@ -115,7 +115,7 @@ export default function Dashboard() {
         </div>
 
         {/* KPI 3 — Días consecutivos */}
-        <div className="bg-white rounded-2xl border-2 border-border shadow-sm px-5 py-3.5 flex flex-col" style={{ borderLeft: "8px solid #EDE6DA" }}>
+        <div className="bg-white rounded-2xl border-2 border-border shadow-sm px-5 py-3.5 flex flex-col animate-kpi-3" style={{ borderLeft: "8px solid #EDE6DA" }}>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#E4F2EC" }}>
               <Flame className="w-6 h-6" style={{ color: "#2E7D52" }} />
