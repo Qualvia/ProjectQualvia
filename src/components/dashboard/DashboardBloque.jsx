@@ -32,12 +32,10 @@ export default function DashboardBloque({ title, icon: Icon, children, dragHandl
         </button>
       </div>
 
-      {/* Content */}
-      {abierto && (
-        <div className="border-t border-border">
-          {children}
-        </div>
-      )}
+      {/* Content — siempre montado para que los callbacks sigan funcionando */}
+      <div className={cn("border-t border-border", !abierto && "hidden")}>
+        {children}
+      </div>
     </div>
   );
 }
