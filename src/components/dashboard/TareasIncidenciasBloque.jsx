@@ -355,7 +355,11 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
               <div
                 key={inc.id}
                 onClick={() => navigate("/registros?tab=incidencias")}
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 space-y-2 cursor-pointer hover:bg-red-100/60 transition-colors">
+                className={`rounded-xl border px-4 py-3 space-y-2 cursor-pointer transition-colors ${
+                  inc.estado === "seguimiento"
+                    ? "border-blue-100 bg-blue-50 hover:bg-blue-100/60"
+                    : "border-red-200 bg-red-50 hover:bg-red-100/60"
+                }`}>
                 <p className="text-sm text-foreground leading-snug">{inc.descripcion}</p>
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-muted-foreground">
