@@ -35,7 +35,7 @@ const BLOQUES_INICIALES = [
 ];
 
 export default function Dashboard() {
-  const { user } = useBusiness();
+  const { user, currentBusiness } = useBusiness();
   const navigate = useNavigate();
   const nombre = user?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "usuario";
   const [bloques, setBloques] = useState(BLOQUES_INICIALES);
@@ -43,7 +43,11 @@ export default function Dashboard() {
   const [incidenciasStats, setIncidenciasStats] = useState({ total: 0, criticas: 0, maxHoras: 0 });
 
   useEffect(() => {
-    base44.entities.Incidencia.list().then((todas) => {
+    if (!user?.id || !currentBusiness?.id) return;
+    base44.entities.Incidencia.filter({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+    }).then((todas) => {
       const activas = todas.filter((i) => i.estado !== "cerrada");
       const criticas = activas.filter((i) => i.prioridad === "critica").length;
       const maxHoras = activas.reduce((max, i) => {
@@ -52,7 +56,7 @@ export default function Dashboard() {
       }, 0);
       setIncidenciasStats({ total: activas.length, criticas, maxHoras });
     });
-  }, []);
+  }, [user?.id, currentBusiness?.id]);
 
   function onDragEnd(result) {
     if (!result.destination) return;
