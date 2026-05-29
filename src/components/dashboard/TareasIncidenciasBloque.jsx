@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight, Settings } from "lucide-react";
+import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight, Settings, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -231,18 +231,21 @@ export default function TareasIncidenciasBloque() {
             <Clock className="w-4 h-4 text-[#0A3E47]" />
             <span className="font-semibold text-[#0A3E47] text-base">Tareas del día</span>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowGestionar(true)}
-              className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5 bg-[#E4F2EC] text-[#0A3E47] hover:bg-[#d0ead9] border border-[#6BB68A]/40 transition-all">
-              <Settings className="w-3.5 h-3.5" />
-              Gestionar tareas
-            </button>
+          {/* Botón partido: acción principal + acceso al gestor */}
+          <div className="flex items-stretch rounded-lg overflow-hidden border border-[#5aa377]">
             <button
               onClick={() => setShowProgramar(true)}
-              className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5 bg-[#6BB68A] text-white hover:bg-[#5aa377] transition-all">
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 bg-[#6BB68A] text-white hover:bg-[#5aa377] transition-all">
               <Plus className="w-3.5 h-3.5" />
               Programar tarea
+            </button>
+            <div className="w-px bg-[#5aa377]" />
+            <button
+              onClick={() => setShowGestionar(true)}
+              title="Gestionar tareas"
+              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 bg-[#6BB68A] text-white hover:bg-[#5aa377] transition-all">
+              <Settings className="w-3.5 h-3.5" />
+              <ChevronDown className="w-3 h-3 opacity-70" />
             </button>
           </div>
         </div>
