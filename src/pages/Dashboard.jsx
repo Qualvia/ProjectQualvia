@@ -45,7 +45,7 @@ export default function Dashboard() {
 
         {/* KPI 1 — Incidencias activas */}
         <div className="bg-white rounded-2xl border border-border p-5 flex flex-col gap-3" style={{ borderLeft: "5px solid #A32D2D" }}>
-          <span className="text-[13px] font-semibold" style={{ color: "#8A8278" }}>Incidencias activas</span>
+          <span className="text-[14px] font-semibold" style={{ color: "#0A3E47" }}>Incidencias activas</span>
           <div className="flex items-center gap-4">
             <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEE8E8" }}>
               <AlertCircle className="w-5 h-5" style={{ color: "#A32D2D" }} />
@@ -62,7 +62,7 @@ export default function Dashboard() {
 
         {/* KPI 2 — Tareas completadas hoy */}
         <div className="bg-white rounded-2xl border border-border p-5 flex flex-col gap-3" style={{ borderLeft: "5px solid #D97706" }}>
-          <span className="text-[13px] font-semibold" style={{ color: "#8A8278" }}>Tareas completadas hoy</span>
+          <span className="text-[14px] font-semibold" style={{ color: "#0A3E47" }}>Tareas completadas hoy</span>
           <div className="flex items-center gap-4">
             <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEF3DC" }}>
               <ClipboardCheck className="w-5 h-5" style={{ color: "#8A5C00" }} />
@@ -82,7 +82,7 @@ export default function Dashboard() {
 
         {/* KPI 3 — Racha de días */}
         <div className="bg-white rounded-2xl border border-border p-5 flex flex-col gap-3" style={{ borderLeft: "5px solid #2E7D52" }}>
-          <span className="text-[13px] font-semibold" style={{ color: "#8A8278" }}>Días consecutivos al día</span>
+          <span className="text-[14px] font-semibold" style={{ color: "#0A3E47" }}>Días consecutivos al día</span>
           <div className="flex items-center gap-4">
             <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#E4F2EC" }}>
               <Flame className="w-5 h-5" style={{ color: "#2E7D52" }} />
