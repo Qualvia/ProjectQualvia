@@ -3,16 +3,16 @@ import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight } from "lucide-re
 import { useNavigate } from "react-router-dom";
 
 const MODULE_COLORS = {
-  "Temperatura": "bg-[#0A3E47] text-white",
-  "Limpieza":    "bg-[#0A3E47] text-white",
-  "Plagas":      "bg-[#0A3E47] text-white",
-  "Recepción":   "bg-[#0A3E47] text-white",
-  "Agua":        "bg-[#0A3E47] text-white",
-  "Formación":   "bg-[#0A3E47] text-white",
-  "Lotes":       "bg-[#0A3E47] text-white",
-  "Alérgenos":   "bg-[#0A3E47] text-white",
-  "Congelación": "bg-[#0A3E47] text-white",
-  "Residuos":    "bg-[#0A3E47] text-white",
+  "Temperatura": "bg-[#E4F2EC] text-[#0A3E47]",
+  "Limpieza":    "bg-[#E4F2EC] text-[#0A3E47]",
+  "Plagas":      "bg-[#E4F2EC] text-[#0A3E47]",
+  "Recepción":   "bg-[#E4F2EC] text-[#0A3E47]",
+  "Agua":        "bg-[#E4F2EC] text-[#0A3E47]",
+  "Formación":   "bg-[#E4F2EC] text-[#0A3E47]",
+  "Lotes":       "bg-[#E4F2EC] text-[#0A3E47]",
+  "Alérgenos":   "bg-[#E4F2EC] text-[#0A3E47]",
+  "Congelación": "bg-[#E4F2EC] text-[#0A3E47]",
+  "Residuos":    "bg-[#E4F2EC] text-[#0A3E47]",
 };
 
 const TAREAS_INICIALES = [
