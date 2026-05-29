@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { AlertCircle, ClipboardCheck, Flame, Sparkles, Lightbulb, Bot, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
+import TareasIncidenciasBloque from "@/components/dashboard/TareasIncidenciasBloque";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -157,7 +158,13 @@ export default function Dashboard() {
                         title={bloque.title}
                         icon={bloque.icon}
                         dragHandleProps={provided.dragHandleProps}>
-                        <p className="text-sm text-muted-foreground">Contenido próximamente...</p>
+                        {bloque.id === "tareas" ? (
+                          <TareasIncidenciasBloque />
+                        ) : (
+                          <div className="px-5 py-4">
+                            <p className="text-sm text-muted-foreground">Contenido próximamente...</p>
+                          </div>
+                        )}
                       </DashboardBloque>
                     </div>
                   )}

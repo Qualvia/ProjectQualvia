@@ -34,7 +34,7 @@ export default function DashboardBloque({ title, icon: Icon, children, dragHandl
 
       {/* Content */}
       {abierto && (
-        <div className="border-t border-border px-5 py-4">
+        <div className="border-t border-border">
           {children}
         </div>
       )}
