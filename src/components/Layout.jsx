@@ -40,7 +40,13 @@ export default function Layout() {
   ALL_NAV_ITEMS;
 
   useEffect(() => {
+    // Solo actuar cuando la carga ha terminado
     if (isLoading) return;
+    // Si hay negocios pero currentBusiness aún es null, estamos en un render intermedio.
+    // Esperar al siguiente render donde currentBusiness ya estará establecido.
+    if (businesses.length > 0 && !currentBusiness) return;
+    // Navegar al onboarding solo si definitivamente no hay negocios,
+    // o si el negocio activo no completó el onboarding.
     if (businesses.length === 0 || !currentBusiness?.onboarding_completed) {
       navigate("/onboarding");
     }
@@ -54,6 +60,9 @@ export default function Layout() {
 
   }
 
+  // No renderizar el layout si aún no tenemos negocio resuelto
+  // (businesses vacío = onboarding, businesses con datos pero currentBusiness null = estado intermedio)
+  if (businesses.length > 0 && !currentBusiness) return null;
   if (!currentBusiness?.onboarding_completed) return null;
 
   return (
