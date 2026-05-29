@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProgramarTareaDialog from "./ProgramarTareaDialog";
+import AnadirTareaPuntualDialog from "./AnadirTareaPuntualDialog";
 
 const MODULE_COLORS = {
   "Temperatura": "bg-[#E4F2EC] text-[#0A3E47]",
@@ -39,6 +40,7 @@ export default function TareasIncidenciasBloque() {
   const [tareas, setTareas] = useState(TAREAS_INICIALES);
   const [verTodasIncidencias, setVerTodasIncidencias] = useState(false);
   const [showProgramar, setShowProgramar] = useState(false);
+  const [showPuntual, setShowPuntual] = useState(false);
   const navigate = useNavigate();
 
   function toggleTarea(id) {
@@ -109,7 +111,9 @@ export default function TareasIncidenciasBloque() {
         {/* Pie */}
         <div className="flex items-center justify-between pt-1">
           <span className="text-xs text-muted-foreground">{completadas} de {tareas.length} tareas completadas hoy</span>
-          <button className="text-xs text-[#6BB68A] hover:underline flex items-center gap-0.5">
+          <button
+            onClick={() => setShowPuntual(true)}
+            className="text-[11px] text-[#6BB68A] hover:underline flex items-center gap-0.5">
             <Plus className="w-3 h-3" />
             Añadir tarea puntual de hoy
           </button>
@@ -171,6 +175,19 @@ export default function TareasIncidenciasBloque() {
 
     </div>
 
+    <AnadirTareaPuntualDialog
+      open={showPuntual}
+      onClose={() => setShowPuntual(false)}
+      onCrear={(form) => {
+        setTareas((prev) => [...prev, {
+          id: Date.now(),
+          nombre: form.titulo,
+          modulo: form.tipo,
+          hora: form.hora || "Hoy",
+          completada: false,
+        }]);
+      }}
+    />
     <ProgramarTareaDialog
       open={showProgramar}
       onClose={() => setShowProgramar(false)}
