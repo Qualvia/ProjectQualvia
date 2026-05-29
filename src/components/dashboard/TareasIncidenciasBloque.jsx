@@ -211,6 +211,19 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
     });
   }
 
+  // ── Ordenar tareas ───────────────────────────────────────────────────────
+  const ejecucionesOrdenadas = [...ejecuciones].sort((a, b) => {
+    // 1. Pendientes antes que completadas
+    if (a.completada !== b.completada) return a.completada ? 1 : -1;
+    // 2. Dentro de pendientes: con hora primero, ordenadas ascendente
+    if (!a.completada) {
+      if (a.hora && b.hora) return a.hora.localeCompare(b.hora);
+      if (a.hora) return -1;
+      if (b.hora) return 1;
+    }
+    return 0;
+  });
+
   // ── Helpers UI ───────────────────────────────────────────────────────────
   const completadas = ejecuciones.filter((e) => e.completada).length;
 
@@ -281,7 +294,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
           </div>
         ) : (
           <div className="space-y-0">
-            {ejecuciones.map((tarea, i) => (
+            {ejecucionesOrdenadas.map((tarea, i) => (
               <div key={tarea.id}>
                 <div className="flex items-center gap-3 py-2.5">
                   <button
@@ -305,7 +318,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
                   </span>
                   <span className="text-[11px] text-muted-foreground shrink-0 w-14 text-right">{formatHora(tarea)}</span>
                 </div>
-                {i < ejecuciones.length - 1 && <div className="border-t border-border/50" />}
+                {i < ejecucionesOrdenadas.length - 1 && <div className="border-t border-border/50" />}
               </div>
             ))}
           </div>
