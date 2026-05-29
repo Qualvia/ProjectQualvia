@@ -57,7 +57,7 @@ function tareaProgramadaCorrespondeHoy(tarea) {
   }
 }
 
-export default function TareasIncidenciasBloque() {
+export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
   const { user, currentBusiness } = useBusiness();
   const navigate = useNavigate();
 
@@ -115,7 +115,9 @@ export default function TareasIncidenciasBloque() {
       }
     }
 
-    setEjecuciones([...existentes, ...nuevas]);
+    const todas = [...existentes, ...nuevas];
+    setEjecuciones(todas);
+    onEjecucionesChange?.(todas);
     setLoading(false);
   }, [user?.id, currentBusiness?.id, hoy]);
 
@@ -137,10 +139,11 @@ export default function TareasIncidenciasBloque() {
   // ── Toggle completada ────────────────────────────────────────────────────
   async function toggleTarea(ejecucion) {
     const nuevo = !ejecucion.completada;
-    // Optimistic update
-    setEjecuciones((prev) =>
-      prev.map((e) => e.id === ejecucion.id ? { ...e, completada: nuevo } : e)
-    );
+    setEjecuciones((prev) => {
+      const updated = prev.map((e) => e.id === ejecucion.id ? { ...e, completada: nuevo } : e);
+      onEjecucionesChange?.(updated);
+      return updated;
+    });
     await base44.entities.TareaEjecucion.update(ejecucion.id, { completada: nuevo });
   }
 
@@ -178,7 +181,11 @@ export default function TareasIncidenciasBloque() {
         es_puntual: false,
         fecha_dia: hoy,
       });
-      setEjecuciones((prev) => [...prev, nueva]);
+      setEjecuciones((prev) => {
+        const updated = [...prev, nueva];
+        onEjecucionesChange?.(updated);
+        return updated;
+      });
     }
   }
 
@@ -197,7 +204,11 @@ export default function TareasIncidenciasBloque() {
       es_puntual: true,
       fecha_dia: hoy,
     });
-    setEjecuciones((prev) => [...prev, nueva]);
+    setEjecuciones((prev) => {
+      const updated = [...prev, nueva];
+      onEjecucionesChange?.(updated);
+      return updated;
+    });
   }
 
   // ── Helpers UI ───────────────────────────────────────────────────────────

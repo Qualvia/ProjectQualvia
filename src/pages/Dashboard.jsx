@@ -38,6 +38,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const nombre = user?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "usuario";
   const [bloques, setBloques] = useState(BLOQUES_INICIALES);
+  const [tareasStats, setTareasStats] = useState({ completadas: 0, total: 0 });
 
   function onDragEnd(result) {
     if (!result.destination) return;
@@ -94,17 +95,21 @@ export default function Dashboard() {
               <ClipboardCheck className="w-6 h-6" style={{ color: "#D97706" }} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>3 <span style={{ fontSize: "24px", color: "#8A8278", fontWeight: 500 }}>/ 7</span></span>
+              <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>
+                {tareasStats.completadas} <span style={{ fontSize: "24px", color: "#8A8278", fontWeight: 500 }}>/ {tareasStats.total}</span>
+              </span>
               <span className="text-[12px] font-medium" style={{ color: "#8A8278" }}>Tareas completadas hoy</span>
             </div>
           </div>
           <div className="border-t border-border mt-4 pt-3 flex flex-col gap-1.5">
             <div className="h-[4px] rounded-full w-full" style={{ background: "#EDE6DA" }}>
-              <div className="h-full rounded-full" style={{ width: "43%", background: "#D97706" }} />
+              <div className="h-full rounded-full transition-all duration-300" style={{ width: tareasStats.total > 0 ? `${Math.round((tareasStats.completadas / tareasStats.total) * 100)}%` : "0%", background: "#D97706" }} />
             </div>
             <div className="flex justify-between">
-              <span className="text-[11px]" style={{ color: "#D97706" }}>43% completado</span>
-              <span className="text-[11px]" style={{ color: "#8A8278" }}>4 pendientes</span>
+              <span className="text-[11px]" style={{ color: "#D97706" }}>
+                {tareasStats.total > 0 ? `${Math.round((tareasStats.completadas / tareasStats.total) * 100)}% completado` : "Sin tareas"}
+              </span>
+              <span className="text-[11px]" style={{ color: "#8A8278" }}>{tareasStats.total - tareasStats.completadas} pendientes</span>
             </div>
           </div>
         </div>
@@ -159,7 +164,7 @@ export default function Dashboard() {
                         icon={bloque.icon}
                         dragHandleProps={provided.dragHandleProps}>
                         {bloque.id === "tareas" ? (
-                          <TareasIncidenciasBloque />
+                          <TareasIncidenciasBloque onEjecucionesChange={(ej) => setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length })} />
                         ) : (
                           <div className="px-5 py-4">
                             <p className="text-sm text-muted-foreground">Contenido próximamente...</p>
