@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RefreshCw, Info } from "lucide-react";
@@ -12,7 +12,7 @@ const PRIORIDADES = ["Baja", "Media", "Alta", "Crítica"];
 const FRECUENCIAS = ["Diaria", "Semanal", "Mensual", "Trimestral", "Semestral", "Anual"];
 const DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
+export default function ProgramarTareaDialog({ open, onClose, onCrear, tareaInicial = null }) {
   const [form, setForm] = useState({
     tipo: "Temperatura",
     titulo: "",
@@ -23,6 +23,24 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
     diasSemana: [],
     diaMes: 1,
   });
+
+  // Rellenar form si viene en modo edición
+  React.useEffect(() => {
+    if (tareaInicial) {
+      setForm({
+        tipo: tareaInicial.tipo || "Temperatura",
+        titulo: tareaInicial.titulo || "",
+        descripcion: tareaInicial.descripcion || "",
+        prioridad: tareaInicial.prioridad || "Media",
+        hora: tareaInicial.hora || "12:30",
+        frecuencia: tareaInicial.frecuencia || "Diaria",
+        diasSemana: tareaInicial.dias_semana || [],
+        diaMes: tareaInicial.dia_mes || 1,
+      });
+    } else {
+      setForm({ tipo: "Temperatura", titulo: "", descripcion: "", prioridad: "Media", hora: "12:30", frecuencia: "Diaria", diasSemana: [], diaMes: 1 });
+    }
+  }, [tareaInicial, open]);
 
   function toggleDia(dia) {
     setForm((prev) => ({
@@ -46,7 +64,7 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-[#0A3E47] text-xl">
             <RefreshCw className="w-5 h-5" />
-            Programar Tarea Recurrente
+            {tareaInicial ? "Editar Tarea Recurrente" : "Programar Tarea Recurrente"}
           </DialogTitle>
         </DialogHeader>
 
@@ -182,7 +200,7 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
               onClick={handleCrear}
               disabled={!form.titulo.trim()}
               className="px-5 py-2 rounded-lg bg-[#6BB68A] text-white text-sm font-medium hover:bg-[#5aa377] transition-colors disabled:opacity-50">
-              Crear programación
+              {tareaInicial ? "Guardar cambios" : "Crear programación"}
             </button>
           </div>
         </div>

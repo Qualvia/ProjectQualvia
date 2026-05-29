@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight } from "lucide-react";
+import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import ProgramarTareaDialog from "./ProgramarTareaDialog";
 import AnadirTareaPuntualDialog from "./AnadirTareaPuntualDialog";
+import GestionarTareasDialog from "./GestionarTareasDialog";
 
 const MODULE_COLORS = {
   "Temperatura": "bg-[#E4F2EC] text-[#0A3E47]",
@@ -66,6 +67,7 @@ export default function TareasIncidenciasBloque() {
   const [verTodasIncidencias, setVerTodasIncidencias] = useState(false);
   const [showProgramar, setShowProgramar] = useState(false);
   const [showPuntual, setShowPuntual] = useState(false);
+  const [showGestionar, setShowGestionar] = useState(false);
 
   const hoy = hoyISO();
 
@@ -229,12 +231,20 @@ export default function TareasIncidenciasBloque() {
             <Clock className="w-4 h-4 text-[#0A3E47]" />
             <span className="font-semibold text-[#0A3E47] text-base">Tareas del día</span>
           </div>
-          <button
-            onClick={() => setShowProgramar(true)}
-            className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5 bg-[#6BB68A] text-white hover:bg-[#5aa377] transition-all">
-            <Plus className="w-3.5 h-3.5" />
-            Programar tarea
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowGestionar(true)}
+              className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5 bg-[#E4F2EC] text-[#0A3E47] hover:bg-[#d0ead9] border border-[#6BB68A]/40 transition-all">
+              <Settings className="w-3.5 h-3.5" />
+              Gestionar tareas
+            </button>
+            <button
+              onClick={() => setShowProgramar(true)}
+              className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5 bg-[#6BB68A] text-white hover:bg-[#5aa377] transition-all">
+              <Plus className="w-3.5 h-3.5" />
+              Programar tarea
+            </button>
+          </div>
         </div>
 
         {/* Lista */}
@@ -351,6 +361,10 @@ export default function TareasIncidenciasBloque() {
 
     </div>
 
+    <GestionarTareasDialog
+      open={showGestionar}
+      onClose={() => { setShowGestionar(false); cargarTareas(); }}
+    />
     <AnadirTareaPuntualDialog
       open={showPuntual}
       onClose={() => setShowPuntual(false)}
