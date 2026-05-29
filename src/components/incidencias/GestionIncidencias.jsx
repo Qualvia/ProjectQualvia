@@ -66,7 +66,7 @@ function filtrarPorPeriodo(registros, periodo, desde, hasta) {
 
 const PAGE_SIZE = 30;
 
-export default function GestionIncidencias({ refreshKey, onIncidenciasChange, showNuevo: showNuevoProp, onCloseNuevo, scrollToId }) {
+export default function GestionIncidencias({ refreshKey, onIncidenciasChange, showNuevo: showNuevoProp, onCloseNuevo }) {
   const { currentBusiness, user } = useBusiness();
   const [incidencias, setIncidencias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,15 +87,6 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
   const [cerrarDialog, setCerrarDialog] = useState(null);
   const [seguimientoDialog, setSeguimientoDialog] = useState(null);
   const [editDialog, setEditDialog] = useState(null);
-
-  // Scroll to a specific incident after load
-  useEffect(() => {
-    if (!scrollToId || loading) return;
-    const el = document.getElementById(`incidencia-${scrollToId}`);
-    if (el) {
-      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
-    }
-  }, [scrollToId, loading]);
 
   async function fetchPage(skipVal, replace = false) {
     if (!currentBusiness) return;
@@ -344,7 +335,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
             <p className="text-sm text-muted-foreground text-center py-8">No hay incidencias registradas.</p>
           )}
           {filtradas.map((inc) => (
-            <div key={inc.id} id={`incidencia-${inc.id}`} className={`rounded-xl border px-5 py-4 ${getCardStyle(inc.estado)} ${scrollToId === inc.id ? "ring-2 ring-[#6BB68A]" : ""}`}>
+            <div key={inc.id} className={`rounded-xl border px-5 py-4 ${getCardStyle(inc.estado)}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-2">
