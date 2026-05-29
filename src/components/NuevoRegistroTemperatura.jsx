@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 
 export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
@@ -83,6 +84,7 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
         fecha: new Date().toISOString(),
       });
     }
+    await marcarTareaCompletada("Temperatura", user.id, currentBusiness.id);
     setSaving(false);
     onSaved();
   }

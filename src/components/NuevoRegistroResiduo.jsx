@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Loader2 } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 
 const TIPOS_RESIDUO = ["Orgánico", "Envases y plásticos", "Papel y cartón", "Vidrio", "Aceite usado", "Subproducto animal", "Otro"];
 const UNIDADES = ["kg", "litros", "unidades", "m³"];
@@ -46,6 +47,7 @@ export default function NuevoRegistroResiduo({ onCancel, onSaved }) {
       registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
+    await marcarTareaCompletada("Residuos", user.id, currentBusiness.id);
     setLoading(false);
     onSaved();
   }

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Camera, Loader2 } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 import { format } from "date-fns";
 
 const TIPOS = ["Preventivo", "Correctivo", "Revisión"];
@@ -60,6 +61,7 @@ export default function NuevoRegistroMantenimiento({ onCancel, onSaved }) {
       registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
+    await marcarTareaCompletada("Mantenimiento", user.id, currentBusiness.id);
     setSaving(false);
     onSaved();
   }

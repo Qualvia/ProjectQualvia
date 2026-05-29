@@ -5,6 +5,7 @@ import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, X, MessageSquare, Camera, Loader2, Ban } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 
 function ZonaRow({ zona, estado, onChange }) {
   const [expanded, setExpanded] = useState(false);
@@ -188,6 +189,7 @@ export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
     setSaving(true);
     try {
       await base44.entities.RegistroLimpieza.bulkCreate(registros);
+      await marcarTareaCompletada("Limpieza", user.id, currentBusiness.id);
       onSaved();
     } catch (err) {
       console.error("Error guardando registros de limpieza:", err);

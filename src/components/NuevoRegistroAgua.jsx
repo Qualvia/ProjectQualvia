@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 
 export default function NuevoRegistroAgua({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
@@ -59,6 +60,7 @@ export default function NuevoRegistroAgua({ onCancel, onSaved }) {
       registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
+    await marcarTareaCompletada("Agua", user.id, currentBusiness.id);
     setSaving(false);
     onSaved();
   }

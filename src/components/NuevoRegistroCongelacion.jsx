@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Loader2 } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 
 const OPERACIONES = ["Congelación", "Descongelación"];
 
@@ -53,6 +54,7 @@ export default function NuevoRegistroCongelacion({ onCancel, onSaved }) {
       registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
+    await marcarTareaCompletada("Congelación", user.id, currentBusiness.id);
     setLoading(false);
     if (imprimir) handleImprimir();
     onSaved();

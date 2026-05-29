@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 
 const ALERGENOS = [
   "Gluten", "Crustáceos", "Huevos", "Pescado", "Cacahuetes", "Soja",
@@ -73,6 +74,7 @@ export default function NuevoRegistroAlergeno({ onCancel, onSaved }) {
       registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
+    await marcarTareaCompletada("Alérgenos", user.id, currentBusiness.id);
     setSaving(false);
     onSaved();
   }

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 
 const TIPOS_ELEMENTO = ["Trampa", "Lámpara UV", "Cebo", "Otro"];
 const ESTADOS = [
@@ -63,6 +64,7 @@ export default function NuevoRegistroPlaga({ onCancel, onSaved }) {
       registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
+    await marcarTareaCompletada("Plagas", user.id, currentBusiness.id);
     setSaving(false);
     onSaved();
   }

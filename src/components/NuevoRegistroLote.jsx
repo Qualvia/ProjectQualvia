@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2, Plus, Trash2, Upload, Link2, Info } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 import { format } from "date-fns";
 
 function generarCodigoLote(contador = 1) {
@@ -131,6 +132,7 @@ export default function NuevoRegistroLote({ onCancel, onSaved }) {
       registrado_por: nombreRegistrador || user.full_name || user.email,
       fecha: new Date().toISOString(),
     });
+    await marcarTareaCompletada("Lotes", user.id, currentBusiness.id);
     setSaving(false);
     onSaved();
   }

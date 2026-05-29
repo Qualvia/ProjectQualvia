@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2, Check, X, AlertCircle } from "lucide-react";
+import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
 
 const ALERGENOS = [
   "Gluten", "Crustáceos", "Huevos", "Pescado", "Cacahuetes", "Soja",
@@ -107,6 +108,7 @@ export default function NuevoRegistroRecepcion({ onCancel, onSaved }) {
         });
       }
 
+      await marcarTareaCompletada("Recepción", user.id, currentBusiness.id);
       onSaved();
     } catch (err) {
       console.error("Error guardando recepción:", err);
