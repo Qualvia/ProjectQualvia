@@ -53,9 +53,9 @@ export default function TareasIncidenciasBloque() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-[#0A3E47]" />
-            <span className="font-semibold text-[#0A3E47] text-sm">Tareas del día</span>
+            <span className="font-semibold text-[#0A3E47] text-base">Tareas del día</span>
           </div>
-          <button className="flex items-center gap-1.5 text-xs font-medium border border-border rounded-lg px-3 py-1.5 text-foreground hover:border-[#0A3E47] hover:bg-[#0A3E47]/5 transition-all">
+          <button className="flex items-center gap-1.5 text-xs font-medium border border-[#6BB68A] rounded-lg px-3 py-1.5 text-[#6BB68A] hover:bg-[#6BB68A]/10 transition-all">
             <Plus className="w-3.5 h-3.5" />
             Programar tarea
           </button>
@@ -116,7 +116,7 @@ export default function TareasIncidenciasBloque() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-[#0A3E47]" />
-            <span className="font-semibold text-[#0A3E47] text-sm">Incidencias activas</span>
+            <span className="font-semibold text-[#0A3E47] text-base">Incidencias activas</span>
           </div>
           <button
             onClick={() => navigate("/registros?tab=incidencias")}
@@ -140,17 +140,15 @@ export default function TareasIncidenciasBloque() {
         ) : (
           <div className="space-y-3">
             {INCIDENCIAS.map((inc) => (
-              <div key={inc.id} className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 space-y-2">
+              <div
+                key={inc.id}
+                onClick={() => navigate("/registros?tab=incidencias")}
+                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 space-y-2 cursor-pointer hover:bg-red-100/60 transition-colors">
                 <p className="text-sm text-foreground leading-snug">{inc.descripcion}</p>
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
                   <span className="text-[11px] text-muted-foreground">
                     {inc.modulo} · {inc.fecha} · <span className="text-red-500 font-medium">{inc.tiempo}</span>
                   </span>
-                  <button
-                    onClick={() => navigate("/registros?tab=incidencias")}
-                    className="text-xs font-medium border border-red-200 text-red-600 bg-white rounded-lg px-3 py-1 hover:bg-red-50 transition-colors shrink-0">
-                    Resolver
-                  </button>
                 </div>
               </div>
             ))}
