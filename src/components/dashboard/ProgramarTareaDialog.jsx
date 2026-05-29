@@ -38,7 +38,7 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear, tareaInic
         diaMes: tareaInicial.dia_mes || 1,
       });
     } else {
-      setForm({ tipo: "Temperatura", titulo: "", descripcion: "", prioridad: "Media", hora: "12:30", frecuencia: "Diaria", diasSemana: [], diaMes: 1 });
+      setForm({ tipo: "Temperatura", titulo: "", descripcion: "", prioridad: "Media", hora: "", frecuencia: "Diaria", diasSemana: [], diaMes: 1 });
     }
   }, [tareaInicial, open]);
 
