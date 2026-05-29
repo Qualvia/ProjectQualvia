@@ -18,7 +18,7 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear, tareaInic
     titulo: "",
     descripcion: "",
     prioridad: "Media",
-    hora: "12:30",
+    hora: "",
     frecuencia: "Diaria",
     diasSemana: [],
     diaMes: 1,
@@ -32,7 +32,7 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear, tareaInic
         titulo: tareaInicial.titulo || "",
         descripcion: tareaInicial.descripcion || "",
         prioridad: tareaInicial.prioridad || "Media",
-        hora: tareaInicial.hora || "12:30",
+        hora: tareaInicial.hora || "",
         frecuencia: tareaInicial.frecuencia || "Diaria",
         diasSemana: tareaInicial.dias_semana || [],
         diaMes: tareaInicial.dia_mes || 1,
@@ -55,7 +55,7 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear, tareaInic
     if (!form.titulo.trim()) return;
     onCrear && onCrear(form);
     onClose();
-    setForm({ tipo: "Temperatura", titulo: "", descripcion: "", prioridad: "Media", hora: "12:30", frecuencia: "Diaria", diasSemana: [], diaMes: 1 });
+    setForm({ tipo: "Temperatura", titulo: "", descripcion: "", prioridad: "Media", hora: "", frecuencia: "Diaria", diasSemana: [], diaMes: 1 });
   }
 
   return (
@@ -120,7 +120,7 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear, tareaInic
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Hora de programación</label>
+              <label className="text-sm font-medium text-foreground">Hora (opcional)</label>
               <input
                 type="time"
                 value={form.hora}
