@@ -44,56 +44,59 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
         {/* KPI 1 — Incidencias activas */}
-        <div className="bg-white rounded-2xl border border-border p-5 flex flex-col gap-3" style={{ borderLeft: "5px solid #A32D2D" }}>
-          <span className="text-[14px] font-semibold" style={{ color: "#0A3E47" }}>Incidencias activas</span>
+        <div className="bg-white rounded-2xl border border-border shadow-sm p-5 flex flex-col">
           <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEE8E8" }}>
-              <AlertCircle className="w-5 h-5" style={{ color: "#A32D2D" }} />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: "#FEE8E8" }}>
+              <AlertCircle className="w-6 h-6" style={{ color: "#C0392B" }} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="font-medium leading-none" style={{ fontSize: "32px", letterSpacing: "-0.02em", color: "#A32D2D" }}>1</span>
-              <div className="flex items-center gap-1 mt-0.5">
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "#A32D2D" }} />
-                <span className="text-[10px]" style={{ color: "#A32D2D" }}>1 de prioridad crítica</span>
-              </div>
+              <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>1</span>
+              <span className="text-[12px] font-medium" style={{ color: "#8A8278" }}>Incidencias activas</span>
             </div>
+          </div>
+          <div className="border-t border-border mt-4 pt-3">
+            <span className="text-[11px]" style={{ color: "#8A8278" }}>1 crítica · más de 48h sin resolver</span>
           </div>
         </div>
 
         {/* KPI 2 — Tareas completadas hoy */}
-        <div className="bg-white rounded-2xl border border-border p-5 flex flex-col gap-3" style={{ borderLeft: "5px solid #D97706" }}>
-          <span className="text-[14px] font-semibold" style={{ color: "#0A3E47" }}>Tareas completadas hoy</span>
+        <div className="bg-white rounded-2xl border border-border shadow-sm p-5 flex flex-col">
           <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEF3DC" }}>
-              <ClipboardCheck className="w-5 h-5" style={{ color: "#8A5C00" }} />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: "#FEF3DC" }}>
+              <ClipboardCheck className="w-6 h-6" style={{ color: "#D97706" }} />
             </div>
-            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-              <span className="font-medium leading-none" style={{ fontSize: "28px", letterSpacing: "-0.02em", color: "#8A5C00" }}>3 / 7</span>
-              <div className="h-[3px] rounded-full my-1" style={{ background: "#DDD5C8" }}>
-                <div className="h-full rounded-full" style={{ width: "43%", background: "#D97706" }} />
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-[10px] h-[10px] shrink-0" style={{ color: "#8A5C00" }} />
-                <span className="text-[10px]" style={{ color: "#8A5C00" }}>4 pendientes esta tarde</span>
-              </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>3 <span style={{ fontSize: "24px", color: "#8A8278", fontWeight: 500 }}>/ 7</span></span>
+              <span className="text-[12px] font-medium" style={{ color: "#8A8278" }}>Tareas completadas hoy</span>
+            </div>
+          </div>
+          <div className="border-t border-border mt-4 pt-3 flex flex-col gap-1.5">
+            <div className="h-[4px] rounded-full w-full" style={{ background: "#EDE6DA" }}>
+              <div className="h-full rounded-full" style={{ width: "43%", background: "#D97706" }} />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[11px]" style={{ color: "#D97706" }}>43% completado</span>
+              <span className="text-[11px]" style={{ color: "#8A8278" }}>4 pendientes</span>
             </div>
           </div>
         </div>
 
-        {/* KPI 3 — Racha de días */}
-        <div className="bg-white rounded-2xl border border-border p-5 flex flex-col gap-3" style={{ borderLeft: "5px solid #2E7D52" }}>
-          <span className="text-[14px] font-semibold" style={{ color: "#0A3E47" }}>Días consecutivos al día</span>
+        {/* KPI 3 — Días consecutivos */}
+        <div className="bg-white rounded-2xl border border-border shadow-sm p-5 flex flex-col">
           <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#E4F2EC" }}>
-              <Flame className="w-5 h-5" style={{ color: "#2E7D52" }} />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: "#E4F2EC" }}>
+              <Flame className="w-6 h-6" style={{ color: "#2E7D52" }} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="font-medium leading-none" style={{ fontSize: "32px", letterSpacing: "-0.02em", color: "#2E7D52" }}>14</span>
-              <div className="flex items-center gap-1 mt-0.5">
-                <TrendingUp className="w-[10px] h-[10px] shrink-0" style={{ color: "#2E7D52" }} />
-                <span className="text-[10px]" style={{ color: "#2E7D52" }}>Tu mejor racha este mes</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>14</span>
+                <span className="text-[14px] font-medium" style={{ color: "#8A8278" }}>días</span>
               </div>
+              <span className="text-[12px] font-medium" style={{ color: "#8A8278" }}>Días consecutivos al día</span>
             </div>
+          </div>
+          <div className="border-t border-border mt-4 pt-3">
+            <span className="text-[11px]" style={{ color: "#8A8278" }}>Tu mejor racha este mes</span>
           </div>
         </div>
 
