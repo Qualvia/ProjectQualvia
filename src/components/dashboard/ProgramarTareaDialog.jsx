@@ -42,7 +42,7 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg w-full">
+      <DialogContent className="max-w-2xl w-full max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-[#0A3E47] text-xl">
             <RefreshCw className="w-5 h-5" />
