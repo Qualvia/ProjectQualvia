@@ -44,9 +44,9 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
         {/* KPI 1 — Incidencias activas */}
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-5 flex flex-col">
+        <div className="bg-white rounded-2xl border-2 border-border shadow-sm p-5 flex flex-col" style={{ borderLeft: "5px solid #C0392B" }}>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: "#FEE8E8" }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEE8E8" }}>
               <AlertCircle className="w-6 h-6" style={{ color: "#C0392B" }} />
             </div>
             <div className="flex flex-col gap-0.5">
@@ -60,9 +60,9 @@ export default function Dashboard() {
         </div>
 
         {/* KPI 2 — Tareas completadas hoy */}
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-5 flex flex-col">
+        <div className="bg-white rounded-2xl border-2 border-border shadow-sm p-5 flex flex-col" style={{ borderLeft: "5px solid #D97706" }}>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: "#FEF3DC" }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#FEF3DC" }}>
               <ClipboardCheck className="w-6 h-6" style={{ color: "#D97706" }} />
             </div>
             <div className="flex flex-col gap-0.5">
@@ -82,9 +82,9 @@ export default function Dashboard() {
         </div>
 
         {/* KPI 3 — Días consecutivos */}
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-5 flex flex-col">
+        <div className="bg-white rounded-2xl border-2 border-border shadow-sm p-5 flex flex-col" style={{ borderLeft: "5px solid #2E7D52" }}>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ background: "#E4F2EC" }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#E4F2EC" }}>
               <Flame className="w-6 h-6" style={{ color: "#2E7D52" }} />
             </div>
             <div className="flex flex-col gap-0.5">
