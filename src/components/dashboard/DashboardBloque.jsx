@@ -8,7 +8,7 @@ export default function DashboardBloque({ title, icon: Icon, children, dragHandl
   return (
     <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 py-4">
+      <div className="flex items-center gap-3 px-5 py-4" style={{ background: "#EDE6DA" }}>
         {/* Drag handle */}
         <div
           {...dragHandleProps}

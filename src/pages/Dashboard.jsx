@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { AlertCircle, ClipboardCheck, Flame, Sparkles, Lightbulb, Bot, ListTodo, BarChart2, Activity } from "lucide-react";
+import { AlertCircle, ClipboardCheck, Flame, Sparkles, Lightbulb, Bot, Clock, BarChart2, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import DashboardBloque from "@/components/dashboard/DashboardBloque";
@@ -25,7 +25,7 @@ function saludo() {
 const CONSEJO = "Establece un sistema de codificación para los ingredientes y productos en tu cocina, asignando un lote y fecha de ingreso a cada uno. Esto facilitará la gestión de inventario y asegurará el seguimiento en caso de cualquier incidencia, mejorando la trazabilidad de los alimentos.";
 
 const BLOQUES_INICIALES = [
-  { id: "tareas", title: "Tareas e Incidencias", icon: ListTodo },
+  { id: "tareas", title: "Tareas e Incidencias", icon: Clock },
   { id: "graficos", title: "Gráficos y evolución", icon: BarChart2 },
   { id: "actividad", title: "Actividad reciente", icon: Activity },
 ];
@@ -125,6 +125,17 @@ export default function Dashboard() {
 
       </div>
 
+      {/* Consejo del día */}
+      <div className="bg-gradient-to-b from-[#1a6b5a] to-[#6BB68A] rounded-2xl p-5 flex gap-4 items-start">
+        <div className="bg-white/20 rounded-xl p-2.5 shrink-0">
+          <Bot className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-white mb-1">Consejo del día</p>
+          <p className="text-sm text-white/85 leading-relaxed">{CONSEJO}</p>
+        </div>
+      </div>
+
       {/* Bloques drag & drop */}
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="dashboard-bloques">
@@ -155,16 +166,7 @@ export default function Dashboard() {
         </Droppable>
       </DragDropContext>
 
-      {/* Consejo QUALVIA */}
-      <div className="bg-gradient-to-b from-[#1a6b5a] to-[#6BB68A] rounded-2xl p-5 flex gap-4 items-start">
-        <div className="bg-white/20 rounded-xl p-2.5 shrink-0">
-          <Bot className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-white mb-1">Consejo QUALVIA del día</p>
-          <p className="text-sm text-white/85 leading-relaxed">{CONSEJO}</p>
-        </div>
-      </div>
+
     </div>
   );
 }
