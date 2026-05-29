@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { base44 } from "@/api/base44Client";
 import { AlertCircle, ClipboardCheck, Flame, Sparkles, Lightbulb, Bot, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
 import TareasIncidenciasBloque from "@/components/dashboard/TareasIncidenciasBloque";
 import { useNavigate } from "react-router-dom";
@@ -39,6 +40,19 @@ export default function Dashboard() {
   const nombre = user?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "usuario";
   const [bloques, setBloques] = useState(BLOQUES_INICIALES);
   const [tareasStats, setTareasStats] = useState({ completadas: 0, total: 0 });
+  const [incidenciasStats, setIncidenciasStats] = useState({ total: 0, criticas: 0, maxHoras: 0 });
+
+  useEffect(() => {
+    base44.entities.Incidencia.list().then((todas) => {
+      const activas = todas.filter((i) => i.estado !== "cerrada");
+      const criticas = activas.filter((i) => i.prioridad === "critica").length;
+      const maxHoras = activas.reduce((max, i) => {
+        const h = Math.floor((Date.now() - new Date(i.fecha || i.created_date).getTime()) / 3600000);
+        return h > max ? h : max;
+      }, 0);
+      setIncidenciasStats({ total: activas.length, criticas, maxHoras });
+    });
+  }, []);
 
   function onDragEnd(result) {
     if (!result.destination) return;
@@ -79,12 +93,15 @@ export default function Dashboard() {
               <AlertCircle className="w-6 h-6" style={{ color: "#C0392B" }} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>1</span>
+              <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>{incidenciasStats.total}</span>
               <span className="text-[12px] font-medium" style={{ color: "#8A8278" }}>Incidencias activas</span>
             </div>
           </div>
           <div className="border-t border-border mt-4 pt-3">
-            <span className="text-[11px]" style={{ color: "#8A8278" }}>1 crítica · más de 48h sin resolver</span>
+            <span className="text-[11px]" style={{ color: "#8A8278" }}>
+              {incidenciasStats.criticas > 0 ? `${incidenciasStats.criticas} crítica${incidenciasStats.criticas > 1 ? "s" : ""} · ` : ""}
+              {incidenciasStats.total === 0 ? "Sin incidencias abiertas" : incidenciasStats.maxHoras >= 48 ? `más de 48h sin resolver` : `${incidenciasStats.maxHoras}h sin resolver`}
+            </span>
           </div>
         </div>
 
