@@ -47,10 +47,11 @@ const CustomTooltipTemp = ({ active, payload, label }) => {
 export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) {
   const { user, currentBusiness } = useBusiness();
   const [data, setData] = useState([]);
-  const [equipos, setEquipos] = useState([]);
+  const [equipos, setEquipos] = useState([]); // equipos con registros recientes
   const [todosEquipos, setTodosEquipos] = useState([]); // todos los configurados
   const [limites, setLimites] = useState({});
-  const [filtroEquipo, setFiltroEquipo] = useState("todos");
+  const [tiposDisponibles, setTiposDisponibles] = useState([]); // tipos únicos configurados
+  const [filtroTipo, setFiltroTipo] = useState("todos");
   const [resumen, setResumen] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -75,15 +76,19 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     const dias = getLast7Days();
 
     const limitesMap = {};
-    eqs.forEach(eq => { limitesMap[eq.id] = { nombre: eq.nombre, min: eq.temp_min, max: eq.temp_max }; });
+    eqs.forEach(eq => { limitesMap[eq.id] = { nombre: eq.nombre, tipo: eq.tipo || "Otro", min: eq.temp_min, max: eq.temp_max }; });
 
-    // Todos los equipos configurados (para el selector)
-    const todosEqs = eqs.map((eq, i) => ({ id: eq.id, nombre: eq.nombre, color: LINE_COLORS[i % LINE_COLORS.length] }));
+    // Todos los equipos configurados
+    const todosEqs = eqs.map((eq, i) => ({ id: eq.id, nombre: eq.nombre, tipo: eq.tipo || "Otro", color: LINE_COLORS[i % LINE_COLORS.length] }));
     setTodosEquipos(todosEqs);
 
-    // Equipos que tienen registros recientes (para las líneas del gráfico)
+    // Tipos únicos disponibles
+    const tipos = ["todos", ...new Set(eqs.map(eq => eq.tipo || "Otro").filter(Boolean))];
+    setTiposDisponibles(tipos);
+
+    // Equipos con registros recientes
     const equiposIds = [...new Set(recientes.map(r => r.equipo_id))];
-    setEquipos(equiposIds.map((id, i) => ({ id, nombre: limitesMap[id]?.nombre || id, color: LINE_COLORS[i % LINE_COLORS.length] })));
+    setEquipos(equiposIds.map((id, i) => ({ id, nombre: limitesMap[id]?.nombre || id, tipo: limitesMap[id]?.tipo || "Otro", color: LINE_COLORS[i % LINE_COLORS.length] })));
     setLimites(limitesMap);
 
     const chartData = dias.map(dia => {
@@ -109,22 +114,32 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
       const lim = limitesMap[eqId];
       const alertas = regsEq.filter(r => lim && (r.temperatura < lim.min || r.temperatura > lim.max)).length;
       const diasConReg = new Set(regsEq.map(r => r.fecha?.slice(0, 10))).size;
-      return { nombre: limitesMap[eqId]?.nombre || eqId, media, alertas, diasConReg, color: LINE_COLORS[i % LINE_COLORS.length] };
+      return { id: eqId, nombre: limitesMap[eqId]?.nombre || eqId, tipo: limitesMap[eqId]?.tipo || "Otro", media, alertas, diasConReg, color: LINE_COLORS[i % LINE_COLORS.length] };
     });
     setResumen(res);
     setLoading(false);
   }
 
-  const equiposMostrar = filtroEquipo === "todos" ? equipos : equipos.filter(e => e.id === filtroEquipo);
+  // Equipos a mostrar en gráfico (filtrados por tipo)
+  const equiposMostrar = filtroTipo === "todos" ? equipos : equipos.filter(e => e.tipo === filtroTipo);
+
+  // Equipos configurados del tipo seleccionado (para mostrar debajo)
+  const equiposDelTipo = filtroTipo === "todos" ? todosEquipos : todosEquipos.filter(e => e.tipo === filtroTipo);
+
   const hayDatos = !loading && equipos.length > 0 && data.some(d => equipos.some(eq => d[eq.nombre] != null));
 
-  // Calcular dominio Y dinámico según el equipo seleccionado
+  // Calcular dominio Y dinámico según el tipo seleccionado
   function getYDomain() {
-    if (filtroEquipo === "todos") return ["auto", "auto"];
-    const lim = limites[filtroEquipo];
-    if (!lim || lim.min == null || lim.max == null) return ["auto", "auto"];
-    const margen = Math.max(3, Math.abs(lim.max - lim.min) * 0.5);
-    return [Math.floor(lim.min - margen), Math.ceil(lim.max + margen)];
+    if (filtroTipo === "todos") return ["auto", "auto"];
+    const eqsDelTipo = Object.entries(limites).filter(([, v]) => v.tipo === filtroTipo);
+    if (eqsDelTipo.length === 0) return ["auto", "auto"];
+    const mins = eqsDelTipo.map(([, v]) => v.min).filter(v => v != null);
+    const maxs = eqsDelTipo.map(([, v]) => v.max).filter(v => v != null);
+    if (!mins.length || !maxs.length) return ["auto", "auto"];
+    const minVal = Math.min(...mins);
+    const maxVal = Math.max(...maxs);
+    const margen = Math.max(3, Math.abs(maxVal - minVal) * 0.5);
+    return [Math.floor(minVal - margen), Math.ceil(maxVal + margen)];
   }
 
   if (expandido) {
@@ -134,13 +149,20 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           <button onClick={onCollapse} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Volver a gráficos
           </button>
-          <select
-            value={filtroEquipo}
-            onChange={e => setFiltroEquipo(e.target.value)}
-            className="text-xs border border-border rounded-lg px-2 py-1 bg-white text-foreground appearance-none cursor-pointer">
-            <option value="todos">Todos los equipos</option>
-            {todosEquipos.map(eq => <option key={eq.id} value={eq.id}>{eq.nombre}</option>)}
-          </select>
+          <div className="flex gap-1.5 flex-wrap justify-end">
+            {tiposDisponibles.map(tipo => (
+              <button
+                key={tipo}
+                onClick={() => setFiltroTipo(tipo)}
+                className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors border ${
+                  filtroTipo === tipo
+                    ? "bg-[#E4F2EC] border-[#6BB68A] text-[#0A3E47]"
+                    : "bg-white border-border text-muted-foreground hover:border-[#6BB68A]/50"
+                }`}>
+                {tipo === "todos" ? "Todos" : tipo}
+              </button>
+            ))}
+          </div>
         </div>
         <h3 className="text-base font-semibold text-[#0A3E47]">Temperatura equipos · Últimos 7 días</h3>
 
@@ -154,7 +176,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
             <LineChart data={data} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F0EBE3" />
               <XAxis dataKey="fecha" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${v}°`} domain={getYDomain()} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${v}°`} domain={getYDomain()} allowDataOverflow={false} />
               <Tooltip content={<CustomTooltipTemp />} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
               {equiposMostrar.map(eq => (
@@ -178,18 +200,30 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           </ResponsiveContainer>
         )}
 
-        {resumen.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-            {resumen.map(r => (
-              <div key={r.nombre} className="bg-[#F8F5F0] rounded-xl p-3">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: r.color }} />
-                  <p className="text-[11px] font-medium text-[#0A3E47] truncate">{r.nombre}</p>
-                </div>
-                <p className="text-sm font-bold text-foreground">{r.media != null ? `${r.media}°C` : "—"}</p>
-                <p className="text-[11px] text-muted-foreground">{r.alertas} alertas · {r.diasConReg} días</p>
-              </div>
-            ))}
+        {equiposDelTipo.length > 0 && (
+          <div className="pt-2">
+            <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
+              {filtroTipo === "todos" ? "Todos los equipos" : `Equipos · ${filtroTipo}`}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {equiposDelTipo.map((eq, i) => {
+                const r = resumen.find(x => x.id === eq.id);
+                const lim = limites[eq.id];
+                return (
+                  <div key={eq.id} className="bg-[#F8F5F0] rounded-xl p-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: eq.color || LINE_COLORS[i % LINE_COLORS.length] }} />
+                      <p className="text-[11px] font-medium text-[#0A3E47] truncate">{eq.nombre}</p>
+                    </div>
+                    <p className="text-sm font-bold text-foreground">{r?.media != null ? `${r.media}°C` : "—"}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {lim ? `Rango: ${lim.min}° – ${lim.max}°` : "Sin rango"}
+                      {r ? ` · ${r.alertas} alertas` : ""}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
