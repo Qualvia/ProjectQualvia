@@ -36,6 +36,7 @@ const INCIDENCIAS = [
 
 export default function TareasIncidenciasBloque() {
   const [tareas, setTareas] = useState(TAREAS_INICIALES);
+  const [verTodasIncidencias, setVerTodasIncidencias] = useState(false);
   const navigate = useNavigate();
 
   function toggleTarea(id) {
@@ -139,7 +140,7 @@ export default function TareasIncidenciasBloque() {
           </div>
         ) : (
           <div className="space-y-3">
-            {INCIDENCIAS.map((inc) => (
+            {(verTodasIncidencias ? INCIDENCIAS : INCIDENCIAS.slice(0, 4)).map((inc) => (
               <div
                 key={inc.id}
                 onClick={() => navigate("/registros?tab=incidencias")}
@@ -152,6 +153,13 @@ export default function TareasIncidenciasBloque() {
                 </div>
               </div>
             ))}
+            {INCIDENCIAS.length > 4 && (
+              <button
+                onClick={() => setVerTodasIncidencias(!verTodasIncidencias)}
+                className="w-full text-xs font-medium text-[#6BB68A] border border-[#6BB68A]/40 rounded-lg py-2 hover:bg-[#6BB68A]/5 transition-colors">
+                {verTodasIncidencias ? "Ver menos ▲" : `Ver ${INCIDENCIAS.length - 4} más ▼`}
+              </button>
+            )}
           </div>
         )}
       </div>
