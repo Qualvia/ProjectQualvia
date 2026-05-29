@@ -26,6 +26,7 @@ const CONSEJO = "Establece un sistema de codificación para los ingredientes y p
 
 const BLOQUES_INICIALES = [
   { id: "tareas", title: "Tareas e Incidencias", icon: Clock },
+
   { id: "graficos", title: "Gráficos y evolución", icon: BarChart2 },
   { id: "actividad", title: "Actividad reciente", icon: Activity },
 ];
