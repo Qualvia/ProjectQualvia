@@ -3,16 +3,16 @@ import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight } from "lucide-re
 import { useNavigate } from "react-router-dom";
 
 const MODULE_COLORS = {
-  "Temperatura": "bg-red-100 text-red-600",
-  "Limpieza":    "bg-cyan-100 text-cyan-700",
-  "Plagas":      "bg-amber-100 text-amber-700",
-  "Recepción":   "bg-orange-100 text-orange-600",
-  "Agua":        "bg-blue-100 text-blue-600",
-  "Formación":   "bg-purple-100 text-purple-600",
-  "Lotes":       "bg-teal-100 text-teal-600",
-  "Alérgenos":   "bg-yellow-100 text-yellow-700",
-  "Congelación": "bg-sky-100 text-sky-600",
-  "Residuos":    "bg-green-100 text-green-700",
+  "Temperatura": "bg-[#E4F2EC] text-[#2E7D52]",
+  "Limpieza":    "bg-[#E4F2EC] text-[#2E7D52]",
+  "Plagas":      "bg-[#E4F2EC] text-[#2E7D52]",
+  "Recepción":   "bg-[#E4F2EC] text-[#2E7D52]",
+  "Agua":        "bg-[#E4F2EC] text-[#2E7D52]",
+  "Formación":   "bg-[#E4F2EC] text-[#2E7D52]",
+  "Lotes":       "bg-[#E4F2EC] text-[#2E7D52]",
+  "Alérgenos":   "bg-[#E4F2EC] text-[#2E7D52]",
+  "Congelación": "bg-[#E4F2EC] text-[#2E7D52]",
+  "Residuos":    "bg-[#E4F2EC] text-[#2E7D52]",
 };
 
 const TAREAS_INICIALES = [
@@ -56,7 +56,7 @@ export default function TareasIncidenciasBloque() {
             <Clock className="w-4 h-4 text-[#0A3E47]" />
             <span className="font-semibold text-[#0A3E47] text-base">Tareas del día</span>
           </div>
-          <button className="flex items-center gap-1.5 text-xs font-medium border border-[#6BB68A] rounded-lg px-3 py-1.5 text-[#6BB68A] hover:bg-[#6BB68A]/10 transition-all">
+          <button className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5 bg-[#6BB68A] text-white hover:bg-[#5aa377] transition-all">
             <Plus className="w-3.5 h-3.5" />
             Programar tarea
           </button>
