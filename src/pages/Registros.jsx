@@ -74,6 +74,10 @@ export default function Registros() {
     const params = new URLSearchParams(window.location.search);
     return params.get("tab") || "temperatura";
   });
+  const [scrollToIncidenciaId] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("incidenciaId") || null;
+  });
   const [showGestionar, setShowGestionar] = useState(false);
   const [gestionarTab, setGestionarTab] = useState("equipos");
   const [showProveedores, setShowProveedores] = useState(() => {
@@ -359,6 +363,7 @@ export default function Registros() {
                 onIncidenciasChange={() => setIncidenciasKey((k) => k + 1)}
                 showNuevo={showNuevoRegistro}
                 onCloseNuevo={() => setShowNuevoRegistro(false)}
+                scrollToId={scrollToIncidenciaId}
               />
             </Suspense>
           )}

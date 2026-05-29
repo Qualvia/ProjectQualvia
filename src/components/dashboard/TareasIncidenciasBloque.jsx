@@ -354,7 +354,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
             {(verTodasIncidencias ? incidencias : incidencias.slice(0, 4)).map((inc) => (
               <div
                 key={inc.id}
-                onClick={() => navigate("/registros?tab=incidencias")}
+                onClick={() => navigate(`/registros?tab=incidencias&incidenciaId=${inc.id}`)}
                 className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 space-y-2 cursor-pointer hover:bg-red-100/60 transition-colors">
                 <p className="text-sm text-foreground leading-snug">{inc.descripcion}</p>
                 <div className="flex items-center gap-2">
