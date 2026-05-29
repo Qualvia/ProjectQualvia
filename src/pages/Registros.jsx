@@ -145,7 +145,7 @@ export default function Registros() {
             <button
               key={id}
               onClick={() => { setActive(id); setShowNuevoRegistro(false); }}
-              className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-all aspect-square
+              className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border-2 transition-all aspect-square
                 ${isActive
                   ? color
                     ? `${color} shadow-md`
