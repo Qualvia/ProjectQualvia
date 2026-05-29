@@ -102,7 +102,7 @@ export default function Dashboard() {
       </div>
 
       {/* Consejo QUALVIA */}
-      <div className="bg-gradient-to-b from-[#0A3E47] to-[#6BB68A] rounded-2xl p-5 flex gap-4 items-start">
+      <div className="bg-gradient-to-b from-[#1a6b5a] to-[#6BB68A] rounded-2xl p-5 flex gap-4 items-start">
         <div className="bg-white/20 rounded-xl p-2.5 shrink-0">
           <Bot className="w-5 h-5 text-white" />
         </div>
