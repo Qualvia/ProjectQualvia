@@ -52,11 +52,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
-    base44.entities.Incidencia.filter({
-      user_id: user.id,
-      business_id: currentBusiness.id,
-    }).then((todas) => {
-      const activas = todas.filter((i) => i.estado !== "cerrada");
+    base44.entities.Incidencia.filter(
+      { user_id: user.id, business_id: currentBusiness.id, estado: { $ne: "cerrada" } },
+      "-fecha",
+      100
+    ).then((activas) => {
       const criticas = activas.filter((i) => i.prioridad === "critica").length;
       const maxHoras = activas.reduce((max, i) => {
         const h = Math.floor((Date.now() - new Date(i.fecha || i.created_date).getTime()) / 3600000);
