@@ -369,6 +369,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               axisLine={false}
               tickFormatter={v => `${v}°`}
               width={30}
+              tickCount={5}
               domain={(() => {
                 const vals = registrosRecientes.map(r => r.temperatura).filter(v => v != null);
                 if (vals.length === 0) return ["auto", "auto"];
