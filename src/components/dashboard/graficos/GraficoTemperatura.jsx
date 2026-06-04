@@ -305,7 +305,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: eq.color || LINE_COLORS[i % LINE_COLORS.length] }} />
                       <p className="text-[11px] font-medium text-[#0A3E47] truncate">{eq.nombre}</p>
                     </div>
-                    <p className="text-sm font-bold text-foreground">{r?.media != null ? `${r.media}°C` : "—"} <span className="text-[11px] font-normal text-muted-foreground">Media</span></p>
+                    <p className="text-sm font-bold text-foreground">{r?.media != null ? `${r.media}°C` : "—"} <span className="text-[11px] font-normal text-muted-foreground">Promedio</span></p>
                     <p className="text-[11px] text-muted-foreground">
                       {lim ? `Rango: ${lim.min}° – ${lim.max}°` : "Sin rango"}
                       {r ? ` · ${r.alertas} alertas` : ""}
@@ -354,7 +354,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={110}>
-          <LineChart data={data} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+          <LineChart data={data} margin={{ top: 6, right: 6, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
             <XAxis
               dataKey="fecha"
@@ -368,7 +368,8 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               tickLine={false}
               axisLine={false}
               tickFormatter={v => `${v}°`}
-              width={36}
+              width={30}
+              domain={getYDomain()}
             />
             <Tooltip content={<CustomTooltipTemp />} />
             {equiposCompactos.map(eq => (
