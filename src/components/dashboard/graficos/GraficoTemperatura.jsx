@@ -278,33 +278,36 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                   }}
                 />
               ))}
-              {filtroTipo !== "todos" && equiposMostrar.flatMap(eq => {
-                const lim = limites[eq.id];
-                if (!lim) return [];
-                const abrev = eq.nombre.slice(0, 4).replace(/\s+$/, "");
+              {filtroTipo !== "todos" && (() => {
+                const abrev = filtroTipo.slice(0, 3);
+                const limsDelTipo = equiposMostrar.map(eq => limites[eq.id]).filter(Boolean);
+                const mins = limsDelTipo.map(l => l.min).filter(v => v != null);
+                const maxs = limsDelTipo.map(l => l.max).filter(v => v != null);
+                const globalMin = mins.length > 0 ? Math.min(...mins) : null;
+                const globalMax = maxs.length > 0 ? Math.max(...maxs) : null;
                 return [
-                  lim.min != null && (
+                  globalMin != null && (
                     <ReferenceLine
-                      key={`min-${eq.id}`}
-                      y={lim.min}
-                      stroke={eq.color}
+                      key="tipo-min"
+                      y={globalMin}
+                      stroke="#6B7280"
                       strokeDasharray="4 3"
-                      strokeOpacity={0.6}
-                      label={{ value: `${abrev}. min`, position: "right", fontSize: 9, fill: eq.color, opacity: 0.8 }}
+                      strokeOpacity={0.7}
+                      label={{ value: `${abrev}. min`, position: "right", fontSize: 9, fill: "#6B7280" }}
                     />
                   ),
-                  lim.max != null && (
+                  globalMax != null && (
                     <ReferenceLine
-                      key={`max-${eq.id}`}
-                      y={lim.max}
-                      stroke={eq.color}
+                      key="tipo-max"
+                      y={globalMax}
+                      stroke="#6B7280"
                       strokeDasharray="4 3"
-                      strokeOpacity={0.6}
-                      label={{ value: `${abrev}. max`, position: "right", fontSize: 9, fill: eq.color, opacity: 0.8 }}
+                      strokeOpacity={0.7}
+                      label={{ value: `${abrev}. max`, position: "right", fontSize: 9, fill: "#6B7280" }}
                     />
                   ),
                 ].filter(Boolean);
-              })}
+              })()}
             </LineChart>
           </ResponsiveContainer>
         )}
