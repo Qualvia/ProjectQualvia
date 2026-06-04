@@ -332,7 +332,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
             value={periodo}
             onChange={e => { e.stopPropagation(); setPeriodo(e.target.value); }}
             onClick={e => e.stopPropagation()}
-            className="text-[10px] text-muted-foreground border border-border rounded px-1 py-0.5 bg-white focus:outline-none cursor-pointer">
+            className="text-[10px] text-[#0A3E47] font-medium border-0 bg-transparent focus:outline-none cursor-pointer appearance-none pr-1">
             {PERIODOS.map(p => (
               <option key={p.value} value={p.value}>{p.label}</option>
             ))}
