@@ -284,7 +284,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               />
               <Tooltip content={<CustomTooltipTemp />} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-              {getGaps().map((gap, i) => (
+              {filtroTipo !== "todos" && getGaps().map((gap, i) => (
                 <ReferenceArea
                   key={`gap-${i}`}
                   x1={gap.x1}
