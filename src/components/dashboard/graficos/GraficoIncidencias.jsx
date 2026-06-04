@@ -185,7 +185,11 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
 
         <h3 className="text-base font-semibold text-[#0A3E47]">Incidencias · {periodoDesc}</h3>
 
-        {!hayDatos ? (
+        {loading ? (
+          <div className="flex items-center justify-center h-[280px]">
+            <div className="w-6 h-6 border-2 border-gray-200 border-t-[#0A3E47] rounded-full animate-spin" />
+          </div>
+        ) : !hayDatos ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
             <AlertTriangle className="w-10 h-10 text-muted-foreground/30" />
             <p className="text-sm text-muted-foreground">Sin incidencias registradas en este periodo</p>
