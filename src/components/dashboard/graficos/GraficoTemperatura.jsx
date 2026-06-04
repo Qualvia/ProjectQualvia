@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, ReferenceLine, Legend,
+  CartesianGrid, ReferenceLine, ReferenceArea, Legend,
 } from "recharts";
 import { Thermometer, Maximize2, ArrowLeft } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -190,6 +190,29 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
 
   const xTickFormatter = filtrarEtiquetasX([], periodo);
 
+  // Calcula rangos de fechas sin ningún dato para los equipos visibles
+  function getGaps() {
+    if (!data.length || !equiposMostrar.length) return [];
+    const gaps = [];
+    let gapStart = null;
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const tieneAlgun = equiposMostrar.some(eq => row[eq.nombre] != null);
+      if (!tieneAlgun) {
+        if (gapStart === null) gapStart = row.fecha;
+      } else {
+        if (gapStart !== null) {
+          gaps.push({ x1: gapStart, x2: data[i - 1].fecha, dias: i - data.findIndex(r => r.fecha === gapStart) });
+          gapStart = null;
+        }
+      }
+    }
+    if (gapStart !== null) {
+      gaps.push({ x1: gapStart, x2: data[data.length - 1].fecha, dias: data.length - data.findIndex(r => r.fecha === gapStart) });
+    }
+    return gaps;
+  }
+
   if (expandido) {
     return (
       <div className="p-6 space-y-4">
@@ -261,6 +284,17 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               />
               <Tooltip content={<CustomTooltipTemp />} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+              {getGaps().map((gap, i) => (
+                <ReferenceArea
+                  key={`gap-${i}`}
+                  x1={gap.x1}
+                  x2={gap.x2}
+                  fill="#F0EBE3"
+                  fillOpacity={0.6}
+                  strokeOpacity={0}
+                  label={gap.dias >= 3 ? { value: "Sin registro", position: "insideTop", fontSize: 9, fill: "#A89F94" } : undefined}
+                />
+              ))}
               {equiposMostrar.map(eq => (
                 <Line
                   key={eq.id}
