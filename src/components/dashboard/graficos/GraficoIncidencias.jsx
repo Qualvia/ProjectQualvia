@@ -40,6 +40,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
   const [dataExpandido, setDataExpandido] = useState([]);
   const [tendencia, setTendencia] = useState(null);
   const [resumen, setResumen] = useState({ mesPico: null, tasaResolucion: 0, tiempoMedio: null });
+  const [miniStats, setMiniStats] = useState({ abiertas: 0, tasaMes: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,22 +69,41 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
       };
     });
     setDataExpandido(dataExp);
-    setDataCompacto(dataExp.map(d => ({ label: d.label, total: d.total })));
+    setDataCompacto(dataExp.map(d => ({ label: d.label, cerradas: d.cerradas, abiertas: d.abiertas })));
 
-    const primera = dataExp.slice(0, 3).reduce((s, d) => s + d.total, 0);
-    const segunda = dataExp.slice(3).reduce((s, d) => s + d.total, 0);
-    if (segunda < primera) setTendencia("baja");
-    else if (segunda > primera) setTendencia("sube");
-    else setTendencia("igual");
+    // Tendencia: solo meses con al menos 1 incidencia
+    const mesesConDatos = dataExp.filter(d => d.total > 0);
+    if (mesesConDatos.length >= 2) {
+      const mitad = Math.floor(mesesConDatos.length / 2);
+      const primera = mesesConDatos.slice(0, mitad).reduce((s, d) => s + d.total, 0);
+      const segunda = mesesConDatos.slice(mitad).reduce((s, d) => s + d.total, 0);
+      if (segunda < primera) setTendencia("baja");
+      else if (segunda > primera) setTendencia("sube");
+      else setTendencia("igual");
+    } else {
+      setTendencia(null);
+    }
 
     const mesPico = dataExp.reduce((max, d) => d.total > (max?.total ?? 0) ? d : max, null);
     const totalConFecha = todas.filter(i => i.fecha_cierre && i.fecha);
+    // "0d" solo si hay incidencias con fecha pero tiempo medio es 0; si no hay ninguna → null → "—"
     const tiempoMedio = totalConFecha.length > 0
       ? Math.round(totalConFecha.reduce((s, i) => s + (new Date(i.fecha_cierre) - new Date(i.fecha)) / (1000 * 3600 * 24), 0) / totalConFecha.length)
       : null;
     const cerradasTotal = todas.filter(i => i.estado === "cerrada").length;
     const tasaResolucion = todas.length > 0 ? Math.round((cerradasTotal / todas.length) * 100) : 0;
     setResumen({ mesPico: mesPico?.total > 0 ? mesPico.label : null, tasaResolucion, tiempoMedio });
+
+    // Mini-stats para vista compacta
+    const abiertasActuales = todas.filter(i => i.estado !== "cerrada").length;
+    const mesActual = new Date();
+    const inicioMes = new Date(mesActual.getFullYear(), mesActual.getMonth(), 1).toISOString();
+    const finMes = new Date(mesActual.getFullYear(), mesActual.getMonth() + 1, 0, 23, 59, 59).toISOString();
+    const incMes = todas.filter(i => (i.fecha || i.created_date) >= inicioMes && (i.fecha || i.created_date) <= finMes);
+    const cerradasMes = incMes.filter(i => i.estado === "cerrada").length;
+    const tasaMes = incMes.length > 0 ? Math.round((cerradasMes / incMes.length) * 100) : 0;
+    setMiniStats({ abiertas: abiertasActuales, tasaMes });
+
     setLoading(false);
   }
 
@@ -164,17 +184,26 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
         <div className="flex items-center justify-center h-[120px]">
           <div className="w-5 h-5 border-2 border-gray-200 border-t-[#0A3E47] rounded-full animate-spin" />
         </div>
-      ) : !hayDatos ? (
-        <div className="flex flex-col items-center justify-center h-[120px] gap-1.5">
-          <AlertTriangle className="w-6 h-6 text-muted-foreground/30" />
-          <p className="text-[11px] text-muted-foreground text-center leading-tight">Aún no hay incidencias<br />registradas</p>
-        </div>
       ) : (
-        <ResponsiveContainer width="100%" height={120}>
-          <BarChart data={dataCompacto}>
-            <Bar dataKey="total" fill="#FECACA" radius={[3, 3, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <>
+          <ResponsiveContainer width="100%" height={75}>
+            <BarChart data={dataCompacto} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+              <Bar dataKey="cerradas" stackId="a" fill="#6BB68A" radius={[0, 0, 0, 0]} isAnimationActive={false} />
+              <Bar dataKey="abiertas" stackId="a" fill="#FECACA" radius={[3, 3, 0, 0]} isAnimationActive={false} />
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="flex gap-1.5 mt-1.5">
+            <div className="flex-1 bg-[#F8F5F0] rounded-lg px-2 py-1.5 flex items-center gap-1.5">
+              {miniStats.abiertas > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />}
+              <span className="text-[9px] text-muted-foreground">Abiertas</span>
+              <span className="text-[10px] font-bold text-[#0A3E47] ml-auto">{miniStats.abiertas}</span>
+            </div>
+            <div className="flex-1 bg-[#F8F5F0] rounded-lg px-2 py-1.5 flex items-center gap-1.5">
+              <span className="text-[9px] text-muted-foreground">Resolución mes</span>
+              <span className="text-[10px] font-bold text-[#0A3E47] ml-auto">{miniStats.tasaMes}%</span>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
