@@ -109,11 +109,11 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     const tipos = ["todos", ...new Set(eqs.map(eq => eq.tipo || "Otro").filter(Boolean))];
     setTiposDisponibles(tipos);
 
-    const equiposIds = [...new Set(recientes.map(r => r.equipo_id))];
-    const equiposConDatos = equiposIds.map((id, i) => ({
-      id,
-      nombre: limitesMap[id]?.nombre || id,
-      tipo: limitesMap[id]?.tipo || "Otro",
+    // Todos los equipos configurados son la fuente de verdad para el gráfico
+    const equiposConDatos = eqs.map((eq, i) => ({
+      id: eq.id,
+      nombre: eq.nombre,
+      tipo: eq.tipo || "Otro",
       color: LINE_COLORS[i % LINE_COLORS.length],
     }));
     setEquipos(equiposConDatos);
@@ -122,33 +122,34 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
 
     const chartData = dias.map(dia => {
       const row = { fecha: formatDD_MM(dia + "T12:00:00") };
-      equiposIds.forEach(eqId => {
-        const regsDelDia = recientes.filter(r => r.equipo_id === eqId && r.fecha?.slice(0, 10) === dia);
+      eqs.forEach((eq, i) => {
+        const eqNombre = eq.nombre;
+        const regsDelDia = recientes.filter(r => r.equipo_id === eq.id && r.fecha?.slice(0, 10) === dia);
         if (regsDelDia.length > 0) {
           const avg = regsDelDia.reduce((s, r) => s + r.temperatura, 0) / regsDelDia.length;
           const val = Math.round(avg * 10) / 10;
-          const lim = limitesMap[eqId];
+          const lim = limitesMap[eq.id];
           const fuera = lim && (val < lim.min || val > lim.max);
-          row[limitesMap[eqId]?.nombre || eqId] = val;
-          row[`_meta_${limitesMap[eqId]?.nombre || eqId}`] = { fuera };
+          row[eqNombre] = val;
+          row[`_meta_${eqNombre}`] = { fuera };
         }
       });
       return row;
     });
     setData(chartData);
 
-    const res = equiposIds.map((eqId, i) => {
-      const regsEq = recientes.filter(r => r.equipo_id === eqId);
+    const res = eqs.map((eq, i) => {
+      const regsEq = recientes.filter(r => r.equipo_id === eq.id);
       const media = regsEq.length > 0
         ? Math.round((regsEq.reduce((s, r) => s + r.temperatura, 0) / regsEq.length) * 10) / 10
         : null;
-      const lim = limitesMap[eqId];
+      const lim = limitesMap[eq.id];
       const alertas = regsEq.filter(r => lim && (r.temperatura < lim.min || r.temperatura > lim.max)).length;
       const diasConReg = new Set(regsEq.map(r => r.fecha?.slice(0, 10))).size;
       return {
-        id: eqId,
-        nombre: limitesMap[eqId]?.nombre || eqId,
-        tipo: limitesMap[eqId]?.tipo || "Otro",
+        id: eq.id,
+        nombre: eq.nombre,
+        tipo: eq.tipo || "Otro",
         media, alertas, diasConReg,
         color: LINE_COLORS[i % LINE_COLORS.length],
       };
@@ -160,7 +161,10 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
   const equiposMostrar = filtroTipo === "todos" ? equipos : equipos.filter(e => e.tipo === filtroTipo);
   const equiposDelTipo = filtroTipo === "todos" ? todosEquipos : todosEquipos.filter(e => e.tipo === filtroTipo);
 
+  // Hay datos si algún equipo configurado tiene al menos un valor en el periodo
   const hayDatos = !loading && equipos.length > 0 && data.some(d => equipos.some(eq => d[eq.nombre] != null));
+  // Para vista compacta usamos todos los equipos configurados
+  const equiposCompactos = equipos;
 
   // Dominio Y: considera valores reales + límites de equipos mostrados, con margen ±3
   function getYDomain() {
@@ -349,9 +353,25 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           <p className="text-[11px] text-muted-foreground text-center">Sin datos<br />todavía</p>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={120}>
-          <LineChart data={data}>
-            {equipos.map(eq => (
+        <ResponsiveContainer width="100%" height={110}>
+          <LineChart data={data} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
+            <XAxis
+              dataKey="fecha"
+              tick={{ fontSize: 9, fill: "#9A9289" }}
+              tickLine={false}
+              axisLine={false}
+              interval={periodo === "7d" ? 1 : periodo === "14d" ? 3 : 6}
+            />
+            <YAxis
+              tick={{ fontSize: 9, fill: "#9A9289" }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={v => `${v}°`}
+              width={36}
+            />
+            <Tooltip content={<CustomTooltipTemp />} />
+            {equiposCompactos.map(eq => (
               <Line
                 key={eq.id}
                 type="monotone"
