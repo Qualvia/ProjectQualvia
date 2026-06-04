@@ -246,7 +246,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={data} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+            <LineChart data={data} margin={{ top: 8, right: filtroTipo === "todos" ? 8 : 72, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F0EBE3" />
               <XAxis
                 dataKey="fecha"
@@ -278,12 +278,31 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                   }}
                 />
               ))}
-              {equiposMostrar.flatMap(eq => {
+              {filtroTipo !== "todos" && equiposMostrar.flatMap(eq => {
                 const lim = limites[eq.id];
                 if (!lim) return [];
+                const abrev = eq.nombre.slice(0, 4).replace(/\s+$/, "");
                 return [
-                  lim.min != null && <ReferenceLine key={`min-${eq.id}`} y={lim.min} stroke={eq.color} strokeDasharray="4 3" strokeOpacity={0.5} />,
-                  lim.max != null && <ReferenceLine key={`max-${eq.id}`} y={lim.max} stroke={eq.color} strokeDasharray="4 3" strokeOpacity={0.5} />,
+                  lim.min != null && (
+                    <ReferenceLine
+                      key={`min-${eq.id}`}
+                      y={lim.min}
+                      stroke={eq.color}
+                      strokeDasharray="4 3"
+                      strokeOpacity={0.6}
+                      label={{ value: `${abrev}. min`, position: "right", fontSize: 9, fill: eq.color, opacity: 0.8 }}
+                    />
+                  ),
+                  lim.max != null && (
+                    <ReferenceLine
+                      key={`max-${eq.id}`}
+                      y={lim.max}
+                      stroke={eq.color}
+                      strokeDasharray="4 3"
+                      strokeOpacity={0.6}
+                      label={{ value: `${abrev}. max`, position: "right", fontSize: 9, fill: eq.color, opacity: 0.8 }}
+                    />
+                  ),
                 ].filter(Boolean);
               })}
             </LineChart>
