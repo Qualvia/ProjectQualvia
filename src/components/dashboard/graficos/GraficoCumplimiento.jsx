@@ -188,8 +188,8 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       className="relative bg-white rounded-xl border border-[#E8E0D5] shadow-sm p-3 cursor-pointer group hover:shadow-md hover:border-[#6BB68A]/40 transition-all">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
-          <ClipboardCheck className="w-3.5 h-3.5 text-[#0A3E47]" />
-          <span className="text-xs font-semibold text-[#0A3E47]">Cumplimiento</span>
+          <ClipboardCheck className="w-4.5 h-4.5 text-[#0A3E47]" />
+          <span className="text-sm font-semibold text-[#0A3E47]">Cumplimiento</span>
         </div>
         <Maximize2 className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>

@@ -327,8 +327,8 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
       className="relative bg-white rounded-xl border border-[#E8E0D5] shadow-sm p-3 cursor-pointer group hover:shadow-md hover:border-[#6BB68A]/40 transition-all">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
-          <Thermometer className="w-3.5 h-3.5 text-[#0A3E47]" />
-          <span className="text-xs font-semibold text-[#0A3E47]">Temperatura</span>
+          <Thermometer className="w-4.5 h-4.5 text-[#0A3E47]" />
+          <span className="text-sm font-semibold text-[#0A3E47]">Temperatura</span>
         </div>
         <div className="flex items-center gap-1.5">
           {/* Selector de periodo compacto — detiene el click para no abrir expandido */}
