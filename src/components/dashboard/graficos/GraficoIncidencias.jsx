@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Line, ComposedChart, Legend,
@@ -9,15 +9,40 @@ import { useBusiness } from "@/contexts/BusinessContext";
 
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
-function getLast6Months() {
-  const result = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(1);
-    d.setMonth(d.getMonth() - i);
-    result.push({ año: d.getFullYear(), mes: d.getMonth(), label: MESES[d.getMonth()] });
+const PERIODOS = [
+  { value: "semanal",    label: "Sem",  desc: "Últimas 8 semanas" },
+  { value: "mensual",    label: "6M",   desc: "Últimos 6 meses" },
+  { value: "trimestral", label: "1A",   desc: "Últimos 12 meses" },
+  { value: "semestral",  label: "2A",   desc: "Últimos 24 meses" },
+];
+
+function getPeriodoBuckets(periodo) {
+  const ahora = new Date();
+  const buckets = [];
+
+  if (periodo === "semanal") {
+    for (let i = 7; i >= 0; i--) {
+      const inicio = new Date(ahora);
+      inicio.setDate(ahora.getDate() - i * 7);
+      inicio.setHours(0, 0, 0, 0);
+      const fin = new Date(inicio);
+      fin.setDate(inicio.getDate() + 6);
+      fin.setHours(23, 59, 59, 999);
+      const label = `${String(inicio.getDate()).padStart(2,"0")}/${String(inicio.getMonth()+1).padStart(2,"0")}`;
+      buckets.push({ label, inicio, fin });
+    }
+  } else {
+    const numMeses = periodo === "mensual" ? 6 : periodo === "trimestral" ? 12 : 24;
+    for (let i = numMeses - 1; i >= 0; i--) {
+      const d = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
+      const fin = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+      const label = periodo === "semestral" && i % 2 !== 0
+        ? ""
+        : `${MESES[d.getMonth()]}${periodo !== "mensual" ? ` '${String(d.getFullYear()).slice(2)}` : ""}`;
+      buckets.push({ label, inicio: d, fin });
+    }
   }
-  return result;
+  return buckets;
 }
 
 const CustomTooltipInc = ({ active, payload, label }) => {
@@ -36,8 +61,8 @@ const CustomTooltipInc = ({ active, payload, label }) => {
 
 export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) {
   const { user, currentBusiness } = useBusiness();
-  const [dataCompacto, setDataCompacto] = useState([]);
-  const [dataExpandido, setDataExpandido] = useState([]);
+  const [periodo, setPeriodo] = useState("mensual");
+  const [todasIncidencias, setTodasIncidencias] = useState([]);
   const [tendencia, setTendencia] = useState(null);
   const [resumen, setResumen] = useState({ mesPico: null, tasaResolucion: 0, tiempoMedio: null });
   const [loading, setLoading] = useState(true);
@@ -51,27 +76,46 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
     setLoading(true);
     const uid = user.id;
     const bid = currentBusiness.id;
-
     const todas = await base44.entities.Incidencia.filter({ user_id: uid, business_id: bid });
-    const meses = getLast6Months();
+    setTodasIncidencias(todas);
 
-    const dataExp = meses.map(({ año, mes, label }) => {
-      const del_mes = todas.filter(i => {
+    const cerradasTotal = todas.filter(i => i.estado === "cerrada").length;
+    const tasaResolucion = todas.length > 0 ? Math.round((cerradasTotal / todas.length) * 100) : 0;
+    const totalConFecha = todas.filter(i => i.fecha_cierre && i.fecha && new Date(i.fecha_cierre) > new Date(i.fecha));
+    const tiempoMedio = totalConFecha.length > 0
+      ? Math.round(totalConFecha.reduce((s, i) => s + (new Date(i.fecha_cierre) - new Date(i.fecha)) / (1000 * 3600 * 24), 0) / totalConFecha.length)
+      : null;
+
+    setResumen({ tasaResolucion, tiempoMedio });
+    setLoading(false);
+  }
+
+  // Recalcular data y tendencia cuando cambia periodo o datos
+  const dataExpandido = useMemo(() => {
+    const buckets = getPeriodoBuckets(periodo);
+    return buckets.map(({ label, inicio, fin }) => {
+      const del_bucket = todasIncidencias.filter(i => {
         const f = new Date(i.fecha || i.created_date);
-        return f.getFullYear() === año && f.getMonth() === mes;
+        return f >= inicio && f <= fin;
       });
       return {
         label,
-        cerradas: del_mes.filter(i => i.estado === "cerrada").length,
-        abiertas: del_mes.filter(i => i.estado !== "cerrada").length,
-        total: del_mes.length,
+        cerradas: del_bucket.filter(i => i.estado === "cerrada").length,
+        abiertas: del_bucket.filter(i => i.estado !== "cerrada").length,
+        total: del_bucket.length,
       };
     });
-    setDataExpandido(dataExp);
-    setDataCompacto(dataExp.map(d => ({ label: d.label, total: d.total })));
+  }, [periodo, todasIncidencias]);
 
-    // Tendencia: solo con meses que tienen al menos 1 incidencia
-    const mesesConDatos = dataExp.filter(d => d.total > 0);
+  const dataCompacto = useMemo(
+    () => dataExpandido.map(d => ({ label: d.label, total: d.total })),
+    [dataExpandido]
+  );
+
+  // Recalcular tendencia y mesPico
+  useEffect(() => {
+    if (!dataExpandido.length) return;
+    const mesesConDatos = dataExpandido.filter(d => d.total > 0);
     if (mesesConDatos.length >= 2) {
       const mitad = Math.floor(mesesConDatos.length / 2);
       const primera = mesesConDatos.slice(0, mitad).reduce((s, d) => s + d.total, 0);
@@ -82,17 +126,9 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
     } else {
       setTendencia(null);
     }
-
-    const mesPico = dataExp.reduce((max, d) => d.total > (max?.total ?? 0) ? d : max, null);
-    const totalConFecha = todas.filter(i => i.fecha_cierre && i.fecha && new Date(i.fecha_cierre) > new Date(i.fecha));
-    const tiempoMedio = totalConFecha.length > 0
-      ? Math.round(totalConFecha.reduce((s, i) => s + (new Date(i.fecha_cierre) - new Date(i.fecha)) / (1000 * 3600 * 24), 0) / totalConFecha.length)
-      : null;
-    const cerradasTotal = todas.filter(i => i.estado === "cerrada").length;
-    const tasaResolucion = todas.length > 0 ? Math.round((cerradasTotal / todas.length) * 100) : 0;
-    setResumen({ mesPico: mesPico?.total > 0 ? mesPico.label : null, tasaResolucion, tiempoMedio });
-    setLoading(false);
-  }
+    const mesPico = dataExpandido.reduce((max, d) => d.total > (max?.total ?? 0) ? d : max, null);
+    setResumen(prev => ({ ...prev, mesPico: mesPico?.total > 0 ? mesPico.label : null }));
+  }, [dataExpandido]);
 
   const hayDatos = dataCompacto.some(d => d.total > 0);
 
@@ -102,18 +138,38 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
     igual: { texto: "→ Sin cambios significativos", color: "#6B7280" },
   };
 
+  const periodoDesc = PERIODOS.find(p => p.value === periodo)?.desc ?? "";
+
   if (expandido) {
     return (
       <div className="p-6 space-y-4">
-        <button onClick={onCollapse} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Volver a gráficos
-        </button>
-        <h3 className="text-base font-semibold text-[#0A3E47]">Incidencias · Últimos 6 meses</h3>
+        {/* Header */}
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <button onClick={onCollapse} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Volver a gráficos
+          </button>
+          <div className="flex gap-1">
+            {PERIODOS.map(p => (
+              <button
+                key={p.value}
+                onClick={() => setPeriodo(p.value)}
+                className={`text-xs px-2.5 py-1.5 rounded-lg font-medium transition-colors border ${
+                  periodo === p.value
+                    ? "bg-[#0A3E47] border-[#0A3E47] text-white"
+                    : "bg-white border-border text-muted-foreground hover:border-[#0A3E47]/40"
+                }`}>
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <h3 className="text-base font-semibold text-[#0A3E47]">Incidencias · {periodoDesc}</h3>
 
         {!hayDatos ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3">
             <AlertTriangle className="w-10 h-10 text-muted-foreground/30" />
-            <p className="text-sm text-muted-foreground">Sin incidencias registradas en los últimos 6 meses</p>
+            <p className="text-sm text-muted-foreground">Sin incidencias registradas en este periodo</p>
           </div>
         ) : (
           <>
@@ -139,7 +195,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
             <div className="grid grid-cols-3 gap-3 pt-2">
               <div className="bg-[#F8F5F0] rounded-xl p-3 text-center">
                 <p className="text-lg font-bold text-[#0A3E47]">{resumen.mesPico ?? "—"}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Mes con más incidencias</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Período con más incidencias</p>
               </div>
               <div className="bg-[#F8F5F0] rounded-xl p-3 text-center">
                 <p className="text-lg font-bold text-[#0A3E47]">{resumen.tasaResolucion}%</p>
@@ -156,6 +212,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
     );
   }
 
+  // Vista compacta
   return (
     <div
       onClick={onExpand}
@@ -165,7 +222,18 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
           <AlertTriangle className="w-4.5 h-4.5 text-[#0A3E47]" />
           <span className="text-sm font-semibold text-[#0A3E47]">Incidencias</span>
         </div>
-        <Maximize2 className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="flex items-center gap-1.5">
+          <select
+            value={periodo}
+            onChange={e => { e.stopPropagation(); setPeriodo(e.target.value); }}
+            onClick={e => e.stopPropagation()}
+            className="text-[10px] text-[#0A3E47] font-medium border-0 bg-transparent focus:outline-none cursor-pointer appearance-none pr-1">
+            {PERIODOS.map(p => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+          <Maximize2 className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
       </div>
       {loading ? (
         <div className="flex items-center justify-center h-[120px]">
