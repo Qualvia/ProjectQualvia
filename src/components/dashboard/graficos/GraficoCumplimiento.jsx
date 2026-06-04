@@ -45,7 +45,7 @@ const CustomTooltipSemana = ({ active, payload }) => {
 
 export default function GraficoCumplimiento({ expandido, onExpand, onCollapse }) {
   const { user, currentBusiness } = useBusiness();
-  const [score, setScore] = useState(null);
+  const [score, setScore] = useState(0);
   const [semanas, setSemanas] = useState([]);
   const [metricas, setMetricas] = useState({ tareasPorc: 0, diasConRegistros: 0, totalDias: 0, incCerradas: 0, incTotal: 0 });
   const [loading, setLoading] = useState(true);
@@ -196,10 +196,6 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       {loading ? (
         <div className="flex items-center justify-center h-[120px]">
           <div className="w-5 h-5 border-2 border-gray-200 border-t-[#0A3E47] rounded-full animate-spin" />
-        </div>
-      ) : score === null ? (
-        <div className="flex items-center justify-center h-[120px]">
-          <p className="text-[11px] text-muted-foreground text-center">Sin datos<br />todavía</p>
         </div>
       ) : (
         <div className="relative flex flex-col items-center">
