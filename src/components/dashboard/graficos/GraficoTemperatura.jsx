@@ -257,23 +257,30 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               />
               <Tooltip content={<CustomTooltipTemp />} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-              {equiposMostrar.map(eq => (
-                <Line
-                  key={eq.id}
-                  type="monotone"
-                  dataKey={eq.nombre}
-                  stroke={eq.color}
-                  strokeWidth={2}
-                  strokeOpacity={0.85}
-                  connectNulls={true}
-                  dot={(props) => {
-                    const fuera = props.payload[`_meta_${eq.nombre}`]?.fuera;
-                    if (props.value == null) return null;
-                    if (fuera) return <circle key={props.index} cx={props.cx} cy={props.cy} r={5} fill="#DC2626" stroke="white" strokeWidth={1.5} />;
-                    return <circle key={props.index} cx={props.cx} cy={props.cy} r={3} fill={eq.color} />;
-                  }}
-                />
-              ))}
+              {equiposMostrar.map(eq => {
+                // Contamos puntos con valor para este equipo en el periodo actual
+                const puntosConValor = data.filter(d => d[eq.nombre] != null).length;
+                const esAislado = puntosConValor <= 2;
+                return (
+                  <Line
+                    key={eq.id}
+                    type="monotone"
+                    dataKey={eq.nombre}
+                    stroke={eq.color}
+                    strokeWidth={2}
+                    strokeOpacity={0.85}
+                    connectNulls={false}
+                    dot={(props) => {
+                      if (props.value == null) return null;
+                      const fuera = props.payload[`_meta_${eq.nombre}`]?.fuera;
+                      if (fuera) return <circle key={props.index} cx={props.cx} cy={props.cy} r={5} fill="#DC2626" stroke="white" strokeWidth={2} />;
+                      const r = esAislado ? 6 : 4;
+                      return <circle key={props.index} cx={props.cx} cy={props.cy} r={r} fill={eq.color} stroke="white" strokeWidth={esAislado ? 2 : 1} />;
+                    }}
+                    activeDot={{ r: 5 }}
+                  />
+                );
+              })}
               {equiposMostrar.flatMap(eq => {
                 const lim = limites[eq.id];
                 if (!lim) return [];
@@ -349,22 +356,50 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           <p className="text-[11px] text-muted-foreground text-center">Sin datos<br />todavía</p>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={120}>
-          <LineChart data={data}>
-            {equipos.map(eq => (
-              <Line
-                key={eq.id}
-                type="monotone"
-                dataKey={eq.nombre}
-                stroke={eq.color}
-                strokeWidth={1.5}
-                strokeOpacity={0.85}
-                dot={false}
-                connectNulls={true}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="flex flex-col gap-1">
+          {/* Mini gráfico — 60px */}
+          <ResponsiveContainer width="100%" height={60}>
+            <LineChart data={data} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
+              {equipos.map(eq => (
+                <Line
+                  key={eq.id}
+                  type="monotone"
+                  dataKey={eq.nombre}
+                  stroke={eq.color}
+                  strokeWidth={1.5}
+                  strokeOpacity={0.85}
+                  dot={false}
+                  connectNulls={false}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+          {/* Mini tarjetas de equipos — 60px aprox */}
+          <div className="flex gap-1.5 overflow-hidden">
+            {equipos.slice(0, 3).map(eq => {
+              const r = resumen.find(x => x.id === eq.id);
+              return (
+                <div key={eq.id} className="flex-1 min-w-0 bg-[#F8F5F0] rounded-lg px-1.5 py-1 flex flex-col gap-0.5">
+                  <div className="flex items-center gap-1 min-w-0">
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: eq.color }} />
+                    <span className="text-[9px] text-[#0A3E47] font-medium truncate">{eq.nombre}</span>
+                    {r?.alertas > 0 && (
+                      <span className="shrink-0 text-[8px] bg-red-500 text-white rounded px-0.5 font-bold">{r.alertas}</span>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-bold text-foreground">
+                    {r?.media != null ? `${r.media}°C` : "—"}
+                  </span>
+                </div>
+              );
+            })}
+            {equipos.length > 3 && (
+              <div className="flex items-center justify-center px-1.5 py-1 bg-[#F8F5F0] rounded-lg">
+                <span className="text-[9px] text-muted-foreground font-medium">+{equipos.length - 3}</span>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
