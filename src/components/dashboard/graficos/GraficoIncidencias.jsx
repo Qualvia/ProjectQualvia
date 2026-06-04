@@ -70,14 +70,21 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
     setDataExpandido(dataExp);
     setDataCompacto(dataExp.map(d => ({ label: d.label, total: d.total })));
 
-    const primera = dataExp.slice(0, 3).reduce((s, d) => s + d.total, 0);
-    const segunda = dataExp.slice(3).reduce((s, d) => s + d.total, 0);
-    if (segunda < primera) setTendencia("baja");
-    else if (segunda > primera) setTendencia("sube");
-    else setTendencia("igual");
+    // Tendencia: solo con meses que tienen al menos 1 incidencia
+    const mesesConDatos = dataExp.filter(d => d.total > 0);
+    if (mesesConDatos.length >= 2) {
+      const mitad = Math.floor(mesesConDatos.length / 2);
+      const primera = mesesConDatos.slice(0, mitad).reduce((s, d) => s + d.total, 0);
+      const segunda = mesesConDatos.slice(mitad).reduce((s, d) => s + d.total, 0);
+      if (segunda < primera) setTendencia("baja");
+      else if (segunda > primera) setTendencia("sube");
+      else setTendencia("igual");
+    } else {
+      setTendencia(null);
+    }
 
     const mesPico = dataExp.reduce((max, d) => d.total > (max?.total ?? 0) ? d : max, null);
-    const totalConFecha = todas.filter(i => i.fecha_cierre && i.fecha);
+    const totalConFecha = todas.filter(i => i.fecha_cierre && i.fecha && new Date(i.fecha_cierre) > new Date(i.fecha));
     const tiempoMedio = totalConFecha.length > 0
       ? Math.round(totalConFecha.reduce((s, i) => s + (new Date(i.fecha_cierre) - new Date(i.fecha)) / (1000 * 3600 * 24), 0) / totalConFecha.length)
       : null;
@@ -171,7 +178,19 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={120}>
-          <BarChart data={dataCompacto}>
+          <BarChart data={dataCompacto} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
+            <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} />
+            <Tooltip content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              return (
+                <div className="bg-white border border-border rounded-lg shadow p-2 text-xs">
+                  <p className="font-semibold text-[#0A3E47]">{label}</p>
+                  <p className="text-red-400">{payload[0]?.value} incidencias</p>
+                </div>
+              );
+            }} />
             <Bar dataKey="total" fill="#FECACA" radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
