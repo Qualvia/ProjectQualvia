@@ -265,8 +265,8 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
           <p className="text-[11px] text-muted-foreground text-center leading-tight">Aún no hay incidencias<br />registradas</p>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={120}>
-          <BarChart data={dataCompacto} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+        <ResponsiveContainer width="100%" height={140}>
+          <BarChart data={dataCompacto} margin={{ top: 6, right: 4, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
             <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} />
             <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} />
