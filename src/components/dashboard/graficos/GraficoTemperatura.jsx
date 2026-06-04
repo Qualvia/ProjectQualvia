@@ -305,7 +305,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: eq.color || LINE_COLORS[i % LINE_COLORS.length] }} />
                       <p className="text-[11px] font-medium text-[#0A3E47] truncate">{eq.nombre}</p>
                     </div>
-                    <p className="text-sm font-bold text-foreground">{r?.media != null ? `${r.media}°C` : "—"}</p>
+                    <p className="text-sm font-bold text-foreground">{r?.media != null ? `${r.media}°C` : "—"} <span className="text-[11px] font-normal text-muted-foreground">Media</span></p>
                     <p className="text-[11px] text-muted-foreground">
                       {lim ? `Rango: ${lim.min}° – ${lim.max}°` : "Sin rango"}
                       {r ? ` · ${r.alertas} alertas` : ""}
