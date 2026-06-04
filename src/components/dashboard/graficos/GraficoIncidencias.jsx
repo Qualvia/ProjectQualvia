@@ -10,10 +10,12 @@ import { useBusiness } from "@/contexts/BusinessContext";
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 const PERIODOS = [
-  { value: "semanal",    label: "Sem",  desc: "Últimas 8 semanas" },
-  { value: "mensual",    label: "6M",   desc: "Últimos 6 meses" },
-  { value: "trimestral", label: "1A",   desc: "Últimos 12 meses" },
-  { value: "semestral",  label: "2A",   desc: "Últimos 24 meses" },
+  { value: "semanal",    label: "Sem", desc: "Últimas 8 semanas" },
+  { value: "mensual",    label: "1M",  desc: "Último mes (por semanas)" },
+  { value: "trimestral", label: "3M",  desc: "Últimos 3 meses" },
+  { value: "semestral",  label: "6M",  desc: "Últimos 6 meses" },
+  { value: "anual",      label: "1A",  desc: "Últimos 12 meses" },
+  { value: "bianual",    label: "2A",  desc: "Últimos 24 meses" },
 ];
 
 function getPeriodoBuckets(periodo) {
@@ -21,6 +23,7 @@ function getPeriodoBuckets(periodo) {
   const buckets = [];
 
   if (periodo === "semanal") {
+    // Últimas 8 semanas
     for (let i = 7; i >= 0; i--) {
       const inicio = new Date(ahora);
       inicio.setDate(ahora.getDate() - i * 7);
@@ -31,14 +34,27 @@ function getPeriodoBuckets(periodo) {
       const label = `${String(inicio.getDate()).padStart(2,"0")}/${String(inicio.getMonth()+1).padStart(2,"0")}`;
       buckets.push({ label, inicio, fin });
     }
+  } else if (periodo === "mensual") {
+    // Último mes por semanas (~4-5 semanas)
+    const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+    const finMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59, 999);
+    let cur = new Date(inicioMes);
+    while (cur <= finMes) {
+      const ini = new Date(cur);
+      const fin = new Date(cur);
+      fin.setDate(fin.getDate() + 6);
+      if (fin > finMes) fin.setTime(finMes.getTime());
+      const label = `${String(ini.getDate()).padStart(2,"0")}/${String(ini.getMonth()+1).padStart(2,"0")}`;
+      buckets.push({ label, inicio: ini, fin });
+      cur.setDate(cur.getDate() + 7);
+    }
   } else {
-    const numMeses = periodo === "mensual" ? 6 : periodo === "trimestral" ? 12 : 24;
+    const numMeses = periodo === "trimestral" ? 3 : periodo === "semestral" ? 6 : periodo === "anual" ? 12 : 24;
+    const mostrarAño = numMeses > 6;
     for (let i = numMeses - 1; i >= 0; i--) {
       const d = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
       const fin = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
-      const label = periodo === "semestral" && i % 2 !== 0
-        ? ""
-        : `${MESES[d.getMonth()]}${periodo !== "mensual" ? ` '${String(d.getFullYear()).slice(2)}` : ""}`;
+      const label = `${MESES[d.getMonth()]}${mostrarAño ? ` '${String(d.getFullYear()).slice(2)}` : ""}`;
       buckets.push({ label, inicio: d, fin });
     }
   }
@@ -48,12 +64,14 @@ function getPeriodoBuckets(periodo) {
 const CustomTooltipInc = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   const cerradas = payload.find(p => p.dataKey === "cerradas")?.value ?? 0;
+  const seguimiento = payload.find(p => p.dataKey === "seguimiento")?.value ?? 0;
   const abiertas = payload.find(p => p.dataKey === "abiertas")?.value ?? 0;
   return (
     <div className="bg-white border border-border rounded-xl shadow-lg p-3 text-xs space-y-1 min-w-[140px]">
       <p className="font-semibold text-[#0A3E47]">{label}</p>
-      <p>Total: <span className="font-bold">{cerradas + abiertas}</span></p>
+      <p>Total: <span className="font-bold">{cerradas + seguimiento + abiertas}</span></p>
       <p className="text-[#6BB68A]">Cerradas: {cerradas}</p>
+      <p className="text-blue-400">En seguimiento: {seguimiento}</p>
       <p className="text-red-400">Abiertas: {abiertas}</p>
     </div>
   );
@@ -61,7 +79,7 @@ const CustomTooltipInc = ({ active, payload, label }) => {
 
 export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) {
   const { user, currentBusiness } = useBusiness();
-  const [periodo, setPeriodo] = useState("mensual");
+  const [periodo, setPeriodo] = useState("semestral");
   const [todasIncidencias, setTodasIncidencias] = useState([]);
   const [tendencia, setTendencia] = useState(null);
   const [resumen, setResumen] = useState({ mesPico: null, tasaResolucion: 0, tiempoMedio: null });
@@ -101,14 +119,15 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
       return {
         label,
         cerradas: del_bucket.filter(i => i.estado === "cerrada").length,
-        abiertas: del_bucket.filter(i => i.estado !== "cerrada").length,
+        seguimiento: del_bucket.filter(i => i.estado === "seguimiento").length,
+        abiertas: del_bucket.filter(i => i.estado === "abierta").length,
         total: del_bucket.length,
       };
     });
   }, [periodo, todasIncidencias]);
 
   const dataCompacto = useMemo(
-    () => dataExpandido.map(d => ({ label: d.label, total: d.total })),
+    () => dataExpandido.map(d => ({ label: d.label, cerradas: d.cerradas, seguimiento: d.seguimiento, abiertas: d.abiertas, total: d.total })),
     [dataExpandido]
   );
 
@@ -179,8 +198,9 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip content={<CustomTooltipInc />} />
-                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} formatter={(v) => v === "cerradas" ? "Cerradas" : v === "abiertas" ? "Abiertas" : v} />
+                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} formatter={(v) => v === "cerradas" ? "Cerradas" : v === "seguimiento" ? "En seguimiento" : v === "abiertas" ? "Abiertas" : v} />
                 <Bar dataKey="cerradas" stackId="a" fill="#6BB68A" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="seguimiento" stackId="a" fill="#BFDBFE" radius={[0, 0, 0, 0]} />
                 <Bar dataKey="abiertas" stackId="a" fill="#FECACA" radius={[4, 4, 0, 0]} />
                 <Line type="monotone" dataKey="total" stroke="#9CA3AF" strokeDasharray="5 3" strokeWidth={1.5} dot={false} legendType="none" />
               </ComposedChart>
@@ -250,16 +270,10 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
             <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
             <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} />
             <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} />
-            <Tooltip content={({ active, payload, label }) => {
-              if (!active || !payload?.length) return null;
-              return (
-                <div className="bg-white border border-border rounded-lg shadow p-2 text-xs">
-                  <p className="font-semibold text-[#0A3E47]">{label}</p>
-                  <p className="text-red-400">{payload[0]?.value} incidencias</p>
-                </div>
-              );
-            }} />
-            <Bar dataKey="total" fill="#FECACA" radius={[3, 3, 0, 0]} />
+            <Tooltip content={<CustomTooltipInc />} />
+            <Bar dataKey="cerradas" stackId="a" fill="#6BB68A" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="seguimiento" stackId="a" fill="#BFDBFE" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="abiertas" stackId="a" fill="#FECACA" radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}
