@@ -290,9 +290,9 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                   x1={gap.x1}
                   x2={gap.x2}
                   fill="#F0EBE3"
-                  fillOpacity={0.6}
+                  fillOpacity={0.35}
                   strokeOpacity={0}
-                  label={gap.dias >= 3 ? { value: "Sin registro", position: "insideTop", fontSize: 9, fill: "#A89F94" } : undefined}
+                  label={gap.dias >= 3 ? { value: "Sin registro", position: "insideBottom", fontSize: 9, fill: "#9A9289", fontStyle: "italic" } : undefined}
                 />
               ))}
               {equiposMostrar.map(eq => (
@@ -303,7 +303,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                   stroke={eq.color}
                   strokeWidth={2}
                   strokeOpacity={0.85}
-                  connectNulls={true}
+                  connectNulls={false}
                   dot={(props) => {
                     const fuera = props.payload[`_meta_${eq.nombre}`]?.fuera;
                     if (props.value == null) return null;
