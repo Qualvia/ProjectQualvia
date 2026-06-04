@@ -353,8 +353,8 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           <p className="text-[11px] text-muted-foreground text-center">Sin datos<br />todavía</p>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={130}>
-          <LineChart data={data} margin={{ top: 6, right: 6, left: 0, bottom: 0 }}>
+        <ResponsiveContainer width="100%" height={120}>
+          <LineChart data={data} margin={{ top: 6, right: 24, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
             <XAxis
               dataKey="fecha"
