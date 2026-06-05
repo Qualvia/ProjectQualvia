@@ -1,0 +1,230 @@
+import React, { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { useBusiness } from "@/contexts/BusinessContext";
+import { Thermometer, Droplets, ShieldCheck, ClipboardList, Package, Trash2, Wrench, Snowflake, FlaskConical, ClipboardCheck, AlertTriangle } from "lucide-react";
+
+function hoyISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatHora(fechaStr) {
+  if (!fechaStr) return "—";
+  const d = new Date(fechaStr);
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function esHoy(fechaStr) {
+  if (!fechaStr) return false;
+  return fechaStr.slice(0, 10) === hoyISO();
+}
+
+const TIPO_CONFIG = {
+  temperatura:  { icon: Thermometer,   bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
+  limpieza:     { icon: ShieldCheck,    bg: "bg-[#EEF2FF]", color: "text-[#4F46E5]" },
+  recepcion:    { icon: Package,        bg: "bg-[#FEF3DC]", color: "text-[#D97706]" },
+  agua:         { icon: Droplets,       bg: "bg-[#E0F2FE]", color: "text-[#0284C7]" },
+  residuos:     { icon: Trash2,         bg: "bg-[#FEE8E8]", color: "text-[#C0392B]" },
+  mantenimiento:{ icon: Wrench,         bg: "bg-secondary", color: "text-[#0A3E47]" },
+  congelacion:  { icon: Snowflake,      bg: "bg-[#E0F2FE]", color: "text-[#0284C7]" },
+  alergenos:    { icon: FlaskConical,   bg: "bg-[#FEF3DC]", color: "text-[#D97706]" },
+  checklist:    { icon: ClipboardCheck, bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
+  auditoria:    { icon: ClipboardList,  bg: "bg-[#EEF2FF]", color: "text-[#4F46E5]" },
+  incidencia:   { icon: AlertTriangle,  bg: "bg-[#FEE8E8]", color: "text-[#C0392B]" },
+};
+
+function EventoItem({ evento, isLast }) {
+  const cfg = TIPO_CONFIG[evento.tipo] || TIPO_CONFIG.temperatura;
+  const Icon = cfg.icon;
+  return (
+    <div className={`flex items-start gap-3 py-3 ${!isLast ? "border-b border-border/50" : ""}`}>
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${cfg.bg}`}>
+        <Icon className={`w-4 h-4 ${cfg.color}`} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-foreground leading-snug">
+          <span className="font-semibold">{evento.quien}</span>{" "}
+          <span>{evento.accion}</span>
+        </p>
+        {evento.detalle && (
+          <p className="text-[11px] text-muted-foreground mt-0.5">{evento.detalle}</p>
+        )}
+      </div>
+      <span className="text-[11px] text-muted-foreground shrink-0 mt-0.5">{evento.hora}</span>
+    </div>
+  );
+}
+
+export default function ActividadRecienteBloque() {
+  const { user, currentBusiness } = useBusiness();
+  const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.id || !currentBusiness?.id) return;
+    cargar();
+  }, [user?.id, currentBusiness?.id]);
+
+  async function cargar() {
+    setLoading(true);
+    const uid = user.id;
+    const bid = currentBusiness.id;
+
+    const [temps, limpiezas, recepciones, aguas, residuos, mantenimientos, congelaciones, alergenos, checklists, auditorias, incidencias] = await Promise.all([
+      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroResiduo.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid }),
+      base44.entities.ChecklistEjecucion.filter({ user_id: uid, business_id: bid }),
+      base44.entities.AuditoriaInterna.filter({ user_id: uid, business_id: bid }),
+      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid }),
+    ]);
+
+    const lista = [];
+
+    temps.filter(r => esHoy(r.fecha)).forEach(r => {
+      lista.push({
+        tipo: "temperatura", fecha: r.fecha,
+        hora: formatHora(r.fecha),
+        quien: r.registrado_por || "Sistema",
+        accion: `registró temperatura · ${r.equipo_nombre || "equipo"}`,
+        detalle: r.temperatura != null ? `${r.temperatura}°C` : null,
+      });
+    });
+
+    limpiezas.filter(r => esHoy(r.fecha)).forEach(r => {
+      lista.push({
+        tipo: "limpieza", fecha: r.fecha,
+        hora: formatHora(r.fecha),
+        quien: r.registrado_por || "Sistema",
+        accion: `registró limpieza · ${r.zona_nombre || "zona"}`,
+        detalle: r.estado === "satisfactorio" ? "Satisfactorio" : r.estado === "no_limpiado" ? "No limpiado" : "No aplica",
+      });
+    });
+
+    recepciones.filter(r => esHoy(r.fecha)).forEach(r => {
+      lista.push({
+        tipo: "recepcion", fecha: r.fecha,
+        hora: formatHora(r.fecha),
+        quien: r.registrado_por || "Sistema",
+        accion: `control de recepción · ${r.producto || "producto"}`,
+        detalle: `${r.proveedor || ""} · ${r.resultado === "aceptado" ? "Aceptado" : "Rechazado"}`,
+      });
+    });
+
+    aguas.filter(r => esHoy(r.fecha)).forEach(r => {
+      lista.push({
+        tipo: "agua", fecha: r.fecha,
+        hora: formatHora(r.fecha),
+        quien: r.registrado_por || "Sistema",
+        accion: `análisis de agua · ${r.punto_nombre || "punto"}`,
+        detalle: r.cloro_nivel != null ? `Cloro: ${r.cloro_nivel} · pH: ${r.ph_nivel ?? "—"}` : null,
+      });
+    });
+
+    residuos.filter(r => esHoy(r.fecha)).forEach(r => {
+      lista.push({
+        tipo: "residuos", fecha: r.fecha,
+        hora: formatHora(r.fecha),
+        quien: r.registrado_por || "Sistema",
+        accion: `gestión de residuos · ${r.tipo_residuo || ""}`,
+        detalle: r.cantidad != null ? `${r.cantidad} ${r.unidad || ""}` : null,
+      });
+    });
+
+    mantenimientos.filter(r => esHoy(r.fecha)).forEach(r => {
+      lista.push({
+        tipo: "mantenimiento", fecha: r.fecha,
+        hora: formatHora(r.fecha),
+        quien: r.registrado_por || "Sistema",
+        accion: `mantenimiento · ${r.equipo_nombre || "equipo"}`,
+        detalle: r.tipo_mantenimiento || null,
+      });
+    });
+
+    congelaciones.filter(r => esHoy(r.fecha)).forEach(r => {
+      lista.push({
+        tipo: "congelacion", fecha: r.fecha,
+        hora: formatHora(r.fecha),
+        quien: r.registrado_por || "Sistema",
+        accion: `${r.operacion?.toLowerCase() || "congelación"} · ${r.producto || "producto"}`,
+        detalle: r.temperatura_inicial != null ? `${r.temperatura_inicial}°C → ${r.temperatura_final ?? "—"}°C` : null,
+      });
+    });
+
+    alergenos.filter(r => esHoy(r.created_date)).forEach(r => {
+      lista.push({
+        tipo: "alergenos", fecha: r.created_date,
+        hora: formatHora(r.created_date),
+        quien: r.registrado_por || "Sistema",
+        accion: `registro de alérgenos · ${r.producto || "producto"}`,
+        detalle: r.alergenos?.length ? r.alergenos.join(", ") : null,
+      });
+    });
+
+    checklists.filter(r => esHoy(r.fecha)).forEach(r => {
+      lista.push({
+        tipo: "checklist", fecha: r.fecha,
+        hora: formatHora(r.fecha),
+        quien: r.registrado_por || "Sistema",
+        accion: `completó checklist · ${r.plantilla_nombre || ""}`,
+        detalle: r.puntuacion != null ? `Puntuación: ${r.puntuacion}%` : null,
+      });
+    });
+
+    auditorias.filter(r => esHoy(r.fecha)).forEach(r => {
+      lista.push({
+        tipo: "auditoria", fecha: r.fecha,
+        hora: formatHora(r.fecha),
+        quien: r.auditor || "Sistema",
+        accion: `auditoría interna · ${r.tipo === "restaurante" ? "Restaurante" : "Industria/Obrador"}`,
+        detalle: r.puntuacion != null ? `Puntuación: ${r.puntuacion}%` : null,
+      });
+    });
+
+    incidencias.filter(r => esHoy(r.fecha || r.created_date)).forEach(r => {
+      lista.push({
+        tipo: "incidencia", fecha: r.fecha || r.created_date,
+        hora: formatHora(r.fecha || r.created_date),
+        quien: r.registrado_por || "Sistema",
+        accion: `incidencia registrada · ${r.tipo || ""}`,
+        detalle: r.descripcion ? r.descripcion.slice(0, 60) + (r.descripcion.length > 60 ? "…" : "") : null,
+      });
+    });
+
+    // Ordenar por hora desc (más reciente primero)
+    lista.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    setEventos(lista);
+    setLoading(false);
+  }
+
+  if (loading) {
+    return (
+      <div className="px-5 py-6 space-y-3">
+        {[1, 2, 3].map(i => <div key={i} className="h-10 rounded-lg bg-muted animate-pulse" />)}
+      </div>
+    );
+  }
+
+  if (eventos.length === 0) {
+    return (
+      <div className="px-5 py-10 flex flex-col items-center gap-2">
+        <ClipboardList className="w-8 h-8 text-muted-foreground/30" />
+        <p className="text-sm text-muted-foreground">Sin actividad registrada hoy</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-5 py-2">
+      <p className="text-[11px] text-muted-foreground py-2">{eventos.length} evento{eventos.length !== 1 ? "s" : ""} hoy</p>
+      {eventos.map((ev, i) => (
+        <EventoItem key={i} evento={ev} isLast={i === eventos.length - 1} />
+      ))}
+    </div>
+  );
+}

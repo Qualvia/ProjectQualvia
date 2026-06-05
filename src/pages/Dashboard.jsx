@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import DashboardBloque from "@/components/dashboard/DashboardBloque";
+import ActividadRecienteBloque from "@/components/dashboard/ActividadRecienteBloque";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -276,9 +277,7 @@ export default function Dashboard() {
                         ) : bloque.id === "graficos" ? (
                           <GraficosBloque />
                         ) : (
-                          <div className="px-5 py-4">
-                            <p className="text-sm text-muted-foreground">Contenido próximamente...</p>
-                          </div>
+                          <ActividadRecienteBloque />
                         )}
                       </DashboardBloque>
                     </div>
