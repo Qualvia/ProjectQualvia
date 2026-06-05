@@ -151,13 +151,12 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
 
   const hayDatos = dataCompacto.some(d => d.total > 0);
 
-  // Calcula ticks uniformes para el eje Y
+  // Calcula ticks de 2 en 2 para el eje Y
   function getYTicks(data) {
-    const maxVal = Math.max(...data.map(d => d.total), 1);
-    const step = maxVal <= 5 ? 1 : maxVal <= 10 ? 2 : maxVal <= 20 ? 4 : 5;
-    const top = Math.ceil(maxVal / step) * step;
+    const maxVal = Math.max(...data.map(d => d.total), 2);
+    const top = maxVal % 2 === 0 ? maxVal : maxVal + 1;
     const ticks = [];
-    for (let i = 0; i <= top; i += step) ticks.push(i);
+    for (let i = 0; i <= top; i += 2) ticks.push(i);
     return ticks;
   }
 
