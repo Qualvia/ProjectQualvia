@@ -200,7 +200,22 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       if (tieneRegDia) semanaMap[sem].registros.push(1);
     }
 
+    const hoyISO = ahora.toISOString().slice(0, 10);
+
     const semanasData = Object.entries(semanaMap).map(([s, data]) => {
+      // Semana futura: finSem aún no ha llegado
+      if (data.finSem > hoyISO) {
+        return {
+          name: data.label || `Sem ${s}`,
+          score: 0,
+          tareas: 0,
+          registros: 0,
+          incidencias: 0,
+          esActual: false,
+          esFutura: true,
+        };
+      }
+
       // tP: tareas de la semana
       const ejSem = ejMes.filter(e => e.fecha_dia && e.fecha_dia >= data.inicioSem && e.fecha_dia <= data.finSem);
       const tP = ejSem.length > 0 ? Math.round((ejSem.filter(e => e.completada).length / ejSem.length) * 35) : 35;
@@ -337,7 +352,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
                 <Tooltip content={<CustomTooltipSemana />} />
                 <Bar dataKey="score" radius={[4, 4, 0, 0]}>
                   {semanas.map((s, i) => (
-                    <Cell key={i} fill={s.esActual ? "#0A3E47" : "#6BB68A"} />
+                    <Cell key={i} fill={s.esFutura ? "#E5E7EB" : s.esActual ? "#0A3E47" : "#6BB68A"} />
                   ))}
                 </Bar>
               </BarChart>
