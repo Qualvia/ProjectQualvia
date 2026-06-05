@@ -215,12 +215,22 @@ export default function Dashboard() {
                   {rachaStats.racha === null ? "—" : rachaStats.racha}
                 </span>
               </div>
-              <span className="text-[12px] font-medium" style={{ color: "#8A8278" }}>Días consecutivos al día</span>
+              <span className="text-[12px] font-medium" style={{ color: "#8A8278" }}>
+                {rachaStats.racha === null ? "Días consecutivos al día"
+                  : rachaStats.racha === 0 ? "Empieza hoy tu racha"
+                  : rachaStats.racha === 1 ? "¡Primer día completado!"
+                  : rachaStats.racha <= 4 ? "Vas bien, sigue así 💪"
+                  : rachaStats.racha <= 9 ? "¡Buena racha! No la rompas 🔥"
+                  : rachaStats.racha <= 19 ? "Racha impresionante 🚀"
+                  : "¡Eres un crack! 🏆"}
+              </span>
             </div>
             </div>
             <div className="border-t border-border mt-4 pt-3">
             <span className="text-[11px]" style={{ color: "#8A8278" }}>
-              {rachaStats.mejorRacha === null ? "Tu mejor racha este mes" : `Mejor racha este mes: ${rachaStats.mejorRacha} día${rachaStats.mejorRacha !== 1 ? "s" : ""}`}
+              {rachaStats.mejorRacha === null ? "Tu mejor racha este mes"
+                : rachaStats.mejorRacha === 0 ? "Sin racha completada este mes"
+                : `Mejor racha este mes: ${rachaStats.mejorRacha} día${rachaStats.mejorRacha !== 1 ? "s" : ""}`}
             </span>
             </div>
         </div>
