@@ -204,7 +204,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
 
     const semanasData = Object.entries(semanaMap).map(([s, data]) => {
       // Semana futura: finSem aún no ha llegado
-      if (data.finSem > hoyISO) {
+      if (data.inicioSem > hoyISO) {
         return {
           name: data.label || `Sem ${s}`,
           score: 0,
