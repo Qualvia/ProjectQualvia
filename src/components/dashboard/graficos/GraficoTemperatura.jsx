@@ -471,18 +471,21 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                 })()}
               />
               <Tooltip content={<CustomTooltipTemp />} />
-              {equiposCompactos.map(eq => (
-                <Line
-                  key={eq.id}
-                  type="monotone"
-                  dataKey={eq.nombre}
-                  stroke={eq.color}
-                  strokeWidth={1.5}
-                  strokeOpacity={0.85}
-                  dot={false}
-                  connectNulls={true}
-                />
-              ))}
+              {equiposCompactos.map(eq => {
+                const numPuntos = data.filter(d => d[eq.nombre] != null).length;
+                return (
+                  <Line
+                    key={eq.id}
+                    type="monotone"
+                    dataKey={eq.nombre}
+                    stroke={eq.color}
+                    strokeWidth={1.5}
+                    strokeOpacity={0.85}
+                    dot={numPuntos <= 1 ? { r: 4, fill: eq.color } : false}
+                    connectNulls={true}
+                  />
+                );
+              })}
             </LineChart>
           </ResponsiveContainer>
         </div>
