@@ -251,8 +251,8 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
       onClick={onExpand}
       className="relative bg-white rounded-xl border border-[#E8E0D5] shadow-sm p-3 cursor-pointer group hover:shadow-md hover:border-[#6BB68A]/40 transition-all h-full flex flex-col">
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1">
-          <AlertTriangle className="w-4 h-4 text-[#0A3E47] shrink-0" />
+        <div className="flex items-center gap-1.5">
+          <AlertTriangle className="w-4.5 h-4.5 text-[#0A3E47]" />
           <span className="text-sm font-semibold text-[#0A3E47]">Incidencias</span>
         </div>
         <div className="flex items-center gap-1.5">
