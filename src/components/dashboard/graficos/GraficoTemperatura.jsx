@@ -437,7 +437,23 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                 axisLine={false}
                 tickFormatter={v => `${v}°`}
                 width={30}
-                tickCount={6}
+                ticks={(() => {
+                  const eqsRef = equiposCompactos.length > 0 ? equiposCompactos : equipos;
+                  const vals = registrosRecientes
+                    .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
+                    .map(r => r.temperatura).filter(v => v != null);
+                  const limVals = eqsRef.flatMap(eq => {
+                    const lim = limites[eq.id];
+                    return lim ? [lim.min, lim.max].filter(v => v != null) : [];
+                  });
+                  const todos = [...vals, ...limVals];
+                  if (todos.length === 0) return [0, 2, 4, 6, 8, 10];
+                  const minV = Math.floor((Math.min(...todos) - 2) / 2) * 2;
+                  const maxV = Math.ceil((Math.max(...todos) + 2) / 2) * 2;
+                  const result = [];
+                  for (let i = minV; i <= maxV; i += 2) result.push(i);
+                  return result;
+                })()}
                 domain={(() => {
                   const eqsRef = equiposCompactos.length > 0 ? equiposCompactos : equipos;
                   const vals = registrosRecientes
@@ -449,7 +465,9 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                   });
                   const todos = [...vals, ...limVals];
                   if (todos.length === 0) return [0, 10];
-                  return [Math.floor(Math.min(...todos) - 2), Math.ceil(Math.max(...todos) + 2)];
+                  const minV = Math.floor((Math.min(...todos) - 2) / 2) * 2;
+                  const maxV = Math.ceil((Math.max(...todos) + 2) / 2) * 2;
+                  return [minV, maxV];
                 })()}
               />
               <Tooltip content={<CustomTooltipTemp />} />
