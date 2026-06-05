@@ -47,7 +47,8 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
   const { user, currentBusiness } = useBusiness();
   const [score, setScore] = useState(0);
   const [semanas, setSemanas] = useState([]);
-  const [metricas, setMetricas] = useState({ tareasPorc: 0, diasConRegistros: 0, totalDias: 0, incCerradas: 0, incTotal: 0 });
+  const [metricas, setMetricas] = useState({ tareasPorc: 0, diasActivos: 0, totalDias: 0, incCerradas: 0, incTotal: 0 });
+  const [onboarding, setOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,32 +66,89 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     const fin = endOfMonth().toISOString();
     const totalDias = daysInMonth();
 
-    const [todasEj, todasInc, todosReg] = await Promise.all([
+    const [todasEj, todasInc, todosTemp, todosLimp, todosAgua, todosRecep, todosMant, todosCong] = await Promise.all([
       base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }),
       base44.entities.Incidencia.filter({ user_id: uid, business_id: bid }),
       base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid }),
     ]);
 
+    // --- ONBOARDING CHECK ---
+    const todosRegistrosGlobal = [...todosTemp, ...todosLimp, ...todosAgua, ...todosRecep, ...todosMant, ...todosCong];
+    const diasActivosGlobalSet = new Set([
+      ...todasEj.map(e => e.fecha_dia).filter(Boolean),
+      ...todosRegistrosGlobal.map(r => r.fecha?.slice(0, 10)).filter(Boolean),
+    ]);
+    const diasActivosGlobal = diasActivosGlobalSet.size;
+    setOnboarding(diasActivosGlobal < 3);
+
+    // --- EJE 1: TAREAS (35pts) ---
     const ejMes = todasEj.filter(e => e.fecha_dia && e.fecha_dia.startsWith(mesActual));
     const tareasTotal = ejMes.length;
     const tareasComp = ejMes.filter(e => e.completada).length;
-    const tareasPorc = tareasTotal > 0 ? Math.round((tareasComp / tareasTotal) * 100) : 0;
-    const puntajeA = tareasTotal > 0 ? Math.round((tareasComp / tareasTotal) * 40) : 0;
+    const tareasPorc = tareasTotal > 0 ? Math.round((tareasComp / tareasTotal) * 100) : 100;
+    const puntajeA = tareasTotal > 0 ? (tareasComp / tareasTotal) * 35 : 35;
 
-    const regMes = todosReg.filter(r => r.fecha && r.fecha >= inicio && r.fecha <= fin);
-    const diasConReg = new Set(regMes.map(r => r.fecha?.slice(0, 10))).size;
-    const puntajeB = Math.round((diasConReg / totalDias) * 30);
+    // --- EJE 2: REGISTROS (35pts) ---
+    const filtrarMes = (arr) => arr.filter(r => r.fecha && r.fecha >= inicio && r.fecha <= fin);
+    const tempMes  = filtrarMes(todosTemp);
+    const limpMes  = filtrarMes(todosLimp);
+    const aguaMes  = filtrarMes(todosAgua);
+    const recepMes = filtrarMes(todosRecep);
+    const mantMes  = filtrarMes(todosMant);
+    const congMes  = filtrarMes(todosCong);
 
-    const incMes = todasInc.filter(i => (i.fecha || i.created_date) >= inicio && (i.fecha || i.created_date) <= fin);
+    // Días activos del mes: días con al menos una tarea o un registro
+    const diasActivosSet = new Set([
+      ...ejMes.map(e => e.fecha_dia).filter(Boolean),
+      ...[...tempMes, ...limpMes, ...aguaMes, ...recepMes, ...mantMes, ...congMes].map(r => r.fecha?.slice(0, 10)).filter(Boolean),
+    ]);
+    const diasActivos = diasActivosSet.size;
+
+    let sumaRegistros = 0;
+    diasActivosSet.forEach(dia => {
+      const tieneTemp  = tempMes.some(r => r.fecha?.slice(0,10) === dia);
+      const tieneLimp  = limpMes.some(r => r.fecha?.slice(0,10) === dia);
+      const tieneOtro  = aguaMes.some(r => r.fecha?.slice(0,10) === dia)
+                      || recepMes.some(r => r.fecha?.slice(0,10) === dia)
+                      || mantMes.some(r => r.fecha?.slice(0,10) === dia)
+                      || congMes.some(r => r.fecha?.slice(0,10) === dia);
+      if (tieneTemp || tieneLimp) sumaRegistros += 1.0;
+      else if (tieneOtro) sumaRegistros += 0.7;
+      // else: solo tareas, sin registros → 0.0
+    });
+    const puntajeB = diasActivos > 0 ? (sumaRegistros / diasActivos) * 35 : 35;
+
+    // --- EJE 3: INCIDENCIAS (30pts) ---
+    const incMes = todasInc.filter(i => {
+      const f = i.created_date || i.fecha;
+      return f && f >= inicio && f <= fin;
+    });
+    let puntajeC;
+    if (incMes.length === 0) {
+      puntajeC = 30;
+    } else {
+      const sumaInc = incMes.reduce((s, i) => {
+        if (i.estado === "cerrada") return s + 1.0;
+        if (i.estado === "seguimiento") return s + 0.8;
+        // abierta
+        const horasAbiertas = (ahora - new Date(i.created_date || i.fecha)) / (1000 * 3600);
+        return s + (horasAbiertas < 48 ? 0.5 : 0.0);
+      }, 0);
+      puntajeC = (sumaInc / incMes.length) * 30;
+    }
     const incCerradas = incMes.filter(i => i.estado === "cerrada").length;
     const incTotal = incMes.length;
-    const incAbiertas = todasInc.filter(i => i.estado !== "cerrada").length;
-    const puntajeC = incAbiertas === 0 ? 30 : incTotal > 0 ? Math.round((incCerradas / incTotal) * 30) : 30;
 
-    const scoreTotal = Math.min(100, puntajeA + puntajeB + puntajeC);
+    const scoreTotal = Math.min(100, Math.round(puntajeA + puntajeB + puntajeC));
     setScore(scoreTotal);
-    setMetricas({ tareasPorc, diasConRegistros: diasConReg, totalDias, incCerradas, incTotal });
+    setMetricas({ tareasPorc, diasActivos, totalDias, incCerradas, incTotal });
 
+    // --- SEMANAS ---
     const semanaMap = {};
     for (let dia = 1; dia <= totalDias; dia++) {
       const sem = Math.ceil((dia + new Date(ahora.getFullYear(), ahora.getMonth(), 1).getDay()) / 7);
@@ -99,15 +157,16 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       const diaISO = `${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
       const ejDia = ejMes.filter(e => e.fecha_dia === diaISO);
       if (ejDia.length > 0) semanaMap[sem].tareas.push(ejDia.filter(e => e.completada).length / ejDia.length);
-      if (regMes.some(r => r.fecha?.slice(0, 10) === diaISO)) semanaMap[sem].registros.push(1);
+      const tieneRegDia = [...tempMes, ...limpMes, ...aguaMes, ...recepMes, ...mantMes, ...congMes].some(r => r.fecha?.slice(0,10) === diaISO);
+      if (tieneRegDia) semanaMap[sem].registros.push(1);
     }
 
     const semanasData = Object.entries(semanaMap).map(([s, data]) => {
-      const tP = data.tareas.length > 0 ? Math.round((data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length)*40) : 0;
-      const rP = Math.round((data.registros.length / data.dias) * 30);
+      const tP = data.tareas.length > 0 ? Math.round((data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length)*35) : 0;
+      const rP = Math.round((data.registros.length / data.dias) * 35);
       return {
         name: `Sem ${s}`,
-        score: Math.min(100, tP + rP + puntajeC),
+        score: Math.min(100, tP + rP + Math.round(puntajeC)),
         tareas: Math.round((data.tareas.length > 0 ? data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length : 0) * 100),
         registros: Math.round((data.registros.length / data.dias) * 100),
         incidencias: Math.round((puntajeC / 30) * 100),
@@ -122,8 +181,20 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     { value: score ?? 0 },
     { value: 100 - (score ?? 0) },
   ];
+  const pieDataGris = [{ value: 1 }];
 
   const donutColor = score >= 70 ? "#6BB68A" : score >= 40 ? "#F59E0B" : "#F87171";
+
+  const OnboardingChips = () => (
+    <div className="flex gap-1.5 flex-wrap justify-center mt-2">
+      {["Temperatura", "Limpieza", "Tareas"].map(chip => (
+        <span key={chip} className="flex items-center gap-1 text-[10px] text-muted-foreground border border-muted-foreground/30 rounded-full px-2 py-0.5">
+          <span className="w-3 h-3 rounded-full border border-muted-foreground/40 flex-shrink-0" />
+          {chip}
+        </span>
+      ))}
+    </div>
+  );
 
   if (expandido) {
     return (
@@ -136,17 +207,31 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <div className="flex flex-col items-center shrink-0" style={{ width: 200 }}>
             <div className="relative" style={{ width: 200, height: 200 }}>
-              <PieChart width={200} height={200}>
-                <Pie data={pieData} cx={100} cy={100} innerRadius={65} outerRadius={90} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
-                  <Cell fill={donutColor} />
-                  <Cell fill="#EDE6DA" />
-                </Pie>
-              </PieChart>
+              {onboarding ? (
+                <PieChart width={200} height={200}>
+                  <Pie data={pieDataGris} cx={100} cy={100} innerRadius={65} outerRadius={90} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
+                    <Cell fill="#D1D5DB" />
+                  </Pie>
+                </PieChart>
+              ) : (
+                <PieChart width={200} height={200}>
+                  <Pie data={pieData} cx={100} cy={100} innerRadius={65} outerRadius={90} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
+                    <Cell fill={donutColor} />
+                    <Cell fill="#EDE6DA" />
+                  </Pie>
+                </PieChart>
+              )}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ paddingLeft: 6 }}>
-                <span className="text-3xl font-bold text-[#0A3E47]">{loading ? "—" : `${score}%`}</span>
+                <span className="text-3xl font-bold text-[#0A3E47]">{loading ? "—" : onboarding ? "—" : `${score}%`}</span>
               </div>
             </div>
             <p className="text-xs text-muted-foreground -mt-2">Mes actual</p>
+            {onboarding && (
+              <>
+                <p className="text-[11px] text-muted-foreground text-center mt-2 leading-tight">Registra los primeros días para ver tu score</p>
+                <OnboardingChips />
+              </>
+            )}
           </div>
 
           <div className="flex-1 min-w-0">
@@ -169,7 +254,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         <div className="grid grid-cols-3 gap-3 pt-2">
           {[
             { label: "Tareas completadas", value: `${metricas.tareasPorc}%` },
-            { label: "Días con registros", value: `${metricas.diasConRegistros} de ${metricas.totalDias}` },
+            { label: "Días activos", value: `${metricas.diasActivos} de ${metricas.totalDias}` },
             { label: "Incidencias gestionadas", value: `${metricas.incCerradas} / ${metricas.incTotal}` },
           ].map((m) => (
             <div key={m.label} className="bg-[#F8F5F0] rounded-xl p-3 text-center">
@@ -196,6 +281,21 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       {loading ? (
         <div className="flex items-center justify-center flex-1">
           <div className="w-5 h-5 border-2 border-gray-200 border-t-[#0A3E47] rounded-full animate-spin" />
+        </div>
+      ) : onboarding ? (
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="relative">
+            <PieChart width={160} height={160}>
+              <Pie data={pieDataGris} cx={80} cy={80} innerRadius={50} outerRadius={70} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
+                <Cell fill="#D1D5DB" />
+              </Pie>
+            </PieChart>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="text-2xl font-bold text-muted-foreground">—</span>
+            </div>
+          </div>
+          <p className="text-[10px] text-muted-foreground text-center leading-tight mt-1 px-1">Registra los primeros días para ver tu score</p>
+          <OnboardingChips />
         </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center">
