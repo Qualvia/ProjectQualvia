@@ -42,12 +42,72 @@ export default function Dashboard() {
   const [bloques, setBloques] = useState(BLOQUES_INICIALES);
   const [tareasStats, setTareasStats] = useState({ completadas: 0, total: 0 });
   const [incidenciasStats, setIncidenciasStats] = useState({ total: 0, criticas: 0, maxHoras: 0 });
+  const [rachaStats, setRachaStats] = useState({ racha: null, mejorRacha: null });
 
   // Resetear stats y orden de bloques al cambiar de negocio o usuario
   useEffect(() => {
     setTareasStats({ completadas: 0, total: 0 });
     setIncidenciasStats({ total: 0, criticas: 0, maxHoras: 0 });
+    setRachaStats({ racha: null, mejorRacha: null });
     setBloques(BLOQUES_INICIALES);
+  }, [user?.id, currentBusiness?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !currentBusiness?.id) return;
+
+    base44.entities.TareaEjecucion.filter({ user_id: user.id, business_id: currentBusiness.id }).then((ejecuciones) => {
+      const ahora = new Date();
+      const hoy = ahora.toISOString().slice(0, 10);
+
+      // Agrupa ejecuciones por fecha_dia
+      const porDia = {};
+      ejecuciones.forEach(e => {
+        if (!e.fecha_dia) return;
+        if (!porDia[e.fecha_dia]) porDia[e.fecha_dia] = [];
+        porDia[e.fecha_dia].push(e);
+      });
+
+      // Función: ¿el día fue "completado"? (tiene tareas y todas completadas)
+      const diaOk = (iso) => {
+        const t = porDia[iso];
+        return t && t.length > 0 && t.every(e => e.completada);
+      };
+
+      // Racha actual: desde ayer hacia atrás
+      let racha = 0;
+      const ayer = new Date(ahora);
+      ayer.setDate(ayer.getDate() - 1);
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(ayer);
+        d.setDate(ayer.getDate() - i);
+        const iso = d.toISOString().slice(0, 10);
+        const t = porDia[iso];
+        if (!t || t.length === 0) continue; // sin tareas ese día → saltar
+        if (diaOk(iso)) { racha++; } else { break; }
+      }
+
+      // Mejor racha del mes actual
+      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+      const diasMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
+      let mejorRacha = 0;
+      let rachaTemp = 0;
+      for (let i = 0; i < diasMes; i++) {
+        const d = new Date(inicioMes);
+        d.setDate(inicioMes.getDate() + i);
+        const iso = d.toISOString().slice(0, 10);
+        if (iso >= hoy) break; // no contar hoy ni futuro
+        const t = porDia[iso];
+        if (!t || t.length === 0) continue; // sin tareas → saltar
+        if (diaOk(iso)) {
+          rachaTemp++;
+          if (rachaTemp > mejorRacha) mejorRacha = rachaTemp;
+        } else {
+          rachaTemp = 0;
+        }
+      }
+
+      setRachaStats({ racha, mejorRacha });
+    });
   }, [user?.id, currentBusiness?.id]);
 
   useEffect(() => {
@@ -151,14 +211,18 @@ export default function Dashboard() {
             </div>
             <div className="flex flex-col gap-0.5">
               <div className="flex items-baseline gap-1.5">
-                <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>14</span>
+                <span className="font-bold leading-none" style={{ fontSize: "36px", letterSpacing: "-0.03em", color: "#1B1B1B" }}>
+                  {rachaStats.racha === null ? "—" : rachaStats.racha}
+                </span>
               </div>
               <span className="text-[12px] font-medium" style={{ color: "#8A8278" }}>Días consecutivos al día</span>
             </div>
-          </div>
-          <div className="border-t border-border mt-4 pt-3">
-            <span className="text-[11px]" style={{ color: "#8A8278" }}>Tu mejor racha este mes</span>
-          </div>
+            </div>
+            <div className="border-t border-border mt-4 pt-3">
+            <span className="text-[11px]" style={{ color: "#8A8278" }}>
+              {rachaStats.mejorRacha === null ? "Tu mejor racha este mes" : `Mejor racha este mes: ${rachaStats.mejorRacha} día${rachaStats.mejorRacha !== 1 ? "s" : ""}`}
+            </span>
+            </div>
         </div>
 
       </div>
