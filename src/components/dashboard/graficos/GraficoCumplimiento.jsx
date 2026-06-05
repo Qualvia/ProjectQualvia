@@ -240,29 +240,31 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
           <button onClick={onCollapse} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Volver a gráficos
           </button>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-[#0A3E47]">Cumplimiento APPCC</h3>
+            <div className="relative">
+              <button
+                onClick={() => setShowInfo(v => !v)}
+                className="text-muted-foreground hover:text-[#0A3E47] transition-colors">
+                <HelpCircle className="w-4 h-4" />
+              </button>
+              {showInfo && (
+                <div className="absolute left-0 top-6 z-20 bg-white border border-border rounded-xl shadow-lg p-3 text-xs text-muted-foreground w-72 space-y-1">
+                  <p className="font-semibold text-[#0A3E47] mb-1">¿Cómo se calcula?</p>
+                  <p>Tareas completadas (35%) · Días con registros (35%) · Gestión de incidencias (30%)</p>
+                  <p className="mt-1 text-[11px]">Tener incidencias no penaliza — lo que cuenta es resolverlas a tiempo.</p>
+                </div>
+              )}
+            </div>
+          </div>
           <select
             value={periodoExp}
             onChange={e => setPeriodoExp(e.target.value)}
             className="text-xs text-[#6BB68A] font-medium border border-[#6BB68A]/50 rounded-full px-3 py-1.5 bg-white focus:outline-none cursor-pointer appearance-none">
             {PERIODOS_EXP.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
           </select>
-        </div>
-        <div className="flex items-center gap-2">
-          <h3 className="text-base font-semibold text-[#0A3E47]">Cumplimiento APPCC</h3>
-          <div className="relative">
-            <button
-              onClick={() => setShowInfo(v => !v)}
-              className="text-muted-foreground hover:text-[#0A3E47] transition-colors">
-              <HelpCircle className="w-4 h-4" />
-            </button>
-            {showInfo && (
-              <div className="absolute left-0 top-6 z-20 bg-white border border-border rounded-xl shadow-lg p-3 text-xs text-muted-foreground w-72 space-y-1">
-                <p className="font-semibold text-[#0A3E47] mb-1">¿Cómo se calcula?</p>
-                <p>Tareas completadas (35%) · Días con registros (35%) · Gestión de incidencias (30%)</p>
-                <p className="mt-1 text-[11px]">Tener incidencias no penaliza — lo que cuenta es resolverlas a tiempo.</p>
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-6 items-start">
