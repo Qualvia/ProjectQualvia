@@ -345,14 +345,14 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         </div>
       ) : onboarding ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-1">
-          <div className="relative w-[140px] h-[140px]">
-            <PieChart width={140} height={140}>
-              <Pie data={pieDataGris} cx={70} cy={70} innerRadius={44} outerRadius={62} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
+          <div className="relative w-[180px] h-[180px]">
+            <PieChart width={180} height={180}>
+              <Pie data={pieDataGris} cx={90} cy={90} innerRadius={58} outerRadius={80} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
                 <Cell fill="#D1D5DB" />
               </Pie>
             </PieChart>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-2xl font-bold text-muted-foreground">—</span>
+              <span className="text-3xl font-bold text-muted-foreground">—</span>
             </div>
           </div>
           <p className="text-[10px] text-muted-foreground text-center leading-tight px-2">Registra los primeros días para ver tu score</p>
@@ -360,15 +360,15 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center gap-1">
-          <div className="relative w-[140px] h-[140px]">
-            <PieChart width={140} height={140}>
-              <Pie data={pieData} cx={70} cy={70} innerRadius={44} outerRadius={62} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
+          <div className="relative w-[180px] h-[180px]">
+            <PieChart width={180} height={180}>
+              <Pie data={pieData} cx={90} cy={90} innerRadius={58} outerRadius={80} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
                 <Cell fill={donutColor} />
                 <Cell fill="#EDE6DA" />
               </Pie>
             </PieChart>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-2xl font-bold text-[#0A3E47]">{`${score}%`}</span>
+              <span className="text-3xl font-bold text-[#0A3E47]">{`${score}%`}</span>
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground">Mes actual</p>
