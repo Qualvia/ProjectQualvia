@@ -249,7 +249,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
   return (
     <div
       onClick={onExpand}
-      className="relative bg-white rounded-xl border border-[#E8E0D5] shadow-sm p-3 cursor-pointer group hover:shadow-md hover:border-[#6BB68A]/40 transition-all">
+      className="relative bg-white rounded-xl border border-[#E8E0D5] shadow-sm p-3 cursor-pointer group hover:shadow-md hover:border-[#6BB68A]/40 transition-all h-full flex flex-col">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <AlertTriangle className="w-4.5 h-4.5 text-[#0A3E47]" />
@@ -269,26 +269,28 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
         </div>
       </div>
       {loading ? (
-        <div className="flex items-center justify-center h-[120px]">
+        <div className="flex items-center justify-center flex-1">
           <div className="w-5 h-5 border-2 border-gray-200 border-t-[#0A3E47] rounded-full animate-spin" />
         </div>
       ) : !hayDatos ? (
-        <div className="flex flex-col items-center justify-center h-[120px] gap-1.5">
+        <div className="flex flex-col items-center justify-center flex-1 gap-1.5">
           <AlertTriangle className="w-6 h-6 text-muted-foreground/30" />
           <p className="text-[11px] text-muted-foreground text-center leading-tight">Aún no hay incidencias<br />registradas</p>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={140}>
-          <BarChart data={dataCompacto} margin={{ top: 6, right: 4, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
-            <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} ticks={getYTicks(dataCompacto)} domain={[0, getYTicks(dataCompacto).at(-1)]} />
-            <Tooltip content={<CustomTooltipInc />} />
-            <Bar dataKey="cerradas" stackId="a" fill="#6BB68A" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="seguimiento" stackId="a" fill="#BFDBFE" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="abiertas" stackId="a" fill="#FECACA" radius={[3, 3, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="flex-1 min-h-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={dataCompacto} margin={{ top: 6, right: 4, left: 0, bottom: 4 }}>
+              <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} ticks={getYTicks(dataCompacto)} domain={[0, getYTicks(dataCompacto).at(-1)]} />
+              <Tooltip content={<CustomTooltipInc />} />
+              <Bar dataKey="cerradas" stackId="a" fill="#6BB68A" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="seguimiento" stackId="a" fill="#BFDBFE" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="abiertas" stackId="a" fill="#FECACA" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       )}
     </div>
   );

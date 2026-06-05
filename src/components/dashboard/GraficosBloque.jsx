@@ -12,21 +12,27 @@ export default function GraficosBloque() {
         className="transition-all duration-300"
         style={{ display: expandido ? "block" : undefined }}>
 
-        {/* Vista compacta: grid 3 columnas */}
+        {/* Vista compacta: grid 3 columnas, altura uniforme */}
         {!expandido && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <GraficoCumplimiento
-              expandido={false}
-              onExpand={() => setExpandido("cumplimiento")}
-            />
-            <GraficoTemperatura
-              expandido={false}
-              onExpand={() => setExpandido("temperatura")}
-            />
-            <GraficoIncidencias
-              expandido={false}
-              onExpand={() => setExpandido("incidencias")}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-stretch">
+            <div className="flex flex-col h-[260px]">
+              <GraficoCumplimiento
+                expandido={false}
+                onExpand={() => setExpandido("cumplimiento")}
+              />
+            </div>
+            <div className="flex flex-col h-[260px]">
+              <GraficoTemperatura
+                expandido={false}
+                onExpand={() => setExpandido("temperatura")}
+              />
+            </div>
+            <div className="flex flex-col h-[260px]">
+              <GraficoIncidencias
+                expandido={false}
+                onExpand={() => setExpandido("incidencias")}
+              />
+            </div>
           </div>
         )}
 

@@ -185,7 +185,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
   return (
     <div
       onClick={onExpand}
-      className="relative bg-white rounded-xl border border-[#E8E0D5] shadow-sm p-3 cursor-pointer group hover:shadow-md hover:border-[#6BB68A]/40 transition-all">
+      className="relative bg-white rounded-xl border border-[#E8E0D5] shadow-sm p-3 cursor-pointer group hover:shadow-md hover:border-[#6BB68A]/40 transition-all h-full flex flex-col">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <ClipboardCheck className="w-4.5 h-4.5 text-[#0A3E47]" />
@@ -194,23 +194,25 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         <Maximize2 className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       {loading ? (
-        <div className="flex items-center justify-center h-[120px]">
+        <div className="flex items-center justify-center flex-1">
           <div className="w-5 h-5 border-2 border-gray-200 border-t-[#0A3E47] rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="relative flex flex-col items-center">
-          <PieChart width={120} height={120}>
-            <Pie data={pieData} cx={60} cy={60} innerRadius={38} outerRadius={54} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
-              <Cell fill={donutColor} />
-              <Cell fill="#EDE6DA" />
-            </Pie>
-          </PieChart>
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ paddingLeft: 4 }}>
-            <span className="text-2xl font-bold text-[#0A3E47]">{`${score}%`}</span>
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="relative">
+            <PieChart width={160} height={160}>
+              <Pie data={pieData} cx={80} cy={80} innerRadius={50} outerRadius={70} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
+                <Cell fill={donutColor} />
+                <Cell fill="#EDE6DA" />
+              </Pie>
+            </PieChart>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="text-3xl font-bold text-[#0A3E47]">{`${score}%`}</span>
+            </div>
           </div>
+          <p className="text-[11px] text-muted-foreground mt-1">Mes actual</p>
         </div>
       )}
-      <p className="text-center text-[11px] text-muted-foreground mt-1">Mes actual</p>
     </div>
   );
 }
