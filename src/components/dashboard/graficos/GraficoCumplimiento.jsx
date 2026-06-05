@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { ClipboardCheck, Maximize2, ArrowLeft } from "lucide-react";
+import { ClipboardCheck, Maximize2, ArrowLeft, HelpCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 
@@ -43,6 +43,13 @@ const CustomTooltipSemana = ({ active, payload }) => {
   );
 };
 
+const PERIODOS_EXP = [
+  { value: "mensual",    label: "Mes actual" },
+  { value: "trimestral", label: "Trimestre" },
+  { value: "semestral",  label: "Semestre" },
+  { value: "anual",      label: "Año actual" },
+];
+
 export default function GraficoCumplimiento({ expandido, onExpand, onCollapse }) {
   const { user, currentBusiness } = useBusiness();
   const [score, setScore] = useState(0);
@@ -50,21 +57,42 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
   const [metricas, setMetricas] = useState({ tareasPorc: 0, diasActivos: 0, totalDias: 0, incCerradas: 0, incTotal: 0 });
   const [onboarding, setOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [periodoExp, setPeriodoExp] = useState("mensual");
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
     cargar();
-  }, [user?.id, currentBusiness?.id]);
+  }, [user?.id, currentBusiness?.id, periodoExp]);
 
   async function cargar() {
     setLoading(true);
     const uid = user.id;
     const bid = currentBusiness.id;
     const ahora = new Date();
+
+    // Calcular rango según periodoExp
+    let inicioDate, finDate;
+    if (periodoExp === "trimestral") {
+      inicioDate = new Date(ahora.getFullYear(), ahora.getMonth() - 2, 1);
+      finDate = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59);
+    } else if (periodoExp === "semestral") {
+      inicioDate = new Date(ahora.getFullYear(), ahora.getMonth() - 5, 1);
+      finDate = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59);
+    } else if (periodoExp === "anual") {
+      inicioDate = new Date(ahora.getFullYear(), 0, 1);
+      finDate = new Date(ahora.getFullYear(), 11, 31, 23, 59, 59);
+    } else {
+      inicioDate = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+      finDate = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59);
+    }
+    const inicio = inicioDate.toISOString();
+    const fin = finDate.toISOString();
     const mesActual = isoYYYYMM(ahora);
-    const inicio = startOfMonth().toISOString();
-    const fin = endOfMonth().toISOString();
-    const totalDias = daysInMonth();
+    // Para tareas del periodo (usando fecha_dia)
+    const inicioISO = inicioDate.toISOString().slice(0, 10);
+    const finISO = finDate.toISOString().slice(0, 10);
+    const totalDias = Math.round((finDate - inicioDate) / (1000 * 3600 * 24)) + 1;
 
     const [todasEj, todasInc, todosTemp, todosLimp, todosAgua, todosRecep, todosMant, todosCong] = await Promise.all([
       base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }),
@@ -87,7 +115,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     setOnboarding(diasActivosGlobal < 3);
 
     // --- EJE 1: TAREAS (35pts) ---
-    const ejMes = todasEj.filter(e => e.fecha_dia && e.fecha_dia.startsWith(mesActual));
+    const ejMes = todasEj.filter(e => e.fecha_dia && e.fecha_dia >= inicioISO && e.fecha_dia <= finISO);
     const tareasTotal = ejMes.length;
     const tareasComp = ejMes.filter(e => e.completada).length;
     const tareasPorc = tareasTotal > 0 ? Math.round((tareasComp / tareasTotal) * 100) : 100;
@@ -150,14 +178,23 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
 
     // --- SEMANAS ---
     const semanaMap = {};
-    for (let dia = 1; dia <= totalDias; dia++) {
-      const sem = Math.ceil((dia + new Date(ahora.getFullYear(), ahora.getMonth(), 1).getDay()) / 7);
-      if (!semanaMap[sem]) semanaMap[sem] = { tareas: [], registros: [], dias: 0 };
+    const todosRegMes = [...tempMes, ...limpMes, ...aguaMes, ...recepMes, ...mantMes, ...congMes];
+    for (let i = 0; i < totalDias; i++) {
+      const diaDate = new Date(inicioDate);
+      diaDate.setDate(inicioDate.getDate() + i);
+      const diaISO = diaDate.toISOString().slice(0, 10);
+      const semOffset = Math.floor(i / 7) + 1;
+      const sem = semOffset;
+      if (!semanaMap[sem]) semanaMap[sem] = { tareas: [], registros: [], dias: 0, label: null };
       semanaMap[sem].dias++;
-      const diaISO = `${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
+      if (!semanaMap[sem].label) {
+        semanaMap[sem].label = periodoExp === "mensual"
+          ? `Sem ${sem}`
+          : `${String(diaDate.getDate()).padStart(2,"0")}/${String(diaDate.getMonth()+1).padStart(2,"0")}`;
+      }
       const ejDia = ejMes.filter(e => e.fecha_dia === diaISO);
       if (ejDia.length > 0) semanaMap[sem].tareas.push(ejDia.filter(e => e.completada).length / ejDia.length);
-      const tieneRegDia = [...tempMes, ...limpMes, ...aguaMes, ...recepMes, ...mantMes, ...congMes].some(r => r.fecha?.slice(0,10) === diaISO);
+      const tieneRegDia = todosRegMes.some(r => r.fecha?.slice(0,10) === diaISO);
       if (tieneRegDia) semanaMap[sem].registros.push(1);
     }
 
@@ -165,7 +202,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       const tP = data.tareas.length > 0 ? Math.round((data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length)*35) : 0;
       const rP = Math.round((data.registros.length / data.dias) * 35);
       return {
-        name: `Sem ${s}`,
+        name: data.label || `Sem ${s}`,
         score: Math.min(100, tP + rP + Math.round(puntajeC)),
         tareas: Math.round((data.tareas.length > 0 ? data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length : 0) * 100),
         registros: Math.round((data.registros.length / data.dias) * 100),
@@ -199,10 +236,34 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
   if (expandido) {
     return (
       <div className="p-6 space-y-4">
-        <button onClick={onCollapse} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="w-3.5 h-3.5" /> Volver a gráficos
-        </button>
-        <h3 className="text-base font-semibold text-[#0A3E47]">Cumplimiento APPCC · Mes actual</h3>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <button onClick={onCollapse} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Volver a gráficos
+          </button>
+          <select
+            value={periodoExp}
+            onChange={e => setPeriodoExp(e.target.value)}
+            className="text-xs text-[#6BB68A] font-medium border border-[#6BB68A]/40 rounded-md px-2 py-1 bg-white focus:outline-none cursor-pointer">
+            {PERIODOS_EXP.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-semibold text-[#0A3E47]">Cumplimiento APPCC</h3>
+          <div className="relative">
+            <button
+              onClick={() => setShowInfo(v => !v)}
+              className="text-muted-foreground hover:text-[#0A3E47] transition-colors">
+              <HelpCircle className="w-4 h-4" />
+            </button>
+            {showInfo && (
+              <div className="absolute left-0 top-6 z-20 bg-white border border-border rounded-xl shadow-lg p-3 text-xs text-muted-foreground w-72 space-y-1">
+                <p className="font-semibold text-[#0A3E47] mb-1">¿Cómo se calcula?</p>
+                <p>Tareas completadas (35%) · Días con registros (35%) · Gestión de incidencias (30%)</p>
+                <p className="mt-1 text-[11px]">Tener incidencias no penaliza — lo que cuenta es resolverlas a tiempo.</p>
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <div className="flex flex-col items-center shrink-0" style={{ width: 200 }}>
@@ -225,7 +286,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
                 <span className="text-3xl font-bold text-[#0A3E47]">{loading ? "—" : onboarding ? "—" : `${score}%`}</span>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground -mt-2">Mes actual</p>
+            <p className="text-xs text-muted-foreground mt-2 text-center">{PERIODOS_EXP.find(p => p.value === periodoExp)?.label}</p>
             {onboarding && (
               <>
                 <p className="text-[11px] text-muted-foreground text-center mt-2 leading-tight">Registra los primeros días para ver tu score</p>
