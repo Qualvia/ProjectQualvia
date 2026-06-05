@@ -384,27 +384,29 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     );
   }
 
-  // Vista compacta
+  // Vista compacta — periodo fijo 7d
   return (
     <div
       onClick={onExpand}
       className="relative bg-white rounded-xl border border-[#E8E0D5] shadow-sm p-3 cursor-pointer group hover:shadow-md hover:border-[#6BB68A]/40 transition-all h-full flex flex-col">
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
           <Thermometer className="w-4.5 h-4.5 text-[#0A3E47]" />
           <span className="text-sm font-semibold text-[#0A3E47]">Temperatura</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          {/* Selector de periodo compacto */}
-          <select
-            value={periodo}
-            onChange={e => { e.stopPropagation(); setPeriodo(e.target.value); }}
-            onClick={e => e.stopPropagation()}
-            className="text-[10px] text-[#0A3E47] font-medium border-0 bg-transparent focus:outline-none cursor-pointer appearance-none pr-1">
-            {PERIODOS.map(p => (
-              <option key={p.value} value={p.value}>{p.label}</option>
-            ))}
-          </select>
+        <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+          {/* Selector de tipo arriba-derecha (solo si hay más de 1 tipo) */}
+          {tiposDisponibles.filter(t => t !== "todos").length > 1 && (
+            <select
+              value={filtroTipoCompacto || ""}
+              onChange={e => { e.stopPropagation(); setFiltroTipoCompacto(e.target.value); }}
+              onClick={e => e.stopPropagation()}
+              className="text-[10px] text-[#0A3E47] font-medium border border-[#6BB68A] rounded-md bg-[#E4F2EC] px-2 py-0.5 focus:outline-none cursor-pointer shadow-sm">
+              {tiposDisponibles.filter(t => t !== "todos").map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          )}
           <Maximize2 className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       </div>
@@ -418,17 +420,16 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           <p className="text-[11px] text-muted-foreground text-center leading-tight">Aún no hay registros<br />de temperatura</p>
         </div>
       ) : (
-        <>
-          <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 6, right: 24, left: 0, bottom: 4 }}>
+            <LineChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
               <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
               <XAxis
                 dataKey="fecha"
                 tick={{ fontSize: 9, fill: "#9A9289" }}
                 tickLine={false}
                 axisLine={false}
-                interval={periodo === "7d" ? 1 : periodo === "14d" ? 3 : 6}
+                interval={1}
               />
               <YAxis
                 tick={{ fontSize: 9, fill: "#9A9289" }}
@@ -466,22 +467,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               ))}
             </LineChart>
           </ResponsiveContainer>
-          </div>
-          {/* Selector de tipo centrado debajo del gráfico */}
-          {tiposDisponibles.filter(t => t !== "todos").length > 1 && (
-            <div className="flex justify-center mt-1" onClick={e => e.stopPropagation()}>
-              <select
-                value={filtroTipoCompacto || ""}
-                onChange={e => { e.stopPropagation(); setFiltroTipoCompacto(e.target.value); }}
-                onClick={e => e.stopPropagation()}
-                className="text-xs text-[#0A3E47] font-medium border border-[#6BB68A] rounded-lg bg-[#E4F2EC] px-3 py-1.5 focus:outline-none cursor-pointer shadow-sm">
-                {tiposDisponibles.filter(t => t !== "todos").map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-          )}
-        </>
+        </div>
       )}
     </div>
   );
