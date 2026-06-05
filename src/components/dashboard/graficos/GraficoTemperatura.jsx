@@ -70,6 +70,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
   const [periodo, setPeriodo] = useState("7d");
   // Guardamos los registros recientes para recalcular dominio Y
   const [registrosRecientes, setRegistrosRecientes] = useState([]);
+  const [equipoCompacto, setEquipoCompacto] = useState(null);
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
@@ -120,6 +121,14 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     setLimites(limitesMap);
     setRegistrosRecientes(recientes);
 
+    // Equipo con el registro más reciente (para vista compacta)
+    const ultimoReg = registros.reduce((max, r) => {
+      if (!r.fecha) return max;
+      return !max || new Date(r.fecha) > new Date(max.fecha) ? r : max;
+    }, null);
+    const eqUltimo = ultimoReg ? equiposConDatos.find(e => e.id === ultimoReg.equipo_id) : equiposConDatos[0] || null;
+    setEquipoCompacto(eqUltimo);
+
     const chartData = dias.map(dia => {
       const row = { fecha: formatDD_MM(dia + "T12:00:00") };
       eqs.forEach((eq, i) => {
@@ -163,8 +172,8 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
 
   // Hay datos si algún equipo configurado tiene al menos un valor en el periodo
   const hayDatos = !loading && equipos.length > 0 && data.some(d => equipos.some(eq => d[eq.nombre] != null));
-  // Para vista compacta usamos todos los equipos configurados
-  const equiposCompactos = equipos;
+  // Para vista compacta solo el equipo con registro más reciente
+  const equiposCompactos = equipoCompacto ? [equipoCompacto] : [];
 
   // Dominio Y: considera valores reales + límites de equipos mostrados, con margen ±3
   function getYDomain() {
@@ -384,7 +393,9 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <Thermometer className="w-4.5 h-4.5 text-[#0A3E47]" />
-          <span className="text-sm font-semibold text-[#0A3E47]">Temperatura</span>
+          <span className="text-sm font-semibold text-[#0A3E47]">
+            Temperatura{equipoCompacto ? ` · ${equipoCompacto.nombre}` : ""}
+          </span>
         </div>
         <div className="flex items-center gap-1.5">
           {/* Selector de periodo compacto — detiene el click para no abrir expandido */}
@@ -428,11 +439,12 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               width={30}
               tickCount={6}
               domain={(() => {
-                const vals = registrosRecientes.map(r => r.temperatura).filter(v => v != null);
-                const limVals = equipos.flatMap(eq => {
-                  const lim = limites[eq.id];
-                  return lim ? [lim.min, lim.max].filter(v => v != null) : [];
-                });
+                const eqRef = equipoCompacto;
+                const vals = eqRef
+                  ? registrosRecientes.filter(r => r.equipo_id === eqRef.id).map(r => r.temperatura).filter(v => v != null)
+                  : [];
+                const lim = eqRef ? limites[eqRef.id] : null;
+                const limVals = lim ? [lim.min, lim.max].filter(v => v != null) : [];
                 const todos = [...vals, ...limVals];
                 if (todos.length === 0) return [0, 10];
                 return [Math.floor(Math.min(...todos) - 2), Math.ceil(Math.max(...todos) + 2)];
