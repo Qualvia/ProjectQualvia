@@ -216,7 +216,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         };
       }
 
-      const esActual = parseInt(s) === getWeekNumber(ahora);
+      const esActual = hoyISO >= data.inicioSem && hoyISO <= data.finSem;
 
       // tP: tareas de la semana
       const ejSem = ejMes.filter(e => e.fecha_dia && e.fecha_dia >= data.inicioSem && e.fecha_dia <= data.finSem);
