@@ -216,9 +216,13 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         };
       }
 
+      const esActual = parseInt(s) === getWeekNumber(ahora);
+
       // tP: tareas de la semana
       const ejSem = ejMes.filter(e => e.fecha_dia && e.fecha_dia >= data.inicioSem && e.fecha_dia <= data.finSem);
-      const tP = ejSem.length > 0 ? Math.round((ejSem.filter(e => e.completada).length / ejSem.length) * 35) : 35;
+      const tP = ejSem.length > 0
+        ? Math.round((ejSem.filter(e => e.completada).length / ejSem.length) * 35)
+        : (esActual ? 35 : 0);
 
       // rP: días con al menos un registro dentro de la semana
       const diasConRegSem = new Set(
@@ -227,16 +231,19 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
           return d && d >= data.inicioSem && d <= data.finSem;
         }).map(r => r.fecha.slice(0, 10))
       ).size;
-      const rP = Math.round((diasConRegSem / data.dias) * 35);
+      const rP = diasConRegSem > 0
+        ? Math.round((diasConRegSem / data.dias) * 35)
+        : (esActual ? 35 : 0);
 
       // Calcular puntaje de incidencias para esta semana individualmente
       const incSem = todasInc.filter(i => {
         const f = (i.created_date || i.fecha)?.slice(0, 10);
         return f && f >= data.inicioSem && f <= data.finSem;
       });
+      const hayActividad = ejSem.length > 0 || diasConRegSem > 0;
       let puntajeCsem;
       if (incSem.length === 0) {
-        puntajeCsem = 30;
+        puntajeCsem = (esActual || hayActividad) ? 30 : 0;
       } else {
         const sumaIncSem = incSem.reduce((acc, i) => {
           if (i.estado === "cerrada") return acc + 1.0;
@@ -253,7 +260,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         tareas: ejSem.length > 0 ? Math.round((ejSem.filter(e => e.completada).length / ejSem.length) * 100) : 100,
         registros: Math.round((diasConRegSem / data.dias) * 100),
         incidencias: Math.round((puntajeCsem / 30) * 100),
-        esActual: parseInt(s) === getWeekNumber(ahora),
+        esActual,
       };
     });
     setSemanas(semanasData);
