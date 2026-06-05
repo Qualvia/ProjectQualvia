@@ -70,7 +70,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
   const [periodo, setPeriodo] = useState("7d");
   // Guardamos los registros recientes para recalcular dominio Y
   const [registrosRecientes, setRegistrosRecientes] = useState([]);
-  const [equipoCompacto, setEquipoCompacto] = useState(null);
+  const [filtroTipoCompacto, setFiltroTipoCompacto] = useState(null);
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
@@ -121,13 +121,9 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     setLimites(limitesMap);
     setRegistrosRecientes(recientes);
 
-    // Equipo con el registro más reciente (para vista compacta)
-    const ultimoReg = registros.reduce((max, r) => {
-      if (!r.fecha) return max;
-      return !max || new Date(r.fecha) > new Date(max.fecha) ? r : max;
-    }, null);
-    const eqUltimo = ultimoReg ? equiposConDatos.find(e => e.id === ultimoReg.equipo_id) : equiposConDatos[0] || null;
-    setEquipoCompacto(eqUltimo);
+    // Inicializar filtro compacto con el primer tipo disponible
+    const tiposArr = [...new Set(eqs.map(eq => eq.tipo || "Otro").filter(Boolean))];
+    setFiltroTipoCompacto(prev => prev && tiposArr.includes(prev) ? prev : (tiposArr[0] || null));
 
     const chartData = dias.map(dia => {
       const row = { fecha: formatDD_MM(dia + "T12:00:00") };
@@ -172,8 +168,8 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
 
   // Hay datos si algún equipo configurado tiene al menos un valor en el periodo
   const hayDatos = !loading && equipos.length > 0 && data.some(d => equipos.some(eq => d[eq.nombre] != null));
-  // Para vista compacta solo el equipo con registro más reciente
-  const equiposCompactos = equipoCompacto ? [equipoCompacto] : [];
+  // Para vista compacta: equipos del tipo seleccionado
+  const equiposCompactos = filtroTipoCompacto ? equipos.filter(e => e.tipo === filtroTipoCompacto) : equipos;
 
   // Dominio Y: considera valores reales + límites de equipos mostrados, con margen ±3
   function getYDomain() {
@@ -393,12 +389,25 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
           <Thermometer className="w-4.5 h-4.5 text-[#0A3E47]" />
-          <span className="text-sm font-semibold text-[#0A3E47]">
-            Temperatura{equipoCompacto ? ` · ${equipoCompacto.nombre}` : ""}
-          </span>
+          <span className="text-sm font-semibold text-[#0A3E47]">Temperatura</span>
         </div>
         <div className="flex items-center gap-1.5">
-          {/* Selector de periodo compacto — detiene el click para no abrir expandido */}
+          {/* Selector de tipo compacto */}
+          {tiposDisponibles.filter(t => t !== "todos").length > 1 && (
+            <select
+              value={filtroTipoCompacto || ""}
+              onChange={e => { e.stopPropagation(); setFiltroTipoCompacto(e.target.value); }}
+              onClick={e => e.stopPropagation()}
+              className="text-[10px] text-[#0A3E47] font-medium border-0 bg-transparent focus:outline-none cursor-pointer appearance-none pr-1">
+              {tiposDisponibles.filter(t => t !== "todos").map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          )}
+          {tiposDisponibles.filter(t => t !== "todos").length <= 1 && filtroTipoCompacto && (
+            <span className="text-[10px] text-[#0A3E47] font-medium">{filtroTipoCompacto}</span>
+          )}
+          {/* Selector de periodo compacto */}
           <select
             value={periodo}
             onChange={e => { e.stopPropagation(); setPeriodo(e.target.value); }}
@@ -439,12 +448,14 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               width={30}
               tickCount={6}
               domain={(() => {
-                const eqRef = equipoCompacto;
-                const vals = eqRef
-                  ? registrosRecientes.filter(r => r.equipo_id === eqRef.id).map(r => r.temperatura).filter(v => v != null)
-                  : [];
-                const lim = eqRef ? limites[eqRef.id] : null;
-                const limVals = lim ? [lim.min, lim.max].filter(v => v != null) : [];
+                const eqsRef = equiposCompactos.length > 0 ? equiposCompactos : equipos;
+                const vals = registrosRecientes
+                  .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
+                  .map(r => r.temperatura).filter(v => v != null);
+                const limVals = eqsRef.flatMap(eq => {
+                  const lim = limites[eq.id];
+                  return lim ? [lim.min, lim.max].filter(v => v != null) : [];
+                });
                 const todos = [...vals, ...limVals];
                 if (todos.length === 0) return [0, 10];
                 return [Math.floor(Math.min(...todos) - 2), Math.ceil(Math.max(...todos) + 2)];
