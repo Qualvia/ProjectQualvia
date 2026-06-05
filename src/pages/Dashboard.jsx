@@ -112,6 +112,15 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
+    const hoy = new Date().toISOString().slice(0, 10);
+    base44.entities.TareaEjecucion.filter({ user_id: user.id, business_id: currentBusiness.id, fecha_dia: hoy })
+      .then((ej) => {
+        setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length });
+      });
+  }, [user?.id, currentBusiness?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !currentBusiness?.id) return;
     base44.entities.Incidencia.filter(
       { user_id: user.id, business_id: currentBusiness.id, estado: { $ne: "cerrada" } },
       "-fecha",
