@@ -199,6 +199,16 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
 
   const xTickFormatter = filtrarEtiquetasX([], periodo);
 
+  // Genera array de ticks equiespaciados entre min y max del dominio
+  function calcTicks(domain, step) {
+    if (domain[0] === "auto") return undefined;
+    const [min, max] = domain;
+    const ticks = [];
+    const start = Math.ceil(min / step) * step;
+    for (let v = start; v <= max; v += step) ticks.push(v);
+    return ticks;
+  }
+
   // Calcula rangos de fechas sin ningún dato para los equipos visibles
   function getGaps() {
     if (!data.length || !equiposMostrar.length) return [];
@@ -289,6 +299,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                 tick={{ fontSize: 11 }}
                 tickFormatter={v => `${v}°`}
                 domain={getYDomain()}
+                ticks={calcTicks(getYDomain(), 3)}
                 allowDataOverflow={false}
               />
               <Tooltip content={<CustomTooltipTemp />} />
@@ -312,7 +323,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                   stroke={eq.color}
                   strokeWidth={2}
                   strokeOpacity={0.85}
-                  connectNulls={true}
+                  connectNulls={false}
                   dot={(props) => {
                     const fuera = props.payload[`_meta_${eq.nombre}`]?.fuera;
                     if (props.value == null) return null;
@@ -437,7 +448,19 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               axisLine={false}
               tickFormatter={v => `${v}°`}
               width={30}
-              tickCount={6}
+              ticks={(() => {
+                const eqRef = equipoCompacto;
+                const vals = eqRef
+                  ? registrosRecientes.filter(r => r.equipo_id === eqRef.id).map(r => r.temperatura).filter(v => v != null)
+                  : [];
+                const lim = eqRef ? limites[eqRef.id] : null;
+                const limVals = lim ? [lim.min, lim.max].filter(v => v != null) : [];
+                const todos = [...vals, ...limVals];
+                if (todos.length === 0) return [0, 5, 10];
+                const domMin = Math.floor(Math.min(...todos) - 2);
+                const domMax = Math.ceil(Math.max(...todos) + 2);
+                return calcTicks([domMin, domMax], 5) || [domMin, domMax];
+              })()}
               domain={(() => {
                 const eqRef = equipoCompacto;
                 const vals = eqRef
@@ -459,8 +482,8 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                 stroke={eq.color}
                 strokeWidth={1.5}
                 strokeOpacity={0.85}
-                dot={false}
-                connectNulls={true}
+                connectNulls={false}
+                dot={(props) => props.value == null ? null : <circle cx={props.cx} cy={props.cy} r={2} fill={props.stroke} />}
               />
             ))}
           </LineChart>
