@@ -151,6 +151,16 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
 
   const hayDatos = dataCompacto.some(d => d.total > 0);
 
+  // Calcula ticks uniformes para el eje Y
+  function getYTicks(data) {
+    const maxVal = Math.max(...data.map(d => d.total), 1);
+    const step = maxVal <= 5 ? 1 : maxVal <= 10 ? 2 : maxVal <= 20 ? 4 : 5;
+    const top = Math.ceil(maxVal / step) * step;
+    const ticks = [];
+    for (let i = 0; i <= top; i += step) ticks.push(i);
+    return ticks;
+  }
+
   const tendenciaInfo = {
     baja: { texto: "↓ Tendencia positiva", color: "#16A34A" },
     sube: { texto: "↑ Atención, tendencia al alza", color: "#DC2626" },
@@ -200,7 +210,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
               <ComposedChart data={dataExpandido} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0EBE3" />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} ticks={getYTicks(dataExpandido)} domain={[0, getYTicks(dataExpandido).at(-1)]} />
                 <Tooltip content={<CustomTooltipInc />} />
                 <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} formatter={(v) => v === "cerradas" ? "Cerradas" : v === "seguimiento" ? "En seguimiento" : v === "abiertas" ? "Abiertas" : v} />
                 <Bar dataKey="cerradas" stackId="a" fill="#6BB68A" radius={[0, 0, 0, 0]} />
@@ -273,7 +283,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
           <BarChart data={dataCompacto} margin={{ top: 6, right: 4, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
             <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} tickCount={5} domain={[0, 'auto']} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} ticks={getYTicks(dataCompacto)} domain={[0, getYTicks(dataCompacto).at(-1)]} />
             <Tooltip content={<CustomTooltipInc />} />
             <Bar dataKey="cerradas" stackId="a" fill="#6BB68A" radius={[0, 0, 0, 0]} />
             <Bar dataKey="seguimiento" stackId="a" fill="#BFDBFE" radius={[0, 0, 0, 0]} />
