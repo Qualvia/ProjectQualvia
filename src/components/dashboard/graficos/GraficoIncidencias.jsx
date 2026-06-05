@@ -260,7 +260,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
             value={periodo}
             onChange={e => { e.stopPropagation(); setPeriodo(e.target.value); }}
             onClick={e => e.stopPropagation()}
-            className="text-[10px] text-[#0A3E47] font-medium border-0 bg-transparent focus:outline-none cursor-pointer appearance-none pr-1">
+            className="text-[10px] text-[#0A3E47] font-medium border border-[#0A3E47]/30 rounded-md px-1.5 py-0.5 bg-transparent focus:outline-none cursor-pointer appearance-none">
             {PERIODOS.map(p => (
               <option key={p.value} value={p.value}>{p.label}</option>
             ))}

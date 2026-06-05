@@ -401,7 +401,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               value={filtroTipoCompacto || ""}
               onChange={e => { e.stopPropagation(); setFiltroTipoCompacto(e.target.value); }}
               onClick={e => e.stopPropagation()}
-              className="text-[10px] text-[#6BB68A] font-medium border-0 bg-transparent focus:outline-none cursor-pointer appearance-none">
+              className="text-[10px] text-[#6BB68A] font-medium border border-[#6BB68A]/40 rounded-md px-1.5 py-0.5 bg-transparent focus:outline-none cursor-pointer appearance-none">
               {tiposDisponibles.filter(t => t !== "todos").map(t => (
                 <option key={t} value={t}>{t}</option>
               ))}
