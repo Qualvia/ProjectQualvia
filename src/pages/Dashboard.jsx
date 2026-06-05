@@ -50,6 +50,23 @@ export default function Dashboard() {
     setTareasStats({ completadas: 0, total: 0 });
     setIncidenciasStats({ total: 0, criticas: 0, maxHoras: 0 });
     setRachaStats({ racha: null, mejorRacha: null });
+
+    if (currentBusiness?.id) {
+      const guardado = localStorage.getItem(`qualvia_bloques_orden_${currentBusiness.id}`);
+      if (guardado) {
+        try {
+          const idsOrdenados = JSON.parse(guardado);
+          const bloquesOrdenados = idsOrdenados
+            .map(id => BLOQUES_INICIALES.find(b => b.id === id))
+            .filter(Boolean);
+          BLOQUES_INICIALES.forEach(b => {
+            if (!bloquesOrdenados.some(o => o.id === b.id)) bloquesOrdenados.push(b);
+          });
+          setBloques(bloquesOrdenados);
+          return;
+        } catch (e) {}
+      }
+    }
     setBloques(BLOQUES_INICIALES);
   }, [user?.id, currentBusiness?.id]);
 
@@ -142,6 +159,9 @@ export default function Dashboard() {
     const [moved] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, moved);
     setBloques(items);
+    if (currentBusiness?.id) {
+      localStorage.setItem(`qualvia_bloques_orden_${currentBusiness.id}`, JSON.stringify(items.map(b => b.id)));
+    }
   }
 
   return (
@@ -269,6 +289,8 @@ export default function Dashboard() {
                       ref={provided.innerRef}
                       {...provided.draggableProps}>
                       <DashboardBloque
+                        id={bloque.id}
+                        businessId={currentBusiness?.id}
                         title={bloque.title}
                         icon={bloque.icon}
                         dragHandleProps={provided.dragHandleProps}>

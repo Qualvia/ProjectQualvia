@@ -1,9 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronDown, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function DashboardBloque({ title, icon: Icon, children, dragHandleProps }) {
-  const [abierto, setAbierto] = useState(true);
+export default function DashboardBloque({ id, businessId, title, icon: Icon, children, dragHandleProps }) {
+  const [abierto, setAbierto] = useState(() => {
+    if (!id || !businessId) return true;
+    const guardado = localStorage.getItem(`qualvia_bloque_abierto_${businessId}_${id}`);
+    return guardado !== null ? JSON.parse(guardado) : true;
+  });
+
+  useEffect(() => {
+    if (!id || !businessId) return;
+    const guardado = localStorage.getItem(`qualvia_bloque_abierto_${businessId}_${id}`);
+    setAbierto(guardado !== null ? JSON.parse(guardado) : true);
+  }, [id, businessId]);
+
+  const handleToggle = () => {
+    const nuevoEstado = !abierto;
+    setAbierto(nuevoEstado);
+    if (id && businessId) {
+      localStorage.setItem(`qualvia_bloque_abierto_${businessId}_${id}`, JSON.stringify(nuevoEstado));
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
@@ -24,7 +42,7 @@ export default function DashboardBloque({ title, icon: Icon, children, dragHandl
 
         {/* Toggle */}
         <button
-          onClick={() => setAbierto(!abierto)}
+          onClick={handleToggle}
           className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
           <ChevronDown
             className={cn("w-5 h-5 transition-transform duration-200", abierto ? "rotate-0" : "-rotate-90")}
