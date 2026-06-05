@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { Thermometer, Droplets, ShieldCheck, ClipboardList, Package, Trash2, Wrench, Snowflake, FlaskConical, ClipboardCheck, AlertTriangle } from "lucide-react";
-
-function hoyISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+import { Thermometer, Droplets, ShieldCheck, ClipboardList, Package, Trash2, Wrench, Snowflake, FlaskConical, ClipboardCheck, AlertTriangle, Activity } from "lucide-react";
 
 function formatHora(fechaStr) {
   if (!fechaStr) return "—";
@@ -14,22 +9,17 @@ function formatHora(fechaStr) {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-function esHoy(fechaStr) {
-  if (!fechaStr) return false;
-  return fechaStr.slice(0, 10) === hoyISO();
-}
-
 const TIPO_CONFIG = {
   temperatura:  { icon: Thermometer,   bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
-  limpieza:     { icon: ShieldCheck,    bg: "bg-[#EEF2FF]", color: "text-[#4F46E5]" },
+  limpieza:     { icon: ShieldCheck,    bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
   recepcion:    { icon: Package,        bg: "bg-[#FEF3DC]", color: "text-[#D97706]" },
-  agua:         { icon: Droplets,       bg: "bg-[#E0F2FE]", color: "text-[#0284C7]" },
+  agua:         { icon: Droplets,       bg: "bg-[#EDE6DA]", color: "text-[#0A3E47]" },
   residuos:     { icon: Trash2,         bg: "bg-[#FEE8E8]", color: "text-[#C0392B]" },
-  mantenimiento:{ icon: Wrench,         bg: "bg-secondary", color: "text-[#0A3E47]" },
-  congelacion:  { icon: Snowflake,      bg: "bg-[#E0F2FE]", color: "text-[#0284C7]" },
+  mantenimiento:{ icon: Wrench,         bg: "bg-[#EDE6DA]", color: "text-[#0A3E47]" },
+  congelacion:  { icon: Snowflake,      bg: "bg-[#EDE6DA]", color: "text-[#0A3E47]" },
   alergenos:    { icon: FlaskConical,   bg: "bg-[#FEF3DC]", color: "text-[#D97706]" },
   checklist:    { icon: ClipboardCheck, bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
-  auditoria:    { icon: ClipboardList,  bg: "bg-[#EEF2FF]", color: "text-[#4F46E5]" },
+  auditoria:    { icon: ClipboardList,  bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
   incidencia:   { icon: AlertTriangle,  bg: "bg-[#FEE8E8]", color: "text-[#C0392B]" },
 };
 
@@ -59,6 +49,7 @@ export default function ActividadRecienteBloque() {
   const { user, currentBusiness } = useBusiness();
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [verTodos, setVerTodos] = useState(false);
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
@@ -69,24 +60,25 @@ export default function ActividadRecienteBloque() {
     setLoading(true);
     const uid = user.id;
     const bid = currentBusiness.id;
+    const fechaInicio = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
     const [temps, limpiezas, recepciones, aguas, residuos, mantenimientos, congelaciones, alergenos, checklists, auditorias, incidencias] = await Promise.all([
-      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroResiduo.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid }),
-      base44.entities.ChecklistEjecucion.filter({ user_id: uid, business_id: bid }),
-      base44.entities.AuditoriaInterna.filter({ user_id: uid, business_id: bid }),
-      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroResiduo.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid, created_date: { $gte: fechaInicio } }),
+      base44.entities.ChecklistEjecucion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.AuditoriaInterna.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid, created_date: { $gte: fechaInicio } }),
     ]);
 
     const lista = [];
 
-    temps.filter(r => esHoy(r.fecha)).forEach(r => {
+    temps.forEach(r => {
       lista.push({
         tipo: "temperatura", fecha: r.fecha,
         hora: formatHora(r.fecha),
@@ -96,7 +88,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    limpiezas.filter(r => esHoy(r.fecha)).forEach(r => {
+    limpiezas.forEach(r => {
       lista.push({
         tipo: "limpieza", fecha: r.fecha,
         hora: formatHora(r.fecha),
@@ -106,7 +98,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    recepciones.filter(r => esHoy(r.fecha)).forEach(r => {
+    recepciones.forEach(r => {
       lista.push({
         tipo: "recepcion", fecha: r.fecha,
         hora: formatHora(r.fecha),
@@ -116,7 +108,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    aguas.filter(r => esHoy(r.fecha)).forEach(r => {
+    aguas.forEach(r => {
       lista.push({
         tipo: "agua", fecha: r.fecha,
         hora: formatHora(r.fecha),
@@ -126,7 +118,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    residuos.filter(r => esHoy(r.fecha)).forEach(r => {
+    residuos.forEach(r => {
       lista.push({
         tipo: "residuos", fecha: r.fecha,
         hora: formatHora(r.fecha),
@@ -136,7 +128,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    mantenimientos.filter(r => esHoy(r.fecha)).forEach(r => {
+    mantenimientos.forEach(r => {
       lista.push({
         tipo: "mantenimiento", fecha: r.fecha,
         hora: formatHora(r.fecha),
@@ -146,7 +138,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    congelaciones.filter(r => esHoy(r.fecha)).forEach(r => {
+    congelaciones.forEach(r => {
       lista.push({
         tipo: "congelacion", fecha: r.fecha,
         hora: formatHora(r.fecha),
@@ -156,7 +148,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    alergenos.filter(r => esHoy(r.created_date)).forEach(r => {
+    alergenos.forEach(r => {
       lista.push({
         tipo: "alergenos", fecha: r.created_date,
         hora: formatHora(r.created_date),
@@ -166,7 +158,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    checklists.filter(r => esHoy(r.fecha)).forEach(r => {
+    checklists.forEach(r => {
       lista.push({
         tipo: "checklist", fecha: r.fecha,
         hora: formatHora(r.fecha),
@@ -176,7 +168,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    auditorias.filter(r => esHoy(r.fecha)).forEach(r => {
+    auditorias.forEach(r => {
       lista.push({
         tipo: "auditoria", fecha: r.fecha,
         hora: formatHora(r.fecha),
@@ -186,7 +178,7 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    incidencias.filter(r => esHoy(r.fecha || r.created_date)).forEach(r => {
+    incidencias.forEach(r => {
       lista.push({
         tipo: "incidencia", fecha: r.fecha || r.created_date,
         hora: formatHora(r.fecha || r.created_date),
@@ -213,18 +205,28 @@ export default function ActividadRecienteBloque() {
   if (eventos.length === 0) {
     return (
       <div className="px-5 py-10 flex flex-col items-center gap-2">
-        <ClipboardList className="w-8 h-8 text-muted-foreground/30" />
-        <p className="text-sm text-muted-foreground">Sin actividad registrada hoy</p>
+        <Activity className="w-8 h-8 text-muted-foreground/30" />
+        <p className="text-sm text-muted-foreground">Sin actividad en las últimas 24h</p>
+        <p className="text-xs text-muted-foreground/70">Los registros de hoy aparecerán aquí</p>
       </div>
     );
   }
 
+  const visibles = verTodos ? eventos : eventos.slice(0, 8);
+
   return (
     <div className="px-5 py-2">
-      <p className="text-[11px] text-muted-foreground py-2">{eventos.length} evento{eventos.length !== 1 ? "s" : ""} hoy</p>
-      {eventos.map((ev, i) => (
-        <EventoItem key={i} evento={ev} isLast={i === eventos.length - 1} />
+      <p className="text-[11px] text-muted-foreground py-2">{eventos.length} evento{eventos.length !== 1 ? "s" : ""} en las últimas 24h</p>
+      {visibles.map((ev, i) => (
+        <EventoItem key={i} evento={ev} isLast={i === visibles.length - 1 && (verTodos || eventos.length <= 8)} />
       ))}
+      {eventos.length > 8 && (
+        <button
+          onClick={() => setVerTodos(!verTodos)}
+          className="w-full text-xs font-medium text-[#6BB68A] border border-[#6BB68A]/40 rounded-lg py-2 mt-2 mb-1 hover:bg-[#6BB68A]/5 transition-colors">
+          {verTodos ? "Ver menos ▲" : `Ver ${eventos.length - 8} más ▼`}
+        </button>
+      )}
     </div>
   );
 }
