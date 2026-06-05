@@ -201,8 +201,18 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     }
 
     const semanasData = Object.entries(semanaMap).map(([s, data]) => {
-      const tP = data.tareas.length > 0 ? Math.round((data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length)*35) : 0;
-      const rP = Math.round((data.registros.length / data.dias) * 35);
+      // tP: tareas de la semana
+      const ejSem = ejMes.filter(e => e.fecha_dia && e.fecha_dia >= data.inicioSem && e.fecha_dia <= data.finSem);
+      const tP = ejSem.length > 0 ? Math.round((ejSem.filter(e => e.completada).length / ejSem.length) * 35) : 35;
+
+      // rP: días con al menos un registro dentro de la semana
+      const diasConRegSem = new Set(
+        todosRegMes.filter(r => {
+          const d = r.fecha?.slice(0, 10);
+          return d && d >= data.inicioSem && d <= data.finSem;
+        }).map(r => r.fecha.slice(0, 10))
+      ).size;
+      const rP = Math.round((diasConRegSem / data.dias) * 35);
 
       // Calcular puntaje de incidencias para esta semana individualmente
       const incSem = todasInc.filter(i => {
@@ -225,8 +235,8 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       return {
         name: data.label || `Sem ${s}`,
         score: Math.min(100, tP + rP + Math.round(puntajeCsem)),
-        tareas: Math.round((data.tareas.length > 0 ? data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length : 0) * 100),
-        registros: Math.round((data.registros.length / data.dias) * 100),
+        tareas: ejSem.length > 0 ? Math.round((ejSem.filter(e => e.completada).length / ejSem.length) * 100) : 100,
+        registros: Math.round((diasConRegSem / data.dias) * 100),
         incidencias: Math.round((puntajeCsem / 30) * 100),
         esActual: parseInt(s) === getWeekNumber(ahora),
       };
