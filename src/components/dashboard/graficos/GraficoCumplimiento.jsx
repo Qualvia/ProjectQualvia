@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { ClipboardCheck, Maximize2, ArrowLeft, HelpCircle } from "lucide-react";
+import { ClipboardCheck, Maximize2, ArrowLeft, HelpCircle, ChevronDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 
@@ -305,12 +305,15 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
               )}
             </div>
           </div>
-          <select
-            value={periodoExp}
-            onChange={e => setPeriodoExp(e.target.value)}
-            className="text-xs text-[#6BB68A] font-medium border border-[#6BB68A]/50 rounded-full px-3 py-1.5 bg-white focus:outline-none cursor-pointer appearance-none">
-            {PERIODOS_EXP.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-          </select>
+          <div className="relative inline-flex items-center">
+            <select
+              value={periodoExp}
+              onChange={e => setPeriodoExp(e.target.value)}
+              className="text-xs text-[#6BB68A] font-medium border border-[#6BB68A]/50 rounded-full pl-3 pr-7 py-1.5 bg-white focus:outline-none cursor-pointer appearance-none">
+              {PERIODOS_EXP.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+            </select>
+            <ChevronDown className="absolute right-2 w-3 h-3 text-[#6BB68A] pointer-events-none" />
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-6 items-start">
