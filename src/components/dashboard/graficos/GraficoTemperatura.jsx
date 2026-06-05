@@ -389,7 +389,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     <div
       onClick={onExpand}
       className="relative bg-white rounded-xl border border-[#E8E0D5] shadow-sm p-3 cursor-pointer group hover:shadow-md hover:border-[#6BB68A]/40 transition-all h-full flex flex-col">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-1.5">
           <Thermometer className="w-4.5 h-4.5 text-[#0A3E47]" />
           <span className="text-sm font-semibold text-[#0A3E47]">Temperatura</span>
@@ -401,7 +401,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               value={filtroTipoCompacto || ""}
               onChange={e => { e.stopPropagation(); setFiltroTipoCompacto(e.target.value); }}
               onClick={e => e.stopPropagation()}
-              className="text-[10px] text-[#0A3E47] font-medium border border-[#6BB68A] rounded-md bg-[#E4F2EC] px-2 py-0.5 focus:outline-none cursor-pointer shadow-sm">
+              className="text-[10px] text-[#6BB68A] font-medium border-0 bg-transparent focus:outline-none cursor-pointer appearance-none">
               {tiposDisponibles.filter(t => t !== "todos").map(t => (
                 <option key={t} value={t}>{t}</option>
               ))}
