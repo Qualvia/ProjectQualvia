@@ -144,7 +144,7 @@ export default function Dashboard() {
           <p className="text-sm text-muted-foreground mt-0.5">{today()}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button onClick={() => navigate("/asistente")} className="bg-[#0A3E47] hover:bg-[#0a3340] text-white gap-2">
+          <Button onClick={() => navigate("/asistente")} className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2">
             <Sparkles className="w-4 h-4" />
             Consultar a QUALVIA
           </Button>
