@@ -280,7 +280,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
       ) : (
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={dataCompacto} margin={{ top: 6, right: 4, left: 0, bottom: 4 }}>
+            <BarChart data={dataCompacto} margin={{ top: 6, right: 4, left: 4, bottom: 4 }}>
               <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
               <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} />
               <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} ticks={getYTicks(dataCompacto)} domain={[0, getYTicks(dataCompacto).at(-1)]} />
