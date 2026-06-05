@@ -121,10 +121,12 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     setLimites(limitesMap);
     setRegistrosRecientes(recientes);
 
-    // Inicializar filtro compacto: prioriza "Nevera", luego el primero disponible
+    // Inicializar filtro compacto: prioriza "Nevera", luego el primero disponible. No sobreescribe si el usuario ya eligió uno válido.
     const tiposArr = [...new Set(eqs.map(eq => eq.tipo || "Otro").filter(Boolean))];
-    const tipoDefault = tiposArr.find(t => t.toLowerCase().includes("nevera")) || tiposArr[0] || null;
-    setFiltroTipoCompacto(prev => prev && tiposArr.includes(prev) ? prev : tipoDefault);
+    setFiltroTipoCompacto(prev => {
+      if (prev && tiposArr.includes(prev)) return prev; // mantiene selección del usuario
+      return tiposArr.find(t => t.toLowerCase().includes("nevera")) || tiposArr[0] || null;
+    });
 
     const chartData = dias.map(dia => {
       const row = { fecha: formatDD_MM(dia + "T12:00:00") };
@@ -417,7 +419,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
         </div>
       ) : (
         <>
-          <ResponsiveContainer width="100%" height={120}>
+          <ResponsiveContainer width="100%" height={150}>
             <LineChart data={data} margin={{ top: 6, right: 24, left: 0, bottom: 4 }}>
               <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
               <XAxis
@@ -470,7 +472,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                 value={filtroTipoCompacto || ""}
                 onChange={e => { e.stopPropagation(); setFiltroTipoCompacto(e.target.value); }}
                 onClick={e => e.stopPropagation()}
-                className="text-[10px] text-[#0A3E47] font-medium border border-border rounded-md bg-white px-2 py-0.5 focus:outline-none cursor-pointer">
+                className="text-[10px] text-[#0A3E47] font-medium border border-[#6BB68A] rounded-md bg-[#E4F2EC] px-2 py-0.5 focus:outline-none cursor-pointer">
                 {tiposDisponibles.filter(t => t !== "todos").map(t => (
                   <option key={t} value={t}>{t}</option>
                 ))}
