@@ -121,9 +121,10 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     setLimites(limitesMap);
     setRegistrosRecientes(recientes);
 
-    // Inicializar filtro compacto con el primer tipo disponible
+    // Inicializar filtro compacto: prioriza "Nevera", luego el primero disponible
     const tiposArr = [...new Set(eqs.map(eq => eq.tipo || "Otro").filter(Boolean))];
-    setFiltroTipoCompacto(prev => prev && tiposArr.includes(prev) ? prev : (tiposArr[0] || null));
+    const tipoDefault = tiposArr.find(t => t.toLowerCase().includes("nevera")) || tiposArr[0] || null;
+    setFiltroTipoCompacto(prev => prev && tiposArr.includes(prev) ? prev : tipoDefault);
 
     const chartData = dias.map(dia => {
       const row = { fecha: formatDD_MM(dia + "T12:00:00") };
@@ -392,21 +393,6 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           <span className="text-sm font-semibold text-[#0A3E47]">Temperatura</span>
         </div>
         <div className="flex items-center gap-1.5">
-          {/* Selector de tipo compacto */}
-          {tiposDisponibles.filter(t => t !== "todos").length > 1 && (
-            <select
-              value={filtroTipoCompacto || ""}
-              onChange={e => { e.stopPropagation(); setFiltroTipoCompacto(e.target.value); }}
-              onClick={e => e.stopPropagation()}
-              className="text-[10px] text-[#0A3E47] font-medium border-0 bg-transparent focus:outline-none cursor-pointer appearance-none pr-1">
-              {tiposDisponibles.filter(t => t !== "todos").map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          )}
-          {tiposDisponibles.filter(t => t !== "todos").length <= 1 && filtroTipoCompacto && (
-            <span className="text-[10px] text-[#0A3E47] font-medium">{filtroTipoCompacto}</span>
-          )}
           {/* Selector de periodo compacto */}
           <select
             value={periodo}
@@ -430,52 +416,68 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
           <p className="text-[11px] text-muted-foreground text-center leading-tight">Aún no hay registros<br />de temperatura</p>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={140}>
-          <LineChart data={data} margin={{ top: 6, right: 24, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
-            <XAxis
-              dataKey="fecha"
-              tick={{ fontSize: 9, fill: "#9A9289" }}
-              tickLine={false}
-              axisLine={false}
-              interval={periodo === "7d" ? 1 : periodo === "14d" ? 3 : 6}
-            />
-            <YAxis
-              tick={{ fontSize: 9, fill: "#9A9289" }}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={v => `${v}°`}
-              width={30}
-              tickCount={6}
-              domain={(() => {
-                const eqsRef = equiposCompactos.length > 0 ? equiposCompactos : equipos;
-                const vals = registrosRecientes
-                  .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
-                  .map(r => r.temperatura).filter(v => v != null);
-                const limVals = eqsRef.flatMap(eq => {
-                  const lim = limites[eq.id];
-                  return lim ? [lim.min, lim.max].filter(v => v != null) : [];
-                });
-                const todos = [...vals, ...limVals];
-                if (todos.length === 0) return [0, 10];
-                return [Math.floor(Math.min(...todos) - 2), Math.ceil(Math.max(...todos) + 2)];
-              })()}
-            />
-            <Tooltip content={<CustomTooltipTemp />} />
-            {equiposCompactos.map(eq => (
-              <Line
-                key={eq.id}
-                type="monotone"
-                dataKey={eq.nombre}
-                stroke={eq.color}
-                strokeWidth={1.5}
-                strokeOpacity={0.85}
-                dot={false}
-                connectNulls={true}
+        <>
+          <ResponsiveContainer width="100%" height={120}>
+            <LineChart data={data} margin={{ top: 6, right: 24, left: 0, bottom: 4 }}>
+              <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
+              <XAxis
+                dataKey="fecha"
+                tick={{ fontSize: 9, fill: "#9A9289" }}
+                tickLine={false}
+                axisLine={false}
+                interval={periodo === "7d" ? 1 : periodo === "14d" ? 3 : 6}
               />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+              <YAxis
+                tick={{ fontSize: 9, fill: "#9A9289" }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={v => `${v}°`}
+                width={30}
+                tickCount={6}
+                domain={(() => {
+                  const eqsRef = equiposCompactos.length > 0 ? equiposCompactos : equipos;
+                  const vals = registrosRecientes
+                    .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
+                    .map(r => r.temperatura).filter(v => v != null);
+                  const limVals = eqsRef.flatMap(eq => {
+                    const lim = limites[eq.id];
+                    return lim ? [lim.min, lim.max].filter(v => v != null) : [];
+                  });
+                  const todos = [...vals, ...limVals];
+                  if (todos.length === 0) return [0, 10];
+                  return [Math.floor(Math.min(...todos) - 2), Math.ceil(Math.max(...todos) + 2)];
+                })()}
+              />
+              <Tooltip content={<CustomTooltipTemp />} />
+              {equiposCompactos.map(eq => (
+                <Line
+                  key={eq.id}
+                  type="monotone"
+                  dataKey={eq.nombre}
+                  stroke={eq.color}
+                  strokeWidth={1.5}
+                  strokeOpacity={0.85}
+                  dot={false}
+                  connectNulls={true}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+          {/* Selector de tipo centrado debajo del gráfico */}
+          {tiposDisponibles.filter(t => t !== "todos").length > 1 && (
+            <div className="flex justify-center mt-1" onClick={e => e.stopPropagation()}>
+              <select
+                value={filtroTipoCompacto || ""}
+                onChange={e => { e.stopPropagation(); setFiltroTipoCompacto(e.target.value); }}
+                onClick={e => e.stopPropagation()}
+                className="text-[10px] text-[#0A3E47] font-medium border border-border rounded-md bg-white px-2 py-0.5 focus:outline-none cursor-pointer">
+                {tiposDisponibles.filter(t => t !== "todos").map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
