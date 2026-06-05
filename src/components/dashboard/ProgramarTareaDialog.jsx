@@ -143,10 +143,13 @@ export default function ProgramarTareaDialog({ open, onClose, onCrear, tareaInic
             </Select>
           </div>
 
-          {/* Días semana (si semanal) */}
-          {form.frecuencia === "Semanal" && (
+          {/* Días semana — siempre visible para frecuencias diarias/semanales */}
+          {(form.frecuencia === "Diaria" || form.frecuencia === "Semanal") && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Selecciona los días de la semana</label>
+              <label className="text-sm font-medium text-foreground">
+                Selecciona los días de la semana
+                <span className="text-xs text-muted-foreground font-normal ml-1.5">(vacío = todos los días)</span>
+              </label>
               <div className="flex gap-2 flex-wrap">
                 {DIAS_SEMANA.map((dia) => (
                   <button

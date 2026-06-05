@@ -38,8 +38,10 @@ function tareaProgramadaCorrespondeHoy(tarea) {
   const mes = hoy.getMonth() + 1; // 1-12
 
   switch (tarea.frecuencia) {
-    case "Diaria":
-      return true;
+    case "Diaria": {
+      if (!tarea.dias_semana || tarea.dias_semana.length === 0) return true;
+      return tarea.dias_semana.some((d) => DIA_MAP[d] === diaSemana);
+    }
     case "Semanal": {
       if (!tarea.dias_semana || tarea.dias_semana.length === 0) return true;
       return tarea.dias_semana.some((d) => DIA_MAP[d] === diaSemana);
