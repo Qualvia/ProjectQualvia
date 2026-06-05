@@ -191,7 +191,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
           <ClipboardCheck className="w-4.5 h-4.5 text-[#0A3E47]" />
           <span className="text-sm font-semibold text-[#0A3E47]">Cumplimiento</span>
         </div>
-        <Maximize2 className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Maximize2 className="w-3 h-3 text-muted-foreground" />
       </div>
       {loading ? (
         <div className="flex items-center justify-center flex-1">

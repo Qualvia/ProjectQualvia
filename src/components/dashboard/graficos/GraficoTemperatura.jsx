@@ -407,7 +407,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               ))}
             </select>
           )}
-          <Maximize2 className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Maximize2 className="w-3 h-3 text-muted-foreground" />
         </div>
       </div>
       {loading ? (
