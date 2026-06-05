@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { ClipboardCheck, Maximize2, ArrowLeft } from "lucide-react";
+import { ClipboardCheck, Maximize2, ArrowLeft, CheckSquare, CalendarCheck, AlertTriangle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 
@@ -211,6 +211,19 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground mt-1">Mes actual</p>
+          <div className="flex justify-between w-full mt-2 px-1 gap-1">
+            {[
+              { icon: CheckSquare, value: `${metricas.tareasPorc}%`, label: "Tareas" },
+              { icon: CalendarCheck, value: `${metricas.diasConRegistros}/${metricas.totalDias}`, label: "Registros" },
+              { icon: AlertTriangle, value: `${metricas.incCerradas}/${metricas.incTotal}`, label: "Incidencias" },
+            ].map(({ icon: Icon, value, label }) => (
+              <div key={label} className="flex flex-col items-center gap-0.5 flex-1">
+                <Icon className="w-3 h-3 text-[#6BB68A]" />
+                <span className="text-[11px] font-bold text-[#0A3E47]">{value}</span>
+                <span className="text-[10px] text-muted-foreground">{label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
