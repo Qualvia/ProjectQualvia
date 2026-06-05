@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { base44 } from "@/api/base44Client";
-import { AlertCircle, ClipboardCheck, Flame, Sparkles, Lightbulb, Bot, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
+import { AlertCircle, ClipboardCheck, Flame, Sparkles, Bot, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
 import TareasIncidenciasBloque from "@/components/dashboard/TareasIncidenciasBloque";
 import GraficosBloque from "@/components/dashboard/GraficosBloque";
 import { useNavigate } from "react-router-dom";
@@ -144,13 +144,9 @@ export default function Dashboard() {
           <p className="text-sm text-muted-foreground mt-0.5">{today()}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2">
+          <Button onClick={() => navigate("/asistente")} className="bg-[#0A3E47] hover:bg-[#0a3340] text-white gap-2">
             <Sparkles className="w-4 h-4" />
-            Preguntar a QUALVIA
-          </Button>
-          <Button className="bg-[#0A3E47] hover:bg-[#0a3340] text-white gap-2">
-            <Lightbulb className="w-4 h-4" />
-            Recomendaciones
+            Consultar a QUALVIA
           </Button>
         </div>
       </div>
