@@ -185,7 +185,9 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       const diaISO = diaDate.toISOString().slice(0, 10);
       const semOffset = Math.floor(i / 7) + 1;
       const sem = semOffset;
-      if (!semanaMap[sem]) semanaMap[sem] = { tareas: [], registros: [], dias: 0, label: null };
+      if (!semanaMap[sem]) semanaMap[sem] = { tareas: [], registros: [], dias: 0, label: null, inicioSem: null, finSem: null };
+      if (semanaMap[sem].inicioSem === null) semanaMap[sem].inicioSem = diaISO;
+      semanaMap[sem].finSem = diaISO;
       semanaMap[sem].dias++;
       if (!semanaMap[sem].label) {
         semanaMap[sem].label = periodoExp === "mensual"
@@ -201,12 +203,31 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     const semanasData = Object.entries(semanaMap).map(([s, data]) => {
       const tP = data.tareas.length > 0 ? Math.round((data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length)*35) : 0;
       const rP = Math.round((data.registros.length / data.dias) * 35);
+
+      // Calcular puntaje de incidencias para esta semana individualmente
+      const incSem = todasInc.filter(i => {
+        const f = (i.created_date || i.fecha)?.slice(0, 10);
+        return f && f >= data.inicioSem && f <= data.finSem;
+      });
+      let puntajeCsem;
+      if (incSem.length === 0) {
+        puntajeCsem = 30;
+      } else {
+        const sumaIncSem = incSem.reduce((acc, i) => {
+          if (i.estado === "cerrada") return acc + 1.0;
+          if (i.estado === "seguimiento") return acc + 0.8;
+          const horasAbiertas = (ahora - new Date(i.created_date || i.fecha)) / (1000 * 3600);
+          return acc + (horasAbiertas < 48 ? 0.5 : 0.0);
+        }, 0);
+        puntajeCsem = (sumaIncSem / incSem.length) * 30;
+      }
+
       return {
         name: data.label || `Sem ${s}`,
-        score: Math.min(100, tP + rP + Math.round(puntajeC)),
+        score: Math.min(100, tP + rP + Math.round(puntajeCsem)),
         tareas: Math.round((data.tareas.length > 0 ? data.tareas.reduce((a,b)=>a+b,0)/data.tareas.length : 0) * 100),
         registros: Math.round((data.registros.length / data.dias) * 100),
-        incidencias: Math.round((puntajeC / 30) * 100),
+        incidencias: Math.round((puntajeCsem / 30) * 100),
         esActual: parseInt(s) === getWeekNumber(ahora),
       };
     });
