@@ -243,7 +243,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
           <select
             value={periodoExp}
             onChange={e => setPeriodoExp(e.target.value)}
-            className="text-xs text-[#6BB68A] font-medium border border-[#6BB68A]/40 rounded-md px-2 py-1 bg-white focus:outline-none cursor-pointer">
+            className="text-xs text-[#6BB68A] font-medium border border-[#6BB68A]/50 rounded-full px-3 py-1.5 bg-white focus:outline-none cursor-pointer appearance-none">
             {PERIODOS_EXP.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
           </select>
         </div>
