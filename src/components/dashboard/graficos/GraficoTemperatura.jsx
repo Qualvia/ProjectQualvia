@@ -426,11 +426,16 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
               axisLine={false}
               tickFormatter={v => `${v}°`}
               width={30}
-              tickCount={5}
+              tickCount={6}
               domain={(() => {
                 const vals = registrosRecientes.map(r => r.temperatura).filter(v => v != null);
-                if (vals.length === 0) return ["auto", "auto"];
-                return [Math.floor(Math.min(...vals) - 2), Math.ceil(Math.max(...vals) + 2)];
+                const limVals = equipos.flatMap(eq => {
+                  const lim = limites[eq.id];
+                  return lim ? [lim.min, lim.max].filter(v => v != null) : [];
+                });
+                const todos = [...vals, ...limVals];
+                if (todos.length === 0) return [0, 10];
+                return [Math.floor(Math.min(...todos) - 2), Math.ceil(Math.max(...todos) + 2)];
               })()}
             />
             <Tooltip content={<CustomTooltipTemp />} />

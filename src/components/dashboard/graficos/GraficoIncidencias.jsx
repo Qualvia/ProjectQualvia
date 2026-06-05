@@ -273,7 +273,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
           <BarChart data={dataCompacto} margin={{ top: 6, right: 4, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="2 2" stroke="#F0EBE3" vertical={false} />
             <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#9A9289" }} tickLine={false} axisLine={false} width={24} tickCount={5} domain={[0, 'auto']} />
             <Tooltip content={<CustomTooltipInc />} />
             <Bar dataKey="cerradas" stackId="a" fill="#6BB68A" radius={[0, 0, 0, 0]} />
             <Bar dataKey="seguimiento" stackId="a" fill="#BFDBFE" radius={[0, 0, 0, 0]} />
