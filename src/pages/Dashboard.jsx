@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { base44 } from "@/api/base44Client";
+
+// Cache en módulo: persiste entre navegaciones de pestaña sin re-consultar
+const _cache = {};
 import { AlertCircle, ClipboardCheck, Flame, Sparkles, Bot, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
 import TareasIncidenciasBloque from "@/components/dashboard/TareasIncidenciasBloque";
 import GraficosBloque from "@/components/dashboard/GraficosBloque";
@@ -44,112 +47,103 @@ export default function Dashboard() {
   const [tareasStats, setTareasStats] = useState({ completadas: 0, total: 0 });
   const [incidenciasStats, setIncidenciasStats] = useState({ total: 0, criticas: 0, maxHoras: 0 });
   const [rachaStats, setRachaStats] = useState({ racha: null, mejorRacha: null });
+  const loadedRef = useRef(null); // guarda el bid para el que ya cargamos KPIs
 
-  // Resetear stats y orden de bloques al cambiar de negocio o usuario
+  // Orden de bloques (solo UI, sin consultas)
   useEffect(() => {
-    setTareasStats({ completadas: 0, total: 0 });
-    setIncidenciasStats({ total: 0, criticas: 0, maxHoras: 0 });
-    setRachaStats({ racha: null, mejorRacha: null });
-
-    if (currentBusiness?.id) {
-      const guardado = localStorage.getItem(`qualvia_bloques_orden_${currentBusiness.id}`);
-      if (guardado) {
-        try {
-          const idsOrdenados = JSON.parse(guardado);
-          const bloquesOrdenados = idsOrdenados
-            .map(id => BLOQUES_INICIALES.find(b => b.id === id))
-            .filter(Boolean);
-          BLOQUES_INICIALES.forEach(b => {
-            if (!bloquesOrdenados.some(o => o.id === b.id)) bloquesOrdenados.push(b);
-          });
-          setBloques(bloquesOrdenados);
-          return;
-        } catch (e) {}
-      }
+    if (!currentBusiness?.id) { setBloques(BLOQUES_INICIALES); return; }
+    const guardado = localStorage.getItem(`qualvia_bloques_orden_${currentBusiness.id}`);
+    if (guardado) {
+      try {
+        const idsOrdenados = JSON.parse(guardado);
+        const bloquesOrdenados = idsOrdenados
+          .map(id => BLOQUES_INICIALES.find(b => b.id === id))
+          .filter(Boolean);
+        BLOQUES_INICIALES.forEach(b => {
+          if (!bloquesOrdenados.some(o => o.id === b.id)) bloquesOrdenados.push(b);
+        });
+        setBloques(bloquesOrdenados);
+        return;
+      } catch (_) {}
     }
     setBloques(BLOQUES_INICIALES);
-  }, [user?.id, currentBusiness?.id]);
+  }, [currentBusiness?.id]);
 
+  // Un único useEffect para todos los KPIs — con cache por negocio
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
+    const bid = currentBusiness.id;
+    const uid = user.id;
+    const cacheKey = `${uid}_${bid}`;
 
-    base44.entities.TareaEjecucion.filter({ user_id: user.id, business_id: currentBusiness.id }).then((ejecuciones) => {
-      const ahora = new Date();
-      const hoy = ahora.toISOString().slice(0, 10);
+    // Si ya tenemos datos en cache para este negocio, usarlos directamente
+    if (_cache[cacheKey]) {
+      const c = _cache[cacheKey];
+      setTareasStats(c.tareasStats);
+      setIncidenciasStats(c.incidenciasStats);
+      setRachaStats(c.rachaStats);
+      return;
+    }
 
-      // Agrupa ejecuciones por fecha_dia
-      const porDia = {};
-      ejecuciones.forEach(e => {
-        if (!e.fecha_dia) return;
-        if (!porDia[e.fecha_dia]) porDia[e.fecha_dia] = [];
-        porDia[e.fecha_dia].push(e);
-      });
-
-      // Función: ¿el día fue "completado"? (tiene tareas y todas completadas)
-      const diaOk = (iso) => {
-        const t = porDia[iso];
-        return t && t.length > 0 && t.every(e => e.completada);
-      };
-
-      // Racha actual: desde ayer hacia atrás
-      let racha = 0;
-      const ayer = new Date(ahora);
-      ayer.setDate(ayer.getDate() - 1);
-      for (let i = 0; i < 365; i++) {
-        const d = new Date(ayer);
-        d.setDate(ayer.getDate() - i);
-        const iso = d.toISOString().slice(0, 10);
-        const t = porDia[iso];
-        if (!t || t.length === 0) continue; // sin tareas ese día → saltar
-        if (diaOk(iso)) { racha++; } else { break; }
-      }
-
-      // Mejor racha del mes actual
-      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-      const diasMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
-      let mejorRacha = 0;
-      let rachaTemp = 0;
-      for (let i = 0; i < diasMes; i++) {
-        const d = new Date(inicioMes);
-        d.setDate(inicioMes.getDate() + i);
-        const iso = d.toISOString().slice(0, 10);
-        if (iso >= hoy) break; // no contar hoy ni futuro
-        const t = porDia[iso];
-        if (!t || t.length === 0) continue; // sin tareas → saltar
-        if (diaOk(iso)) {
-          rachaTemp++;
-          if (rachaTemp > mejorRacha) mejorRacha = rachaTemp;
-        } else {
-          rachaTemp = 0;
-        }
-      }
-
-      setRachaStats({ racha, mejorRacha });
-    });
-  }, [user?.id, currentBusiness?.id]);
-
-  useEffect(() => {
-    if (!user?.id || !currentBusiness?.id) return;
     const hoy = new Date().toISOString().slice(0, 10);
-    base44.entities.TareaEjecucion.filter({ user_id: user.id, business_id: currentBusiness.id, fecha_dia: hoy })
-      .then((ej) => {
-        setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length });
-      });
-  }, [user?.id, currentBusiness?.id]);
 
-  useEffect(() => {
-    if (!user?.id || !currentBusiness?.id) return;
-    base44.entities.Incidencia.filter(
-      { user_id: user.id, business_id: currentBusiness.id, estado: { $ne: "cerrada" } },
-      "-fecha",
-      100
-    ).then((activas) => {
-      const criticas = activas.filter((i) => i.prioridad === "critica").length;
+    // 3 consultas en paralelo — solo la primera vez por negocio
+    Promise.all([
+      base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid, fecha_dia: hoy }),
+      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid, estado: { $ne: "cerrada" } }, "-fecha", 100),
+      base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }),
+    ]).then(([ejHoy, activas, todasEj]) => {
+      // Tareas de hoy
+      const newTareasStats = { completadas: ejHoy.filter(e => e.completada).length, total: ejHoy.length };
+
+      // Incidencias
+      const criticas = activas.filter(i => i.prioridad === "critica").length;
       const maxHoras = activas.reduce((max, i) => {
         const h = Math.floor((Date.now() - new Date(i.fecha || i.created_date).getTime()) / 3600000);
         return h > max ? h : max;
       }, 0);
-      setIncidenciasStats({ total: activas.length, criticas, maxHoras });
+      const newIncidenciasStats = { total: activas.length, criticas, maxHoras };
+
+      // Racha
+      const ahora = new Date();
+      const porDia = {};
+      todasEj.forEach(e => {
+        if (!e.fecha_dia) return;
+        if (!porDia[e.fecha_dia]) porDia[e.fecha_dia] = [];
+        porDia[e.fecha_dia].push(e);
+      });
+      const diaOk = (iso) => { const t = porDia[iso]; return t && t.length > 0 && t.every(e => e.completada); };
+
+      let racha = 0;
+      const ayer = new Date(ahora);
+      ayer.setDate(ayer.getDate() - 1);
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(ayer); d.setDate(ayer.getDate() - i);
+        const iso = d.toISOString().slice(0, 10);
+        const t = porDia[iso];
+        if (!t || t.length === 0) continue;
+        if (diaOk(iso)) { racha++; } else { break; }
+      }
+
+      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+      const diasMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
+      let mejorRacha = 0, rachaTemp = 0;
+      for (let i = 0; i < diasMes; i++) {
+        const d = new Date(inicioMes); d.setDate(inicioMes.getDate() + i);
+        const iso = d.toISOString().slice(0, 10);
+        if (iso >= hoy) break;
+        const t = porDia[iso];
+        if (!t || t.length === 0) continue;
+        if (diaOk(iso)) { rachaTemp++; if (rachaTemp > mejorRacha) mejorRacha = rachaTemp; } else { rachaTemp = 0; }
+      }
+      const newRachaStats = { racha, mejorRacha };
+
+      // Guardar en cache (válida para esta sesión)
+      _cache[cacheKey] = { tareasStats: newTareasStats, incidenciasStats: newIncidenciasStats, rachaStats: newRachaStats };
+
+      setTareasStats(newTareasStats);
+      setIncidenciasStats(newIncidenciasStats);
+      setRachaStats(newRachaStats);
     });
   }, [user?.id, currentBusiness?.id]);
 
@@ -299,7 +293,16 @@ export default function Dashboard() {
                         icon={bloque.icon}
                         dragHandleProps={provided.dragHandleProps}>
                         {bloque.id === "tareas" ? (
-                          <TareasIncidenciasBloque onEjecucionesChange={(ej) => setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length })} key={currentBusiness?.id} />
+                          <TareasIncidenciasBloque
+                            key={currentBusiness?.id}
+                            onEjecucionesChange={(ej) => {
+                              const updated = { completadas: ej.filter(e => e.completada).length, total: ej.length };
+                              setTareasStats(updated);
+                              // Actualizar cache para no perder el cambio en próxima visita
+                              const cacheKey = `${user?.id}_${currentBusiness?.id}`;
+                              if (_cache[cacheKey]) _cache[cacheKey].tareasStats = updated;
+                            }}
+                          />
                         ) : bloque.id === "graficos" ? (
                           <GraficosBloque />
                         ) : (
