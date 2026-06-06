@@ -53,29 +53,22 @@ export default function ActividadRecienteBloque() {
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
-    let cancelled = false;
-    // Pequeño delay para no saturar junto con el resto del Dashboard
-    const timer = setTimeout(() => { if (!cancelled) cargar(cancelled); }, 800);
-    return () => { cancelled = true; clearTimeout(timer); };
+    cargar();
   }, [user?.id, currentBusiness?.id]);
 
-  async function cargar(cancelledRef) {
+  async function cargar() {
     setLoading(true);
     const uid = user.id;
     const bid = currentBusiness.id;
     const fechaInicio = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-    // Lanzar en dos tandas para reducir concurrencia
-    const [temps, limpiezas, recepciones, aguas, residuos, mantenimientos] = await Promise.all([
+    const [temps, limpiezas, recepciones, aguas, residuos, mantenimientos, congelaciones, alergenos, checklists, auditorias, incidencias] = await Promise.all([
       base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
       base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
       base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
       base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
       base44.entities.RegistroResiduo.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
       base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-    ]);
-
-    const [congelaciones, alergenos, checklists, auditorias, incidencias] = await Promise.all([
       base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
       base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid, created_date: { $gte: fechaInicio } }),
       base44.entities.ChecklistEjecucion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
@@ -197,10 +190,8 @@ export default function ActividadRecienteBloque() {
 
     // Ordenar por hora desc (más reciente primero)
     lista.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    if (!cancelledRef) {
-      setEventos(lista);
-      setLoading(false);
-    }
+    setEventos(lista);
+    setLoading(false);
   }
 
   if (loading) {
