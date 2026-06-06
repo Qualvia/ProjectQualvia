@@ -62,12 +62,10 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
-    const cancelRef = { current: false };
-    const timer = setTimeout(() => { if (!cancelRef.current) cargar(cancelRef); }, 1400);
-    return () => { cancelRef.current = true; clearTimeout(timer); };
+    cargar();
   }, [user?.id, currentBusiness?.id, periodoExp]);
 
-  async function cargar(cancelRef) {
+  async function cargar() {
     setLoading(true);
     const uid = user.id;
     const bid = currentBusiness.id;
@@ -96,20 +94,25 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     const finISO = finDate.toISOString().slice(0, 10);
     const totalDias = Math.round((finDate - inicioDate) / (1000 * 3600 * 24)) + 1;
 
-    const [todasEj, todasInc, todosTemp, todosLimp, todosAgua, todosRecep, todosMant, todosCong, ejCount] = await Promise.all([
-      base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid, fecha_dia: { $gte: inicioISO, $lte: finISO } }),
-      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid, created_date: { $gte: inicio } }),
-      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid, fecha: { $gte: inicio } }),
-      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid, fecha: { $gte: inicio } }),
-      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid, fecha: { $gte: inicio } }),
-      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid, fecha: { $gte: inicio } }),
-      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid, fecha: { $gte: inicio } }),
-      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid, fecha: { $gte: inicio } }),
-      base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }, null, 3),
+    const [todasEj, todasInc, todosTemp, todosLimp, todosAgua, todosRecep, todosMant, todosCong] = await Promise.all([
+      base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }),
+      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid }),
     ]);
 
     // --- ONBOARDING CHECK ---
-    setOnboarding(ejCount.length < 3);
+    const todosRegistrosGlobal = [...todosTemp, ...todosLimp, ...todosAgua, ...todosRecep, ...todosMant, ...todosCong];
+    const diasActivosGlobalSet = new Set([
+      ...todasEj.map(e => e.fecha_dia).filter(Boolean),
+      ...todosRegistrosGlobal.map(r => r.fecha?.slice(0, 10)).filter(Boolean),
+    ]);
+    const diasActivosGlobal = diasActivosGlobalSet.size;
+    setOnboarding(diasActivosGlobal < 3);
 
     // --- EJE 1: TAREAS (35pts) ---
     const ejMes = todasEj.filter(e => e.fecha_dia && e.fecha_dia >= inicioISO && e.fecha_dia <= finISO);
@@ -260,7 +263,6 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
         esActual,
       };
     });
-    if (cancelRef.current) return;
     setSemanas(semanasData);
     setLoading(false);
   }
