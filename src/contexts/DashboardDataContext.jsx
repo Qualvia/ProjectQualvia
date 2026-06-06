@@ -15,6 +15,8 @@ export function DashboardDataProvider({ children }) {
     const uid = user.id;
     const bid = currentBusiness.id;
 
+    const fechaInicio90 = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+
     const [
       ejecuciones,
       incidencias,
@@ -32,16 +34,16 @@ export function DashboardDataProvider({ children }) {
     ] = await Promise.all([
       base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }),
       base44.entities.Incidencia.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroResiduo.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid }),
-      base44.entities.ChecklistEjecucion.filter({ user_id: uid, business_id: bid }),
-      base44.entities.AuditoriaInterna.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.RegistroResiduo.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.ChecklistEjecucion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.AuditoriaInterna.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
       base44.entities.EquipoTemperatura.filter({ user_id: uid, business_id: bid }),
     ]);
 
