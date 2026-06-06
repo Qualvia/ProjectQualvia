@@ -110,6 +110,11 @@ export function DashboardDataProvider({ children }) {
       base44.entities.RegistroTemperatura.subscribe(makeUpdater("temperaturas")),
       base44.entities.RegistroLimpieza.subscribe(makeUpdater("limpiezas")),
       base44.entities.RegistroRecepcion.subscribe(makeUpdater("recepciones")),
+      base44.entities.RegistroAgua.subscribe(makeUpdater("aguas")),
+      base44.entities.RegistroMantenimiento.subscribe(makeUpdater("mantenimientos")),
+      base44.entities.RegistroCongelacion.subscribe(makeUpdater("congelaciones")),
+      base44.entities.RegistroResiduo.subscribe(makeUpdater("residuos")),
+      base44.entities.RegistroAlergeno.subscribe(makeUpdater("alergenos")),
       base44.entities.ChecklistEjecucion.subscribe(makeUpdater("checklists")),
       base44.entities.AuditoriaInterna.subscribe(makeUpdater("auditorias")),
     ];

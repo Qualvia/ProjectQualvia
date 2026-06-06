@@ -121,9 +121,14 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
 
     const chartData = dias.map(dia => {
       const row = { fecha: formatDD_MM(dia + "T12:00:00") };
-      eqs.forEach((eq, i) => {
+      eqs.forEach((eq) => {
         const eqNombre = eq.nombre;
-        const regsDelDia = recientes.filter(r => r.equipo_id === eq.id && r.fecha?.slice(0, 10) === dia);
+        const regsDelDia = recientes.filter(r => {
+          // Match por equipo_id, con fallback a equipo_nombre si equipo_id no está presente
+          const matchId = r.equipo_id ? r.equipo_id === eq.id : r.equipo_nombre === eq.nombre;
+          const fechaStr = r.fecha ? new Date(r.fecha).toISOString().slice(0, 10) : null;
+          return matchId && fechaStr === dia;
+        });
         if (regsDelDia.length > 0) {
           const avg = regsDelDia.reduce((s, r) => s + r.temperatura, 0) / regsDelDia.length;
           const val = Math.round(avg * 10) / 10;
@@ -138,7 +143,9 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     setData(chartData);
 
     const res = eqs.map((eq, i) => {
-      const regsEq = recientes.filter(r => r.equipo_id === eq.id);
+      const regsEq = recientes.filter(r =>
+        r.equipo_id ? r.equipo_id === eq.id : r.equipo_nombre === eq.nombre
+      );
       const media = regsEq.length > 0
         ? Math.round((regsEq.reduce((s, r) => s + r.temperatura, 0) / regsEq.length) * 10) / 10
         : null;
@@ -168,7 +175,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
   function getYDomain() {
     const eqsRef = equiposMostrar.length > 0 ? equiposMostrar : equipos;
     const valoresReales = registrosRecientes
-      .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
+      .filter(r => eqsRef.some(eq => r.equipo_id ? eq.id === r.equipo_id : eq.nombre === r.equipo_nombre))
       .map(r => r.temperatura)
       .filter(v => v != null);
 
@@ -430,7 +437,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                 ticks={(() => {
                   const eqsRef = equiposCompactos.length > 0 ? equiposCompactos : equipos;
                   const vals = registrosRecientes
-                    .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
+                    .filter(r => eqsRef.some(eq => r.equipo_id ? eq.id === r.equipo_id : eq.nombre === r.equipo_nombre))
                     .map(r => r.temperatura).filter(v => v != null);
                   const limVals = eqsRef.flatMap(eq => {
                     const lim = limites[eq.id];
@@ -443,11 +450,11 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                   const result = [];
                   for (let i = minV; i <= maxV; i += 2) result.push(i);
                   return result;
-                })()}
-                domain={(() => {
+                  })()}
+                  domain={(() => {
                   const eqsRef = equiposCompactos.length > 0 ? equiposCompactos : equipos;
                   const vals = registrosRecientes
-                    .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
+                    .filter(r => eqsRef.some(eq => r.equipo_id ? eq.id === r.equipo_id : eq.nombre === r.equipo_nombre))
                     .map(r => r.temperatura).filter(v => v != null);
                   const limVals = eqsRef.flatMap(eq => {
                     const lim = limites[eq.id];
