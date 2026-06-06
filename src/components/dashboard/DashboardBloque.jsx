@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import { ChevronDown, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function DashboardBloque({ id, businessId, title, icon: Icon, children, dragHandleProps }) {
+export default function DashboardBloque({ id, businessId, title, icon: Icon, children, dragHandleProps, defaultOpen = true }) {
   const [abierto, setAbierto] = useState(() => {
-    if (!id || !businessId) return true;
+    if (!id || !businessId) return defaultOpen;
     const guardado = localStorage.getItem(`qualvia_bloque_abierto_${businessId}_${id}`);
-    return guardado !== null ? JSON.parse(guardado) : true;
+    return guardado !== null ? JSON.parse(guardado) : defaultOpen;
   });
 
   useEffect(() => {
     if (!id || !businessId) return;
     const guardado = localStorage.getItem(`qualvia_bloque_abierto_${businessId}_${id}`);
-    setAbierto(guardado !== null ? JSON.parse(guardado) : true);
+    setAbierto(guardado !== null ? JSON.parse(guardado) : defaultOpen);
   }, [id, businessId]);
 
   const handleToggle = () => {

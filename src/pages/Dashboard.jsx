@@ -291,7 +291,8 @@ export default function Dashboard() {
                         businessId={currentBusiness?.id}
                         title={bloque.title}
                         icon={bloque.icon}
-                        dragHandleProps={provided.dragHandleProps}>
+                        dragHandleProps={provided.dragHandleProps}
+                        defaultOpen={bloque.id !== "graficos"}>
                         {bloque.id === "tareas" ? (
                           <TareasIncidenciasBloque
                             key={currentBusiness?.id}
