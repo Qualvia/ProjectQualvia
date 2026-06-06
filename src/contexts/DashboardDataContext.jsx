@@ -84,78 +84,38 @@ export function DashboardDataProvider({ children }) {
     cargar();
   }, [user?.id, currentBusiness?.id, cargar]);
 
-  // Suscripciones en tiempo real — actualiza el contexto sin recargar todo
+  // Suscripciones en tiempo real — filtrando siempre por business_id activo
   useEffect(() => {
-    if (!data) return;
+    if (!data || !currentBusiness?.id) return;
+    const bid = currentBusiness.id;
+
+    // Helper genérico que filtra por business_id antes de actualizar el estado
+    function makeUpdater(key) {
+      return (event) => {
+        setData((prev) => {
+          if (!prev) return prev;
+          // Ignorar eventos de otros negocios
+          if (event.data?.business_id && event.data.business_id !== bid) return prev;
+          if (event.type === "create") return { ...prev, [key]: [...prev[key], event.data] };
+          if (event.type === "update") return { ...prev, [key]: prev[key].map((r) => r.id === event.id ? event.data : r) };
+          if (event.type === "delete") return { ...prev, [key]: prev[key].filter((r) => r.id !== event.id) };
+          return prev;
+        });
+      };
+    }
 
     const unsubs = [
-      base44.entities.Incidencia.subscribe((event) => {
-        setData((prev) => {
-          if (!prev) return prev;
-          if (event.type === "create") return { ...prev, incidencias: [...prev.incidencias, event.data] };
-          if (event.type === "update") return { ...prev, incidencias: prev.incidencias.map((i) => i.id === event.id ? event.data : i) };
-          if (event.type === "delete") return { ...prev, incidencias: prev.incidencias.filter((i) => i.id !== event.id) };
-          return prev;
-        });
-      }),
-      base44.entities.TareaEjecucion.subscribe((event) => {
-        setData((prev) => {
-          if (!prev) return prev;
-          if (event.type === "create") return { ...prev, ejecuciones: [...prev.ejecuciones, event.data] };
-          if (event.type === "update") return { ...prev, ejecuciones: prev.ejecuciones.map((e) => e.id === event.id ? event.data : e) };
-          if (event.type === "delete") return { ...prev, ejecuciones: prev.ejecuciones.filter((e) => e.id !== event.id) };
-          return prev;
-        });
-      }),
-      base44.entities.RegistroTemperatura.subscribe((event) => {
-        setData((prev) => {
-          if (!prev) return prev;
-          if (event.type === "create") return { ...prev, temperaturas: [...prev.temperaturas, event.data] };
-          if (event.type === "update") return { ...prev, temperaturas: prev.temperaturas.map((r) => r.id === event.id ? event.data : r) };
-          if (event.type === "delete") return { ...prev, temperaturas: prev.temperaturas.filter((r) => r.id !== event.id) };
-          return prev;
-        });
-      }),
-      base44.entities.RegistroLimpieza.subscribe((event) => {
-        setData((prev) => {
-          if (!prev) return prev;
-          if (event.type === "create") return { ...prev, limpiezas: [...prev.limpiezas, event.data] };
-          if (event.type === "update") return { ...prev, limpiezas: prev.limpiezas.map((r) => r.id === event.id ? event.data : r) };
-          if (event.type === "delete") return { ...prev, limpiezas: prev.limpiezas.filter((r) => r.id !== event.id) };
-          return prev;
-        });
-      }),
-      base44.entities.RegistroRecepcion.subscribe((event) => {
-        setData((prev) => {
-          if (!prev) return prev;
-          if (event.type === "create") return { ...prev, recepciones: [...prev.recepciones, event.data] };
-          if (event.type === "update") return { ...prev, recepciones: prev.recepciones.map((r) => r.id === event.id ? event.data : r) };
-          if (event.type === "delete") return { ...prev, recepciones: prev.recepciones.filter((r) => r.id !== event.id) };
-          return prev;
-        });
-      }),
-      base44.entities.ChecklistEjecucion.subscribe((event) => {
-        setData((prev) => {
-          if (!prev) return prev;
-          if (event.type === "create") return { ...prev, checklists: [...prev.checklists, event.data] };
-          if (event.type === "update") return { ...prev, checklists: prev.checklists.map((r) => r.id === event.id ? event.data : r) };
-          if (event.type === "delete") return { ...prev, checklists: prev.checklists.filter((r) => r.id !== event.id) };
-          return prev;
-        });
-      }),
-      base44.entities.AuditoriaInterna.subscribe((event) => {
-        setData((prev) => {
-          if (!prev) return prev;
-          if (event.type === "create") return { ...prev, auditorias: [...prev.auditorias, event.data] };
-          if (event.type === "update") return { ...prev, auditorias: prev.auditorias.map((r) => r.id === event.id ? event.data : r) };
-          if (event.type === "delete") return { ...prev, auditorias: prev.auditorias.filter((r) => r.id !== event.id) };
-          return prev;
-        });
-      }),
+      base44.entities.Incidencia.subscribe(makeUpdater("incidencias")),
+      base44.entities.TareaEjecucion.subscribe(makeUpdater("ejecuciones")),
+      base44.entities.RegistroTemperatura.subscribe(makeUpdater("temperaturas")),
+      base44.entities.RegistroLimpieza.subscribe(makeUpdater("limpiezas")),
+      base44.entities.RegistroRecepcion.subscribe(makeUpdater("recepciones")),
+      base44.entities.ChecklistEjecucion.subscribe(makeUpdater("checklists")),
+      base44.entities.AuditoriaInterna.subscribe(makeUpdater("auditorias")),
     ];
 
     return () => unsubs.forEach((u) => u());
-  }, [!!data]);
+  }, [currentBusiness?.id, !!data]); // !!data: re-suscribir cuando los datos iniciales llegan
 
   return (
     <DashboardDataContext.Provider value={{ data, loading, recargar: cargar }}>

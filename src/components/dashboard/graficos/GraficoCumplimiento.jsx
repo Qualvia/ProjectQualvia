@@ -3,30 +3,6 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveCo
 import { ClipboardCheck, Maximize2, ArrowLeft, HelpCircle, ChevronDown } from "lucide-react";
 import { useDashboardData } from "@/contexts/DashboardDataContext";
 
-function getWeekNumber(date) {
-  const d = new Date(date);
-  const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
-  return Math.ceil((d.getDate() + startOfMonth.getDay()) / 7);
-}
-
-function isoYYYYMM(date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function startOfMonth() {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1);
-}
-
-function endOfMonth() {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
-}
-
-function daysInMonth() {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-}
 
 const CustomTooltipSemana = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
@@ -60,8 +36,8 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
 
   useEffect(() => {
     if (!data) return;
-    calcular();
-  }, [data, periodoExp]);
+    calcular(); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [data, periodoExp]); // calcular lee data y periodoExp del closure — se ejecuta tras render
 
   function calcular() {
     const ahora = new Date();

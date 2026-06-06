@@ -79,22 +79,20 @@ const CustomTooltipInc = ({ active, payload, label }) => {
 export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) {
   const { data, loading } = useDashboardData();
   const [periodo, setPeriodo] = useState("semestral");
-  const [todasIncidencias, setTodasIncidencias] = useState([]);
   const [tendencia, setTendencia] = useState(null);
   const [resumen, setResumen] = useState({ mesPico: null, tasaResolucion: 0, tiempoMedio: null });
+
+  const todasIncidencias = data?.incidencias ?? [];
 
   useEffect(() => {
     if (!data) return;
     const todas = data.incidencias;
-    setTodasIncidencias(todas);
-
     const cerradasTotal = todas.filter(i => i.estado === "cerrada").length;
     const tasaResolucion = todas.length > 0 ? Math.round((cerradasTotal / todas.length) * 100) : 0;
     const totalConFecha = todas.filter(i => i.fecha_cierre && i.fecha && new Date(i.fecha_cierre) > new Date(i.fecha));
     const tiempoMedio = totalConFecha.length > 0
       ? Math.round(totalConFecha.reduce((s, i) => s + (new Date(i.fecha_cierre) - new Date(i.fecha)) / (1000 * 3600 * 24), 0) / totalConFecha.length)
       : null;
-
     setResumen({ tasaResolucion, tiempoMedio });
   }, [data]);
 
