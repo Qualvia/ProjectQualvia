@@ -51,19 +51,26 @@ export default function ActividadRecienteBloque() {
 
   useEffect(() => {
     if (!data) return;
-    const fechaInicio = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    construirEventos();
+  }, [data]);
 
-    const temps        = data.temperaturas.filter(r => r.fecha >= fechaInicio);
-    const limpiezas    = data.limpiezas.filter(r => r.fecha >= fechaInicio);
-    const recepciones  = data.recepciones.filter(r => r.fecha >= fechaInicio);
-    const aguas        = data.aguas.filter(r => r.fecha >= fechaInicio);
-    const residuos     = data.residuos.filter(r => r.fecha >= fechaInicio);
-    const mantenimientos = data.mantenimientos.filter(r => r.fecha >= fechaInicio);
-    const congelaciones  = data.congelaciones.filter(r => r.fecha >= fechaInicio);
-    const alergenos    = data.alergenos.filter(r => (r.created_date || "") >= fechaInicio);
-    const checklists   = data.checklists.filter(r => r.fecha >= fechaInicio);
-    const auditorias   = data.auditorias.filter(r => r.fecha >= fechaInicio);
-    const incidencias  = data.incidencias.filter(r => (r.created_date || "") >= fechaInicio);
+  function construirEventos() {
+    const fechaInicio = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const filtrar = (arr, campo = "fecha") =>
+      (arr || []).filter(r => new Date(r[campo] || r.fecha || r.created_date) >= fechaInicio);
+
+    const temps         = filtrar(data.temperaturas);
+    const limpiezas     = filtrar(data.limpiezas);
+    const recepciones   = filtrar(data.recepciones);
+    const aguas         = filtrar(data.aguas);
+    const residuos      = filtrar(data.residuos);
+    const mantenimientos = filtrar(data.mantenimientos);
+    const congelaciones = filtrar(data.congelaciones);
+    const alergenos     = (data.alergenos || []).filter(r => new Date(r.created_date || r.fecha) >= fechaInicio);
+    const checklists    = filtrar(data.checklists);
+    const auditorias    = filtrar(data.auditorias);
+    const incidencias   = (data.incidencias || []).filter(r => new Date(r.created_date || r.fecha) >= fechaInicio);
 
     const lista = [];
 
@@ -177,10 +184,9 @@ export default function ActividadRecienteBloque() {
       });
     });
 
-    // Ordenar por hora desc (más reciente primero)
     lista.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     setEventos(lista);
-  }, [data]);
+  }
 
   if (loading) {
     return (
