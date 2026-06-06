@@ -53,7 +53,7 @@ export default function Dashboard() {
     setTareasStats({ completadas: 0, total: 0 });
     setIncidenciasStats({ total: 0, criticas: 0, maxHoras: 0 });
     setRachaStats({ racha: null, mejorRacha: null });
-    setConsejo(CONSEJO);
+    setConsejo(null);
     setCargandoConsejo(false);
     consejoCargando.current = false;
 
@@ -307,8 +307,8 @@ export default function Dashboard() {
         </div>
         <div>
           <p className="text-sm font-semibold text-white mb-1">Consejo inteligente del día</p>
-          <p className={`text-sm text-white/85 leading-relaxed ${cargandoConsejo ? "animate-pulse opacity-70" : ""}`}>
-            {cargandoConsejo ? "Generando consejo personalizado..." : consejo}
+          <p className={`text-sm text-white/85 leading-relaxed ${consejo === null || cargandoConsejo ? "animate-pulse opacity-70" : ""}`}>
+            {cargandoConsejo ? "Generando consejo personalizado..." : consejo === null ? "Cargando..." : consejo}
           </p>
         </div>
       </div>
