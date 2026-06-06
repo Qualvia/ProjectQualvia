@@ -72,79 +72,55 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
+    const uid = user.id;
+    const bid = currentBusiness.id;
+    const ahora = new Date();
+    const hoy = ahora.toISOString().slice(0, 10);
 
-    base44.entities.TareaEjecucion.filter({ user_id: user.id, business_id: currentBusiness.id }).then((ejecuciones) => {
-      const ahora = new Date();
-      const hoy = ahora.toISOString().slice(0, 10);
+    // Una sola llamada para todas las ejecuciones (racha + stats hoy)
+    Promise.all([
+      base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }),
+      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid, estado: { $ne: "cerrada" } }, "-fecha", 100),
+    ]).then(([ejecuciones, activas]) => {
+      // ── Stats de hoy ─────────────────────────────────────────────────────
+      const hoyEj = ejecuciones.filter(e => e.fecha_dia === hoy);
+      setTareasStats({ completadas: hoyEj.filter(e => e.completada).length, total: hoyEj.length });
 
-      // Agrupa ejecuciones por fecha_dia
+      // ── Racha ─────────────────────────────────────────────────────────────
       const porDia = {};
       ejecuciones.forEach(e => {
         if (!e.fecha_dia) return;
         if (!porDia[e.fecha_dia]) porDia[e.fecha_dia] = [];
         porDia[e.fecha_dia].push(e);
       });
+      const diaOk = (iso) => { const t = porDia[iso]; return t && t.length > 0 && t.every(e => e.completada); };
 
-      // Función: ¿el día fue "completado"? (tiene tareas y todas completadas)
-      const diaOk = (iso) => {
-        const t = porDia[iso];
-        return t && t.length > 0 && t.every(e => e.completada);
-      };
-
-      // Racha actual: desde ayer hacia atrás
       let racha = 0;
       const ayer = new Date(ahora);
       ayer.setDate(ayer.getDate() - 1);
       for (let i = 0; i < 365; i++) {
-        const d = new Date(ayer);
-        d.setDate(ayer.getDate() - i);
+        const d = new Date(ayer); d.setDate(ayer.getDate() - i);
         const iso = d.toISOString().slice(0, 10);
         const t = porDia[iso];
-        if (!t || t.length === 0) continue; // sin tareas ese día → saltar
+        if (!t || t.length === 0) continue;
         if (diaOk(iso)) { racha++; } else { break; }
       }
 
-      // Mejor racha del mes actual
       const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
       const diasMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
-      let mejorRacha = 0;
-      let rachaTemp = 0;
+      let mejorRacha = 0, rachaTemp = 0;
       for (let i = 0; i < diasMes; i++) {
-        const d = new Date(inicioMes);
-        d.setDate(inicioMes.getDate() + i);
+        const d = new Date(inicioMes); d.setDate(inicioMes.getDate() + i);
         const iso = d.toISOString().slice(0, 10);
-        if (iso >= hoy) break; // no contar hoy ni futuro
+        if (iso >= hoy) break;
         const t = porDia[iso];
-        if (!t || t.length === 0) continue; // sin tareas → saltar
-        if (diaOk(iso)) {
-          rachaTemp++;
-          if (rachaTemp > mejorRacha) mejorRacha = rachaTemp;
-        } else {
-          rachaTemp = 0;
-        }
+        if (!t || t.length === 0) continue;
+        if (diaOk(iso)) { rachaTemp++; if (rachaTemp > mejorRacha) mejorRacha = rachaTemp; } else { rachaTemp = 0; }
       }
-
       setRachaStats({ racha, mejorRacha });
-    });
-  }, [user?.id, currentBusiness?.id]);
 
-  useEffect(() => {
-    if (!user?.id || !currentBusiness?.id) return;
-    const hoy = new Date().toISOString().slice(0, 10);
-    base44.entities.TareaEjecucion.filter({ user_id: user.id, business_id: currentBusiness.id, fecha_dia: hoy })
-      .then((ej) => {
-        setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length });
-      });
-  }, [user?.id, currentBusiness?.id]);
-
-  useEffect(() => {
-    if (!user?.id || !currentBusiness?.id) return;
-    base44.entities.Incidencia.filter(
-      { user_id: user.id, business_id: currentBusiness.id, estado: { $ne: "cerrada" } },
-      "-fecha",
-      100
-    ).then((activas) => {
-      const criticas = activas.filter((i) => i.prioridad === "critica").length;
+      // ── Incidencias ───────────────────────────────────────────────────────
+      const criticas = activas.filter(i => i.prioridad === "critica").length;
       const maxHoras = activas.reduce((max, i) => {
         const h = Math.floor((Date.now() - new Date(i.fecha || i.created_date).getTime()) / 3600000);
         return h > max ? h : max;
