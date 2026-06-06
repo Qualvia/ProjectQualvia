@@ -253,11 +253,15 @@ export default function Dashboard() {
             </div>
             </div>
             <div className="border-t border-border mt-4 pt-3">
-            <span className="text-[11px]" style={{ color: "#8A8278" }}>
-              {rachaStats.mejorRacha === null ? "Tu mejor racha este mes"
-                : rachaStats.mejorRacha === 0 ? "Sin racha completada este mes"
-                : `Mejor racha este mes: ${rachaStats.mejorRacha} día${rachaStats.mejorRacha !== 1 ? "s" : ""}`}
-            </span>
+            {tareasStats.total > 0 && tareasStats.completadas < tareasStats.total ? (
+              <span className="text-[11px] text-[#D97706]">Completa hoy para mantenerla</span>
+            ) : tareasStats.completadas === tareasStats.total && tareasStats.total > 0 ? (
+              <span className="text-[11px] text-[#2E7D52]">¡Hoy completado! 🎉</span>
+            ) : rachaStats.mejorRacha === 0 ? (
+              <span className="text-[11px]" style={{ color: "#8A8278" }}>Sin racha completada este mes</span>
+            ) : (
+              <span className="text-[11px]" style={{ color: "#8A8278" }}>{`Mejor racha este mes: ${rachaStats.mejorRacha ?? "—"} día${rachaStats.mejorRacha !== 1 ? "s" : ""}`}</span>
+            )}
             </div>
         </div>
 
