@@ -315,9 +315,6 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
                   <span className={`flex-1 text-sm leading-tight ${tarea.completada ? "line-through text-muted-foreground" : "text-foreground"}`}>
                     {tarea.titulo}
                   </span>
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${MODULE_COLORS[tarea.tipo] || "bg-secondary text-foreground"}`}>
-                    {tarea.tipo}
-                  </span>
                   <span className="text-[11px] text-muted-foreground shrink-0 w-14 text-right">{formatHora(tarea)}</span>
                 </div>
                 {i < ejecucionesOrdenadas.length - 1 && <div className="border-t border-border/50" />}
