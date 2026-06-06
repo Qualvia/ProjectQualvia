@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, X, MessageSquare, Camera, Loader2, Ban } from "lucide-react";
 import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
+import { registrarActividad } from "@/utils/registrarActividad";
 
 function ZonaRow({ zona, estado, onChange }) {
   const [expanded, setExpanded] = useState(false);
@@ -190,6 +191,15 @@ export default function NuevoRegistroLimpieza({ onCancel, onSaved }) {
     try {
       await base44.entities.RegistroLimpieza.bulkCreate(registros);
       await marcarTareaCompletada("Limpieza", user.id, currentBusiness.id);
+      const ok = registros.filter(r => r.estado === "satisfactorio").length;
+      registrarActividad({
+        user_id: user.id,
+        business_id: currentBusiness.id,
+        tipo: "limpieza",
+        quien: nombreRegistrador || user.full_name || user.email,
+        accion: `registró limpieza · ${registros.length} zona${registros.length !== 1 ? "s" : ""}`,
+        detalle: `${ok} satisfactoria${ok !== 1 ? "s" : ""} de ${registros.length}`,
+      });
       onSaved();
     } catch (err) {
       console.error("Error guardando registros de limpieza:", err);

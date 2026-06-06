@@ -1,31 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { Thermometer, Droplets, ShieldCheck, ClipboardList, Package, Trash2, Wrench, Snowflake, FlaskConical, ClipboardCheck, AlertTriangle, Activity } from "lucide-react";
-
-function formatHora(fechaStr) {
-  if (!fechaStr) return "—";
-  const d = new Date(fechaStr);
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
+import { Thermometer, Droplets, ShieldCheck, ClipboardList, Package, Trash2, Wrench, Snowflake, FlaskConical, ClipboardCheck, AlertTriangle, Activity, Bug } from "lucide-react";
 
 const TIPO_CONFIG = {
-  temperatura:  { icon: Thermometer,   bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
-  limpieza:     { icon: ShieldCheck,    bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
-  recepcion:    { icon: Package,        bg: "bg-[#FEF3DC]", color: "text-[#D97706]" },
-  agua:         { icon: Droplets,       bg: "bg-[#EDE6DA]", color: "text-[#0A3E47]" },
-  residuos:     { icon: Trash2,         bg: "bg-[#FEE8E8]", color: "text-[#C0392B]" },
-  mantenimiento:{ icon: Wrench,         bg: "bg-[#EDE6DA]", color: "text-[#0A3E47]" },
-  congelacion:  { icon: Snowflake,      bg: "bg-[#EDE6DA]", color: "text-[#0A3E47]" },
-  alergenos:    { icon: FlaskConical,   bg: "bg-[#FEF3DC]", color: "text-[#D97706]" },
-  checklist:    { icon: ClipboardCheck, bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
-  auditoria:    { icon: ClipboardList,  bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
-  incidencia:   { icon: AlertTriangle,  bg: "bg-[#FEE8E8]", color: "text-[#C0392B]" },
+  temperatura:   { icon: Thermometer,   bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
+  limpieza:      { icon: ShieldCheck,   bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
+  recepcion:     { icon: Package,       bg: "bg-[#FEF3DC]", color: "text-[#D97706]" },
+  agua:          { icon: Droplets,      bg: "bg-[#EDE6DA]", color: "text-[#0A3E47]" },
+  residuos:      { icon: Trash2,        bg: "bg-[#FEE8E8]", color: "text-[#C0392B]" },
+  mantenimiento: { icon: Wrench,        bg: "bg-[#EDE6DA]", color: "text-[#0A3E47]" },
+  congelacion:   { icon: Snowflake,     bg: "bg-[#EDE6DA]", color: "text-[#0A3E47]" },
+  alergenos:     { icon: FlaskConical,  bg: "bg-[#FEF3DC]", color: "text-[#D97706]" },
+  plagas:        { icon: Bug,           bg: "bg-[#FEF3DC]", color: "text-[#D97706]" },
+  checklist:     { icon: ClipboardCheck,bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
+  auditoria:     { icon: ClipboardList, bg: "bg-[#E4F2EC]", color: "text-[#2E7D52]" },
+  incidencia:    { icon: AlertTriangle, bg: "bg-[#FEE8E8]", color: "text-[#C0392B]" },
 };
 
 function EventoItem({ evento, isLast }) {
   const cfg = TIPO_CONFIG[evento.tipo] || TIPO_CONFIG.temperatura;
   const Icon = cfg.icon;
+  const hora = evento.fecha
+    ? `${String(new Date(evento.fecha).getHours()).padStart(2,"0")}:${String(new Date(evento.fecha).getMinutes()).padStart(2,"0")}`
+    : "—";
+
   return (
     <div className={`flex items-start gap-3 py-3 ${!isLast ? "border-b border-border/50" : ""}`}>
       <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${cfg.bg}`}>
@@ -40,7 +39,7 @@ function EventoItem({ evento, isLast }) {
           <p className="text-[11px] text-muted-foreground mt-0.5">{evento.detalle}</p>
         )}
       </div>
-      <span className="text-[11px] text-muted-foreground shrink-0 mt-0.5">{evento.hora}</span>
+      <span className="text-[11px] text-muted-foreground shrink-0 mt-0.5">{hora}</span>
     </div>
   );
 }
@@ -53,151 +52,39 @@ export default function ActividadRecienteBloque() {
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
-    cargar();
-  }, [user?.id, currentBusiness?.id]);
 
-  async function cargar() {
-    setLoading(true);
-    const uid = user.id;
     const bid = currentBusiness.id;
-    const fechaInicio = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const uid = user.id;
 
-    const [temps, limpiezas, recepciones, aguas, residuos, mantenimientos, congelaciones, alergenos, checklists, auditorias, incidencias] = await Promise.all([
-      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-      base44.entities.RegistroResiduo.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-      base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid, created_date: { $gte: fechaInicio } }),
-      base44.entities.ChecklistEjecucion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-      base44.entities.AuditoriaInterna.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
-      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid, created_date: { $gte: fechaInicio } }),
-    ]);
+    setLoading(true);
+    setEventos([]);
 
-    const lista = [];
-
-    temps.forEach(r => {
-      lista.push({
-        tipo: "temperatura", fecha: r.fecha,
-        hora: formatHora(r.fecha),
-        quien: r.registrado_por || "Sistema",
-        accion: `registró temperatura · ${r.equipo_nombre || "equipo"}`,
-        detalle: r.temperatura != null ? `${r.temperatura}°C` : null,
-      });
+    // UNA sola consulta: los 20 más recientes de este negocio/usuario
+    base44.entities.RegistroActividad.filter(
+      { user_id: uid, business_id: bid },
+      "-fecha",
+      20
+    ).then((data) => {
+      setEventos(data);
+      setLoading(false);
     });
 
-    limpiezas.forEach(r => {
-      lista.push({
-        tipo: "limpieza", fecha: r.fecha,
-        hora: formatHora(r.fecha),
-        quien: r.registrado_por || "Sistema",
-        accion: `registró limpieza · ${r.zona_nombre || "zona"}`,
-        detalle: r.estado === "satisfactorio" ? "Satisfactorio" : r.estado === "no_limpiado" ? "No limpiado" : "No aplica",
-      });
+    // Suscripción en tiempo real: aparece al instante cuando alguien registra algo
+    const unsubscribe = base44.entities.RegistroActividad.subscribe((event) => {
+      if (event.type === "create"
+        && event.data?.business_id === bid
+        && event.data?.user_id === uid) {
+        setEventos((prev) => [event.data, ...prev].slice(0, 20));
+      }
     });
 
-    recepciones.forEach(r => {
-      lista.push({
-        tipo: "recepcion", fecha: r.fecha,
-        hora: formatHora(r.fecha),
-        quien: r.registrado_por || "Sistema",
-        accion: `control de recepción · ${r.producto || "producto"}`,
-        detalle: `${r.proveedor || ""} · ${r.resultado === "aceptado" ? "Aceptado" : "Rechazado"}`,
-      });
-    });
-
-    aguas.forEach(r => {
-      lista.push({
-        tipo: "agua", fecha: r.fecha,
-        hora: formatHora(r.fecha),
-        quien: r.registrado_por || "Sistema",
-        accion: `análisis de agua · ${r.punto_nombre || "punto"}`,
-        detalle: r.cloro_nivel != null ? `Cloro: ${r.cloro_nivel} · pH: ${r.ph_nivel ?? "—"}` : null,
-      });
-    });
-
-    residuos.forEach(r => {
-      lista.push({
-        tipo: "residuos", fecha: r.fecha,
-        hora: formatHora(r.fecha),
-        quien: r.registrado_por || "Sistema",
-        accion: `gestión de residuos · ${r.tipo_residuo || ""}`,
-        detalle: r.cantidad != null ? `${r.cantidad} ${r.unidad || ""}` : null,
-      });
-    });
-
-    mantenimientos.forEach(r => {
-      lista.push({
-        tipo: "mantenimiento", fecha: r.fecha,
-        hora: formatHora(r.fecha),
-        quien: r.registrado_por || "Sistema",
-        accion: `mantenimiento · ${r.equipo_nombre || "equipo"}`,
-        detalle: r.tipo_mantenimiento || null,
-      });
-    });
-
-    congelaciones.forEach(r => {
-      lista.push({
-        tipo: "congelacion", fecha: r.fecha,
-        hora: formatHora(r.fecha),
-        quien: r.registrado_por || "Sistema",
-        accion: `${r.operacion?.toLowerCase() || "congelación"} · ${r.producto || "producto"}`,
-        detalle: r.temperatura_inicial != null ? `${r.temperatura_inicial}°C → ${r.temperatura_final ?? "—"}°C` : null,
-      });
-    });
-
-    alergenos.forEach(r => {
-      lista.push({
-        tipo: "alergenos", fecha: r.created_date,
-        hora: formatHora(r.created_date),
-        quien: r.registrado_por || "Sistema",
-        accion: `registro de alérgenos · ${r.producto || "producto"}`,
-        detalle: r.alergenos?.length ? r.alergenos.join(", ") : null,
-      });
-    });
-
-    checklists.forEach(r => {
-      lista.push({
-        tipo: "checklist", fecha: r.fecha,
-        hora: formatHora(r.fecha),
-        quien: r.registrado_por || "Sistema",
-        accion: `completó checklist · ${r.plantilla_nombre || ""}`,
-        detalle: r.puntuacion != null ? `Puntuación: ${r.puntuacion}%` : null,
-      });
-    });
-
-    auditorias.forEach(r => {
-      lista.push({
-        tipo: "auditoria", fecha: r.fecha,
-        hora: formatHora(r.fecha),
-        quien: r.auditor || "Sistema",
-        accion: `auditoría interna · ${r.tipo === "restaurante" ? "Restaurante" : "Industria/Obrador"}`,
-        detalle: r.puntuacion != null ? `Puntuación: ${r.puntuacion}%` : null,
-      });
-    });
-
-    incidencias.forEach(r => {
-      lista.push({
-        tipo: "incidencia", fecha: r.fecha || r.created_date,
-        hora: formatHora(r.fecha || r.created_date),
-        quien: r.registrado_por || "Sistema",
-        accion: `incidencia registrada · ${r.tipo || ""}`,
-        detalle: r.descripcion ? r.descripcion.slice(0, 60) + (r.descripcion.length > 60 ? "…" : "") : null,
-      });
-    });
-
-    // Ordenar por hora desc (más reciente primero)
-    lista.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    setEventos(lista);
-    setLoading(false);
-  }
+    return () => unsubscribe();
+  }, [user?.id, currentBusiness?.id]);
 
   if (loading) {
     return (
       <div className="px-5 py-6 space-y-3">
-        {[1, 2, 3].map(i => <div key={i} className="h-10 rounded-lg bg-muted animate-pulse" />)}
+        {[1, 2, 3].map((i) => <div key={i} className="h-10 rounded-lg bg-muted animate-pulse" />)}
       </div>
     );
   }
@@ -206,8 +93,8 @@ export default function ActividadRecienteBloque() {
     return (
       <div className="px-5 py-10 flex flex-col items-center gap-2">
         <Activity className="w-8 h-8 text-muted-foreground/30" />
-        <p className="text-sm text-muted-foreground">Sin actividad en las últimas 24h</p>
-        <p className="text-xs text-muted-foreground/70">Los registros de hoy aparecerán aquí</p>
+        <p className="text-sm text-muted-foreground">Sin actividad registrada aún</p>
+        <p className="text-xs text-muted-foreground/70">Los registros aparecerán aquí en tiempo real</p>
       </div>
     );
   }
@@ -216,9 +103,11 @@ export default function ActividadRecienteBloque() {
 
   return (
     <div className="px-5 py-2">
-      <p className="text-[11px] text-muted-foreground py-2">{eventos.length} evento{eventos.length !== 1 ? "s" : ""} en las últimas 24h</p>
+      <p className="text-[11px] text-muted-foreground py-2">
+        {eventos.length} evento{eventos.length !== 1 ? "s" : ""} recientes
+      </p>
       {visibles.map((ev, i) => (
-        <EventoItem key={i} evento={ev} isLast={i === visibles.length - 1 && (verTodos || eventos.length <= 8)} />
+        <EventoItem key={ev.id || i} evento={ev} isLast={i === visibles.length - 1 && (verTodos || eventos.length <= 8)} />
       ))}
       {eventos.length > 8 && (
         <button

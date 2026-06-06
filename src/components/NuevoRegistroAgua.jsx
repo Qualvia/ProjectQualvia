@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
+import { registrarActividad } from "@/utils/registrarActividad";
 
 export default function NuevoRegistroAgua({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
@@ -61,6 +62,14 @@ export default function NuevoRegistroAgua({ onCancel, onSaved }) {
       fecha: new Date().toISOString(),
     });
     await marcarTareaCompletada("Agua", user.id, currentBusiness.id);
+    registrarActividad({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tipo: "agua",
+      quien: nombreRegistrador || user.full_name || user.email,
+      accion: `análisis de agua · ${form.punto_nombre}`,
+      detalle: form.cloro_nivel !== "" ? `Cloro: ${form.cloro_nivel} ppm · pH: ${form.ph_nivel || "—"}` : null,
+    });
     setSaving(false);
     onSaved();
   }

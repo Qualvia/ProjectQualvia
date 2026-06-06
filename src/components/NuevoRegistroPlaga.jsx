@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
+import { registrarActividad } from "@/utils/registrarActividad";
 
 const TIPOS_ELEMENTO = ["Trampa", "Lámpara UV", "Cebo", "Otro"];
 const ESTADOS = [
@@ -65,6 +66,14 @@ export default function NuevoRegistroPlaga({ onCancel, onSaved }) {
       fecha: new Date().toISOString(),
     });
     await marcarTareaCompletada("Plagas", user.id, currentBusiness.id);
+    registrarActividad({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tipo: "plagas",
+      quien: nombreRegistrador || user.full_name || user.email,
+      accion: `control de plagas · ${form.punto_nombre}`,
+      detalle: `${form.tipo_elemento} · ${form.estado === "correcto" ? "Correcto" : form.estado === "incidencia" ? "Incidencia" : "Requiere revisión"}`,
+    });
     setSaving(false);
     onSaved();
   }

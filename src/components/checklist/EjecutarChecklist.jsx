@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { ArrowLeft, ClipboardList } from "lucide-react";
+import { registrarActividad } from "@/utils/registrarActividad";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -73,6 +74,14 @@ export default function EjecutarChecklist({ plantilla, onCancel, onCompletado })
       puntuacion,
       observaciones,
       fecha: new Date().toISOString(),
+    });
+    registrarActividad({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tipo: "checklist",
+      quien: registrado_por,
+      accion: `completó checklist · ${plantilla.nombre}`,
+      detalle: `Puntuación: ${puntuacion}%`,
     });
     onCompletado();
   }

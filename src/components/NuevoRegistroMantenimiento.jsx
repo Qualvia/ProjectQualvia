@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Camera, Loader2 } from "lucide-react";
 import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
+import { registrarActividad } from "@/utils/registrarActividad";
 import { format } from "date-fns";
 
 const TIPOS = ["Preventivo", "Correctivo", "Revisión"];
@@ -62,6 +63,14 @@ export default function NuevoRegistroMantenimiento({ onCancel, onSaved }) {
       fecha: new Date().toISOString(),
     });
     await marcarTareaCompletada("Mantenimiento", user.id, currentBusiness.id);
+    registrarActividad({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tipo: "mantenimiento",
+      quien: nombreRegistrador || user.full_name || user.email,
+      accion: `mantenimiento · ${form.equipo_nombre}`,
+      detalle: `${form.tipo_mantenimiento} · ${form.estado_final}`,
+    });
     setSaving(false);
     onSaved();
   }

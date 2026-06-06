@@ -299,7 +299,7 @@ export default function Dashboard() {
                         icon={bloque.icon}
                         dragHandleProps={provided.dragHandleProps}>
                         {bloque.id === "tareas" ? (
-                          <TareasIncidenciasBloque onEjecucionesChange={(ej) => setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length })} />
+                          <TareasIncidenciasBloque onEjecucionesChange={(ej) => setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length })} key={currentBusiness?.id} />
                         ) : bloque.id === "graficos" ? (
                           <GraficosBloque />
                         ) : (

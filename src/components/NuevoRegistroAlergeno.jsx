@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
+import { registrarActividad } from "@/utils/registrarActividad";
 
 const ALERGENOS = [
   "Gluten", "Crustáceos", "Huevos", "Pescado", "Cacahuetes", "Soja",
@@ -75,6 +76,14 @@ export default function NuevoRegistroAlergeno({ onCancel, onSaved }) {
       fecha: new Date().toISOString(),
     });
     await marcarTareaCompletada("Alérgenos", user.id, currentBusiness.id);
+    registrarActividad({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tipo: "alergenos",
+      quien: nombreRegistrador || user.full_name || user.email,
+      accion: `registro de alérgenos · ${form.producto.trim()}`,
+      detalle: form.alergenos.length ? form.alergenos.join(", ") : null,
+    });
     setSaving(false);
     onSaved();
   }

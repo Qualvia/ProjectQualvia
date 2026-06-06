@@ -4,6 +4,7 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Loader2 } from "lucide-react";
 import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
+import { registrarActividad } from "@/utils/registrarActividad";
 
 const OPERACIONES = ["Congelación", "Descongelación"];
 
@@ -55,6 +56,14 @@ export default function NuevoRegistroCongelacion({ onCancel, onSaved }) {
       fecha: new Date().toISOString(),
     });
     await marcarTareaCompletada("Congelación", user.id, currentBusiness.id);
+    registrarActividad({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tipo: "congelacion",
+      quien: nombreRegistrador || user.full_name || user.email,
+      accion: `${form.operacion.toLowerCase()} · ${form.producto}`,
+      detalle: form.temperatura_inicial !== "" ? `${form.temperatura_inicial}°C → ${form.temperatura_final !== "" ? form.temperatura_final + "°C" : "—"}` : null,
+    });
     setLoading(false);
     if (imprimir) handleImprimir();
     onSaved();

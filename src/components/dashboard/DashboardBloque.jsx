@@ -50,10 +50,12 @@ export default function DashboardBloque({ id, businessId, title, icon: Icon, chi
         </button>
       </div>
 
-      {/* Content — siempre montado para que los callbacks sigan funcionando */}
-      <div className={cn("border-t border-border", !abierto && "hidden")}>
-        {children}
-      </div>
+      {/* Content — lazy: solo se monta si está abierto */}
+      {abierto && (
+        <div className="border-t border-border">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,91 @@
+{
+  "name": "RegistroActividad",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID del usuario propietario"
+    },
+    "business_id": {
+      "type": "string",
+      "description": "ID del negocio"
+    },
+    "tipo": {
+      "type": "string",
+      "description": "temperatura | limpieza | recepcion | agua | residuos | mantenimiento | congelacion | alergenos | plagas | checklist | incidencia"
+    },
+    "quien": {
+      "type": "string",
+      "description": "Nombre del operario que realiz\u00f3 el registro"
+    },
+    "accion": {
+      "type": "string",
+      "description": "Descripci\u00f3n corta de la acci\u00f3n"
+    },
+    "detalle": {
+      "type": "string",
+      "description": "Detalle adicional (temperatura, resultado, etc)"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "business_id",
+    "tipo",
+    "quien",
+    "accion"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

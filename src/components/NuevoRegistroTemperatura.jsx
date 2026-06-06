@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
+import { registrarActividad } from "@/utils/registrarActividad";
 
 export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
   const { currentBusiness, user } = useBusiness();
@@ -85,6 +86,14 @@ export default function NuevoRegistroTemperatura({ onCancel, onSaved }) {
       });
     }
     await marcarTareaCompletada("Temperatura", user.id, currentBusiness.id);
+    registrarActividad({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tipo: "temperatura",
+      quien: nombreRegistrador || user.full_name || user.email,
+      accion: `registró temperatura · ${filled.length} equipo${filled.length !== 1 ? "s" : ""}`,
+      detalle: filled.map(e => `${e.nombre}: ${values[e.id].temperatura}°C`).join(" · "),
+    });
     setSaving(false);
     onSaved();
   }

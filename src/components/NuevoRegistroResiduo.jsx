@@ -4,6 +4,7 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Loader2 } from "lucide-react";
 import { marcarTareaCompletada } from "@/utils/marcarTareaCompletada";
+import { registrarActividad } from "@/utils/registrarActividad";
 
 const TIPOS_RESIDUO = ["Orgánico", "Envases y plásticos", "Papel y cartón", "Vidrio", "Aceite usado", "Subproducto animal", "Otro"];
 const UNIDADES = ["kg", "litros", "unidades", "m³"];
@@ -48,6 +49,14 @@ export default function NuevoRegistroResiduo({ onCancel, onSaved }) {
       fecha: new Date().toISOString(),
     });
     await marcarTareaCompletada("Residuos", user.id, currentBusiness.id);
+    registrarActividad({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tipo: "residuos",
+      quien: nombreRegistrador || user.full_name || user.email,
+      accion: `gestión de residuos · ${form.tipo_residuo}`,
+      detalle: form.cantidad !== "" ? `${form.cantidad} ${form.unidad}` : null,
+    });
     setLoading(false);
     onSaved();
   }
