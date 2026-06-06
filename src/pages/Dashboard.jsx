@@ -295,7 +295,6 @@ export default function Dashboard() {
                         defaultOpen={bloque.id !== "graficos"}>
                         {bloque.id === "tareas" ? (
                           <TareasIncidenciasBloque
-                            key={currentBusiness?.id}
                             onEjecucionesChange={(ej) => {
                               const updated = { completadas: ej.filter(e => e.completada).length, total: ej.length };
                               setTareasStats(updated);

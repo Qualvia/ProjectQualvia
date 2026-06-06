@@ -25,6 +25,7 @@ export default function BusinessSelector() {
   const { businesses, currentBusiness, setCurrentBusiness, deleteBusiness } = useBusiness();
   const [bizToDelete, setBizToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [bizToSwitch, setBizToSwitch] = useState(null);
   const navigate = useNavigate();
 
   if (!currentBusiness) return null;
@@ -54,7 +55,9 @@ export default function BusinessSelector() {
           {businesses.map((biz) => (
             <DropdownMenuItem
               key={biz.id}
-              onClick={() => setCurrentBusiness(biz)}
+              onClick={() => {
+                if (biz.id !== currentBusiness.id) setBizToSwitch(biz);
+              }}
               className="gap-2 group"
             >
               <Check
@@ -84,6 +87,27 @@ export default function BusinessSelector() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Confirmación cambio de negocio */}
+      <AlertDialog open={!!bizToSwitch} onOpenChange={(o) => !o && setBizToSwitch(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Cambiar de negocio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vas a cambiar al negocio <strong>{bizToSwitch?.name}</strong>. Se cargará la información correspondiente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { setCurrentBusiness(bizToSwitch); setBizToSwitch(null); }}
+              className="bg-[#0A3E47] text-white hover:bg-[#0A3E47]/90"
+            >
+              Cambiar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!bizToDelete} onOpenChange={(o) => !o && setBizToDelete(null)}>
         <AlertDialogContent>
