@@ -87,7 +87,9 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
-    cargar();
+    // Delay para evitar rate limit al cargar el dashboard completo
+    const timer = setTimeout(() => cargar(), 1500);
+    return () => clearTimeout(timer);
   }, [user?.id, currentBusiness?.id]);
 
   async function cargar() {

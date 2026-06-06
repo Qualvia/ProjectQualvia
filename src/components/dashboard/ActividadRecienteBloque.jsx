@@ -53,7 +53,9 @@ export default function ActividadRecienteBloque() {
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
-    cargar();
+    // Delay para evitar rate limit al cargar el dashboard completo
+    const timer = setTimeout(() => cargar(), 1200);
+    return () => clearTimeout(timer);
   }, [user?.id, currentBusiness?.id]);
 
   async function cargar() {
