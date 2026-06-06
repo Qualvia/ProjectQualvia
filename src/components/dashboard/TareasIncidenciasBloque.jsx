@@ -74,8 +74,6 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
   const [showPuntual, setShowPuntual] = useState(false);
   const [showGestionar, setShowGestionar] = useState(false);
 
-  const hoy = hoyISO();
-
   // ── Incidencias desde contexto ───────────────────────────────────────────
   useEffect(() => {
     if (!dashData) return;
@@ -98,7 +96,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
     const existentes = await base44.entities.TareaEjecucion.filter({
       user_id: uid,
       business_id: bid,
-      fecha_dia: hoy,
+      fecha_dia: hoyISO(),
     });
 
     const idsYaCreados = new Set(existentes.map((e) => e.tarea_id).filter(Boolean));
@@ -127,7 +125,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
           prioridad: tp.prioridad || "Media",
           completada: false,
           es_puntual: false,
-          fecha_dia: hoy,
+          fecha_dia: hoyISO(),
         });
         nuevas.push(nueva);
       }
@@ -138,7 +136,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
     onEjecucionesChange?.(todas);
     setLoading(false);
     creandoEjecucionesRef.current = false;
-  }, [user?.id, currentBusiness?.id, hoy]);
+  }, [user?.id, currentBusiness?.id]);
 
   useEffect(() => {
     cargarTareas();
@@ -187,7 +185,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
         prioridad: tp.prioridad,
         completada: false,
         es_puntual: false,
-        fecha_dia: hoy,
+        fecha_dia: hoyISO(),
       });
       setEjecuciones((prev) => {
         const updated = [...prev, nueva];
@@ -210,7 +208,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
       prioridad: form.prioridad || "Media",
       completada: false,
       es_puntual: true,
-      fecha_dia: hoy,
+      fecha_dia: hoyISO(),
     });
     setEjecuciones((prev) => {
       const updated = [...prev, nueva];
