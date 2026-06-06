@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { DashboardDataProvider } from "@/contexts/DashboardDataContext";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { base44 } from "@/api/base44Client";
@@ -192,7 +193,9 @@ export default function Layout() {
         </header>
 
         <main className="flex-1 overflow-y-auto bg-background">
-          <Outlet />
+          <DashboardDataProvider>
+            <Outlet />
+          </DashboardDataProvider>
         </main>
       </div>
     </div>);

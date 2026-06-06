@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import DashboardBloque from "@/components/dashboard/DashboardBloque";
 import ActividadRecienteBloque from "@/components/dashboard/ActividadRecienteBloque";
-import { DashboardDataProvider, useDashboardData } from "@/contexts/DashboardDataContext";
+import { useDashboardData } from "@/contexts/DashboardDataContext";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -332,9 +332,5 @@ function DashboardInner() {
 }
 
 export default function Dashboard() {
-  return (
-    <DashboardDataProvider>
-      <DashboardInner />
-    </DashboardDataProvider>
-  );
+  return <DashboardInner />;
 }
