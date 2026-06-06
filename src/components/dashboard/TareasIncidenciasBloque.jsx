@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight, Settings, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
@@ -69,6 +69,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
   const [incidencias, setIncidencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const creandoEjecucionesRef = useRef(false);
+  const cargadoParaRef = useRef(null);
   const [verTodasIncidencias, setVerTodasIncidencias] = useState(false);
   const [showProgramar, setShowProgramar] = useState(false);
   const [showPuntual, setShowPuntual] = useState(false);
@@ -80,11 +81,9 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
     setIncidencias(dashData.incidencias.filter(i => i.estado !== "cerrada"));
   }, [dashData]);
 
-  // ── Carga principal de tareas (única parte que sigue llamando a la API, ──
-  // porque necesita crear ejecuciones nuevas para las tareas programadas) ───
-  const cargarTareas = useCallback(async () => {
+  // ── Carga principal de tareas ────────────────────────────────────────────
+  async function cargarTareas() {
     if (!user?.id || !currentBusiness?.id) return;
-    // Evitar ejecuciones concurrentes (multi-pestaña / doble render)
     if (creandoEjecucionesRef.current) return;
     creandoEjecucionesRef.current = true;
     setLoading(true);
@@ -92,7 +91,6 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
     const uid = user.id;
     const bid = currentBusiness.id;
 
-    // 1. Ejecuciones ya existentes hoy
     const existentes = await base44.entities.TareaEjecucion.filter({
       user_id: uid,
       business_id: bid,
@@ -101,20 +99,17 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
 
     const idsYaCreados = new Set(existentes.map((e) => e.tarea_id).filter(Boolean));
 
-    // 2. Tareas programadas activas
     const programadas = await base44.entities.TareaProgramada.filter({
       user_id: uid,
       business_id: bid,
       activa: true,
     });
 
-    // 3. Crear ejecuciones faltantes para hoy (secuencial para evitar duplicados)
     const nuevas = [];
     for (const tp of programadas) {
       if (!idsYaCreados.has(tp.id) && tareaProgramadaCorrespondeHoy(tp)) {
-        // Re-check antes de crear para manejar concurrencia multi-pestaña
         if (idsYaCreados.has(tp.id)) continue;
-        idsYaCreados.add(tp.id); // optimistic lock local
+        idsYaCreados.add(tp.id);
         const nueva = await base44.entities.TareaEjecucion.create({
           user_id: uid,
           business_id: bid,
@@ -136,11 +131,16 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
     onEjecucionesChange?.(todas);
     setLoading(false);
     creandoEjecucionesRef.current = false;
-  }, [user?.id, currentBusiness?.id]);
+  }
 
   useEffect(() => {
+    const key = `${user?.id}_${currentBusiness?.id}`;
+    if (!user?.id || !currentBusiness?.id) return;
+    if (cargadoParaRef.current === key) return;
+    cargadoParaRef.current = key;
+    creandoEjecucionesRef.current = false; // reset guard for new key
     cargarTareas();
-  }, [cargarTareas]);
+  }, [user?.id, currentBusiness?.id]);
 
   // ── Toggle completada ────────────────────────────────────────────────────
   async function toggleTarea(ejecucion) {
