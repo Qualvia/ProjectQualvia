@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { base44 } from "@/api/base44Client";
 import { AlertCircle, ClipboardCheck, Flame, Sparkles, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
@@ -46,7 +46,6 @@ export default function Dashboard() {
   const [rachaStats, setRachaStats] = useState({ racha: null, mejorRacha: null });
   const [consejo, setConsejo] = useState(CONSEJO);
   const [cargandoConsejo, setCargandoConsejo] = useState(false);
-  const consejoCargando = useRef(false);
 
   // Resetear stats y orden de bloques al cambiar de negocio o usuario
   useEffect(() => {
@@ -55,7 +54,6 @@ export default function Dashboard() {
     setRachaStats({ racha: null, mejorRacha: null });
     setConsejo(CONSEJO);
     setCargandoConsejo(false);
-    consejoCargando.current = false;
 
     if (currentBusiness?.id) {
       const guardado = localStorage.getItem(`qualvia_bloques_orden_${currentBusiness.id}`);
@@ -147,18 +145,10 @@ export default function Dashboard() {
     if (!user?.id || !currentBusiness?.id) return;
     const hoy = new Date().toISOString().slice(0, 10);
 
-    if (consejoCargando.current) return;
-
     async function cargarConsejo() {
-      // Evitar ejecuciones concurrentes
-      consejoCargando.current = true;
-      let cancelled = false;
-
       const resultado = await base44.entities.ConsejoDia.filter({ user_id: user.id, business_id: currentBusiness.id, fecha: hoy });
-      if (cancelled) return;
       if (resultado.length > 0) {
         setConsejo(resultado[0].consejo);
-        consejoCargando.current = false;
         return;
       }
 
@@ -169,8 +159,6 @@ export default function Dashboard() {
           base44.entities.Incidencia.filter({ user_id: user.id, business_id: currentBusiness.id, estado: { $ne: "cerrada" } }, "-fecha", 10),
           base44.entities.AuditoriaInterna.filter({ user_id: user.id, business_id: currentBusiness.id }, "-fecha", 1),
         ]);
-
-        if (cancelled) return;
 
         const ultima_auditoria_dias = auditorias[0]?.fecha
           ? Math.floor((Date.now() - new Date(auditorias[0].fecha)) / 86400000)
@@ -194,16 +182,13 @@ export default function Dashboard() {
           ultima_auditoria_dias,
         });
 
-        if (!cancelled && res?.data?.ok) {
+        if (res?.data?.ok) {
           setConsejo(res.data.consejo);
           base44.entities.ConsejoDia.create({ user_id: user.id, business_id: currentBusiness.id, fecha: hoy, consejo: res.data.consejo });
         }
       } finally {
-        if (!cancelled) setCargandoConsejo(false);
-        consejoCargando.current = false;
+        setCargandoConsejo(false);
       }
-
-      return () => { cancelled = true; };
     }
 
     cargarConsejo();
