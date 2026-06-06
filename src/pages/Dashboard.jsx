@@ -84,6 +84,7 @@ export default function Dashboard() {
     const hoy = new Date().toISOString().slice(0, 10);
 
     async function cargarTodo() {
+      try {
       // 1. Peticiones paralelas de KPIs (sin consejo todavía)
       const [ejecucionesHoy, todasEjecuciones, incidenciasActivas, consejoCache] = await Promise.all([
         base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid, fecha_dia: hoy }),
@@ -180,10 +181,15 @@ export default function Dashboard() {
         consejoCargando.current = false;
         if (!cancelled) setCargandoConsejo(false);
       }
+      } catch (err) {
+        // Rate limit u otro error: no propagar, simplemente ignorar
+        consejoCargando.current = false;
+        if (!cancelled) setCargandoConsejo(false);
+      }
     }
 
-    cargarTodo();
-    return () => { cancelled = true; };
+    const timer = setTimeout(() => { cargarTodo(); }, 300);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [user?.id, currentBusiness?.id]);
 
   function onDragEnd(result) {
