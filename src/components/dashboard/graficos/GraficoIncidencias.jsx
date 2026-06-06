@@ -87,17 +87,14 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
-    let cancelled = false;
-    const timer = setTimeout(() => { if (!cancelled) cargar(cancelled); }, 1000);
-    return () => { cancelled = true; clearTimeout(timer); };
+    cargar();
   }, [user?.id, currentBusiness?.id]);
 
-  async function cargar(cancelledRef) {
+  async function cargar() {
     setLoading(true);
     const uid = user.id;
     const bid = currentBusiness.id;
     const todas = await base44.entities.Incidencia.filter({ user_id: uid, business_id: bid });
-    if (cancelledRef) return;
     setTodasIncidencias(todas);
 
     const cerradasTotal = todas.filter(i => i.estado === "cerrada").length;
@@ -107,7 +104,6 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
       ? Math.round(totalConFecha.reduce((s, i) => s + (new Date(i.fecha_cierre) - new Date(i.fecha)) / (1000 * 3600 * 24), 0) / totalConFecha.length)
       : null;
 
-    if (cancelledRef) return;
     setResumen({ tasaResolucion, tiempoMedio });
     setLoading(false);
   }
