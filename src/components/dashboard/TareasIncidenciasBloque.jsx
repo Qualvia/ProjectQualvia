@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight, Settings, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
-import { useDashboardData } from "@/contexts/DashboardDataContext";
 import ProgramarTareaDialog from "./ProgramarTareaDialog";
 import AnadirTareaPuntualDialog from "./AnadirTareaPuntualDialog";
 import GestionarTareasDialog from "./GestionarTareasDialog";
@@ -62,54 +61,46 @@ function tareaProgramadaCorrespondeHoy(tarea) {
 
 export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
   const { user, currentBusiness } = useBusiness();
-  const { data: dashData, recargar } = useDashboardData();
   const navigate = useNavigate();
 
   const [ejecuciones, setEjecuciones] = useState([]);
   const [incidencias, setIncidencias] = useState([]);
   const [loading, setLoading] = useState(true);
-  const creandoEjecucionesRef = useRef(false);
-  const cargadoParaRef = useRef(null);
   const [verTodasIncidencias, setVerTodasIncidencias] = useState(false);
   const [showProgramar, setShowProgramar] = useState(false);
   const [showPuntual, setShowPuntual] = useState(false);
   const [showGestionar, setShowGestionar] = useState(false);
 
-  // ── Incidencias desde contexto ───────────────────────────────────────────
-  useEffect(() => {
-    if (!dashData) return;
-    setIncidencias(dashData.incidencias.filter(i => i.estado !== "cerrada"));
-  }, [dashData]);
+  const hoy = hoyISO();
 
-  // ── Carga principal de tareas ────────────────────────────────────────────
-  async function cargarTareas() {
+  // ── Carga principal ──────────────────────────────────────────────────────
+  const cargarTareas = useCallback(async () => {
     if (!user?.id || !currentBusiness?.id) return;
-    if (creandoEjecucionesRef.current) return;
-    creandoEjecucionesRef.current = true;
     setLoading(true);
 
     const uid = user.id;
     const bid = currentBusiness.id;
 
+    // 1. Ejecuciones ya existentes hoy para este user+business
     const existentes = await base44.entities.TareaEjecucion.filter({
       user_id: uid,
       business_id: bid,
-      fecha_dia: hoyISO(),
+      fecha_dia: hoy,
     });
 
     const idsYaCreados = new Set(existentes.map((e) => e.tarea_id).filter(Boolean));
 
+    // 2. Tareas programadas activas de este user+business
     const programadas = await base44.entities.TareaProgramada.filter({
       user_id: uid,
       business_id: bid,
       activa: true,
     });
 
+    // 3. Generar ejecuciones para las que corresponden hoy y aún no existen
     const nuevas = [];
     for (const tp of programadas) {
       if (!idsYaCreados.has(tp.id) && tareaProgramadaCorrespondeHoy(tp)) {
-        if (idsYaCreados.has(tp.id)) continue;
-        idsYaCreados.add(tp.id);
         const nueva = await base44.entities.TareaEjecucion.create({
           user_id: uid,
           business_id: bid,
@@ -120,7 +111,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
           prioridad: tp.prioridad || "Media",
           completada: false,
           es_puntual: false,
-          fecha_dia: hoyISO(),
+          fecha_dia: hoy,
         });
         nuevas.push(nueva);
       }
@@ -130,17 +121,22 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
     setEjecuciones(todas);
     onEjecucionesChange?.(todas);
     setLoading(false);
-    creandoEjecucionesRef.current = false;
-  }
+  }, [user?.id, currentBusiness?.id, hoy]);
+
+  // ── Carga de incidencias ─────────────────────────────────────────────────
+  const cargarIncidencias = useCallback(async () => {
+    if (!user?.id || !currentBusiness?.id) return;
+    const todas = await base44.entities.Incidencia.filter({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+    });
+    setIncidencias(todas.filter((i) => i.estado !== "cerrada"));
+  }, [user?.id, currentBusiness?.id]);
 
   useEffect(() => {
-    const key = `${user?.id}_${currentBusiness?.id}`;
-    if (!user?.id || !currentBusiness?.id) return;
-    if (cargadoParaRef.current === key) return;
-    cargadoParaRef.current = key;
-    creandoEjecucionesRef.current = false; // reset guard for new key
     cargarTareas();
-  }, [user?.id, currentBusiness?.id]);
+    cargarIncidencias();
+  }, [cargarTareas, cargarIncidencias]);
 
   // ── Toggle completada ────────────────────────────────────────────────────
   async function toggleTarea(ejecucion) {
@@ -185,7 +181,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
         prioridad: tp.prioridad,
         completada: false,
         es_puntual: false,
-        fecha_dia: hoyISO(),
+        fecha_dia: hoy,
       });
       setEjecuciones((prev) => {
         const updated = [...prev, nueva];
@@ -208,7 +204,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
       prioridad: form.prioridad || "Media",
       completada: false,
       es_puntual: true,
-      fecha_dia: hoyISO(),
+      fecha_dia: hoy,
     });
     setEjecuciones((prev) => {
       const updated = [...prev, nueva];

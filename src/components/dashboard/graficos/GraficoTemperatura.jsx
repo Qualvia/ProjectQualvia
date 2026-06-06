@@ -4,7 +4,8 @@ import {
   CartesianGrid, ReferenceLine, ReferenceArea, Legend,
 } from "recharts";
 import { Thermometer, Maximize2, ArrowLeft } from "lucide-react";
-import { useDashboardData } from "@/contexts/DashboardDataContext";
+import { base44 } from "@/api/base44Client";
+import { useBusiness } from "@/contexts/BusinessContext";
 
 const LINE_COLORS = ["#0A3E47", "#6BB68A", "#D97706", "#9333EA", "#0891B2", "#DC2626", "#65A30D"];
 
@@ -57,7 +58,7 @@ const CustomTooltipTemp = ({ active, payload, label }) => {
 };
 
 export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) {
-  const { data: dashData, loading } = useDashboardData();
+  const { user, currentBusiness } = useBusiness();
   const [data, setData] = useState([]);
   const [equipos, setEquipos] = useState([]);
   const [todosEquipos, setTodosEquipos] = useState([]);
@@ -65,22 +66,30 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
   const [tiposDisponibles, setTiposDisponibles] = useState([]);
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [resumen, setResumen] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState("7d");
+  // Guardamos los registros recientes para recalcular dominio Y
   const [registrosRecientes, setRegistrosRecientes] = useState([]);
   const [filtroTipoCompacto, setFiltroTipoCompacto] = useState(null);
 
   useEffect(() => {
-    if (!dashData) return;
-    calcular();
-  }, [dashData, periodo]);
+    if (!user?.id || !currentBusiness?.id) return;
+    cargar();
+  }, [user?.id, currentBusiness?.id, periodo]);
 
-  function calcular() {
+  async function cargar() {
+    setLoading(true);
+    const uid = user.id;
+    const bid = currentBusiness.id;
     const diasNum = PERIODOS.find(p => p.value === periodo)?.dias || 7;
+
     const fechaInicio = new Date();
     fechaInicio.setDate(fechaInicio.getDate() - diasNum);
 
-    const registros = dashData.temperaturas;
-    const eqs = dashData.equipos;
+    const [registros, eqs] = await Promise.all([
+      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
+      base44.entities.EquipoTemperatura.filter({ user_id: uid, business_id: bid }),
+    ]);
 
     const recientes = registros.filter(r => r.fecha && new Date(r.fecha) >= fechaInicio);
     const dias = getLastNDays(diasNum);
@@ -121,14 +130,9 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
 
     const chartData = dias.map(dia => {
       const row = { fecha: formatDD_MM(dia + "T12:00:00") };
-      eqs.forEach((eq) => {
+      eqs.forEach((eq, i) => {
         const eqNombre = eq.nombre;
-        const regsDelDia = recientes.filter(r => {
-          // Match por equipo_id, con fallback a equipo_nombre si equipo_id no está presente
-          const matchId = r.equipo_id ? r.equipo_id === eq.id : r.equipo_nombre === eq.nombre;
-          const fechaStr = r.fecha ? new Date(r.fecha).toISOString().slice(0, 10) : null;
-          return matchId && fechaStr === dia;
-        });
+        const regsDelDia = recientes.filter(r => r.equipo_id === eq.id && r.fecha?.slice(0, 10) === dia);
         if (regsDelDia.length > 0) {
           const avg = regsDelDia.reduce((s, r) => s + r.temperatura, 0) / regsDelDia.length;
           const val = Math.round(avg * 10) / 10;
@@ -143,9 +147,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     setData(chartData);
 
     const res = eqs.map((eq, i) => {
-      const regsEq = recientes.filter(r =>
-        r.equipo_id ? r.equipo_id === eq.id : r.equipo_nombre === eq.nombre
-      );
+      const regsEq = recientes.filter(r => r.equipo_id === eq.id);
       const media = regsEq.length > 0
         ? Math.round((regsEq.reduce((s, r) => s + r.temperatura, 0) / regsEq.length) * 10) / 10
         : null;
@@ -161,6 +163,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
       };
     });
     setResumen(res);
+    setLoading(false);
   }
 
   const equiposMostrar = filtroTipo === "todos" ? equipos : equipos.filter(e => e.tipo === filtroTipo);
@@ -175,7 +178,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
   function getYDomain() {
     const eqsRef = equiposMostrar.length > 0 ? equiposMostrar : equipos;
     const valoresReales = registrosRecientes
-      .filter(r => eqsRef.some(eq => r.equipo_id ? eq.id === r.equipo_id : eq.nombre === r.equipo_nombre))
+      .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
       .map(r => r.temperatura)
       .filter(v => v != null);
 
@@ -437,7 +440,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                 ticks={(() => {
                   const eqsRef = equiposCompactos.length > 0 ? equiposCompactos : equipos;
                   const vals = registrosRecientes
-                    .filter(r => eqsRef.some(eq => r.equipo_id ? eq.id === r.equipo_id : eq.nombre === r.equipo_nombre))
+                    .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
                     .map(r => r.temperatura).filter(v => v != null);
                   const limVals = eqsRef.flatMap(eq => {
                     const lim = limites[eq.id];
@@ -450,11 +453,11 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
                   const result = [];
                   for (let i = minV; i <= maxV; i += 2) result.push(i);
                   return result;
-                  })()}
-                  domain={(() => {
+                })()}
+                domain={(() => {
                   const eqsRef = equiposCompactos.length > 0 ? equiposCompactos : equipos;
                   const vals = registrosRecientes
-                    .filter(r => eqsRef.some(eq => r.equipo_id ? eq.id === r.equipo_id : eq.nombre === r.equipo_nombre))
+                    .filter(r => eqsRef.some(eq => eq.id === r.equipo_id))
                     .map(r => r.temperatura).filter(v => v != null);
                   const limVals = eqsRef.flatMap(eq => {
                     const lim = limites[eq.id];

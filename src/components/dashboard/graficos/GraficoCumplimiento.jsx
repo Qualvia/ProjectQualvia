@@ -1,8 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ClipboardCheck, Maximize2, ArrowLeft, HelpCircle, ChevronDown } from "lucide-react";
-import { useDashboardData } from "@/contexts/DashboardDataContext";
+import { base44 } from "@/api/base44Client";
+import { useBusiness } from "@/contexts/BusinessContext";
 
+function getWeekNumber(date) {
+  const d = new Date(date);
+  const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+  return Math.ceil((d.getDate() + startOfMonth.getDay()) / 7);
+}
+
+function isoYYYYMM(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function startOfMonth() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+function endOfMonth() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+}
+
+function daysInMonth() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+}
 
 const CustomTooltipSemana = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
@@ -26,20 +51,24 @@ const PERIODOS_EXP = [
 ];
 
 export default function GraficoCumplimiento({ expandido, onExpand, onCollapse }) {
-  const { data, loading } = useDashboardData();
+  const { user, currentBusiness } = useBusiness();
   const [score, setScore] = useState(0);
   const [semanas, setSemanas] = useState([]);
   const [metricas, setMetricas] = useState({ tareasPorc: 0, diasActivos: 0, totalDias: 0, incCerradas: 0, incTotal: 0 });
   const [onboarding, setOnboarding] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [periodoExp, setPeriodoExp] = useState("mensual");
   const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
-    if (!data) return;
-    calcular(); // eslint-disable-line react-hooks/exhaustive-deps
-  }, [data, periodoExp]); // calcular lee data y periodoExp del closure — se ejecuta tras render
+    if (!user?.id || !currentBusiness?.id) return;
+    cargar();
+  }, [user?.id, currentBusiness?.id, periodoExp]);
 
-  function calcular() {
+  async function cargar() {
+    setLoading(true);
+    const uid = user.id;
+    const bid = currentBusiness.id;
     const ahora = new Date();
 
     // Calcular rango según periodoExp
@@ -59,18 +88,22 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     }
     const inicio = inicioDate.toISOString();
     const fin = finDate.toISOString();
+    const mesActual = isoYYYYMM(ahora);
+    // Para tareas del periodo (usando fecha_dia)
     const inicioISO = inicioDate.toISOString().slice(0, 10);
     const finISO = finDate.toISOString().slice(0, 10);
     const totalDias = Math.round((finDate - inicioDate) / (1000 * 3600 * 24)) + 1;
 
-    const todasEj  = data.ejecuciones;
-    const todasInc = data.incidencias;
-    const todosTemp  = data.temperaturas;
-    const todosLimp  = data.limpiezas;
-    const todosAgua  = data.aguas;
-    const todosRecep = data.recepciones;
-    const todosMant  = data.mantenimientos;
-    const todosCong  = data.congelaciones;
+    const [todasEj, todasInc, todosTemp, todosLimp, todosAgua, todosRecep, todosMant, todosCong] = await Promise.all([
+      base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }),
+      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid }),
+    ]);
 
     // --- ONBOARDING CHECK ---
     const todosRegistrosGlobal = [...todosTemp, ...todosLimp, ...todosAgua, ...todosRecep, ...todosMant, ...todosCong];
@@ -231,6 +264,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       };
     });
     setSemanas(semanasData);
+    setLoading(false);
   }
 
   const pieData = [
@@ -241,7 +275,16 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
 
   const donutColor = score >= 70 ? "#6BB68A" : score >= 40 ? "#F59E0B" : "#F87171";
 
-
+  const OnboardingChips = () => (
+    <div className="flex gap-1.5 flex-wrap justify-center mt-2">
+      {["Temperatura", "Limpieza", "Tareas"].map(chip => (
+        <span key={chip} className="flex items-center gap-1 text-[10px] text-muted-foreground border border-muted-foreground/30 rounded-full px-2 py-0.5">
+          <span className="w-3 h-3 rounded-full border border-muted-foreground/40 flex-shrink-0" />
+          {chip}
+        </span>
+      ))}
+    </div>
+  );
 
   if (expandido) {
     return (
@@ -305,6 +348,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
             {onboarding && (
               <>
                 <p className="text-[11px] text-muted-foreground text-center mt-2 leading-tight">Registra los primeros días para ver tu score</p>
+                <OnboardingChips />
               </>
             )}
           </div>
@@ -370,6 +414,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
             </div>
           </div>
           <p className="text-[10px] text-muted-foreground text-center leading-tight px-2">Registra los primeros días para ver tu score</p>
+          <OnboardingChips />
         </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center gap-1">

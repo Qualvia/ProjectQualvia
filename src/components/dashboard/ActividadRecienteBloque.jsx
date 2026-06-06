@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useDashboardData } from "@/contexts/DashboardDataContext";
+import { base44 } from "@/api/base44Client";
+import { useBusiness } from "@/contexts/BusinessContext";
 import { Thermometer, Droplets, ShieldCheck, ClipboardList, Package, Trash2, Wrench, Snowflake, FlaskConical, ClipboardCheck, AlertTriangle, Activity } from "lucide-react";
 
 function formatHora(fechaStr) {
@@ -45,25 +46,35 @@ function EventoItem({ evento, isLast }) {
 }
 
 export default function ActividadRecienteBloque() {
-  const { data, loading } = useDashboardData();
+  const { user, currentBusiness } = useBusiness();
   const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [verTodos, setVerTodos] = useState(false);
 
   useEffect(() => {
-    if (!data) return;
+    if (!user?.id || !currentBusiness?.id) return;
+    cargar();
+  }, [user?.id, currentBusiness?.id]);
+
+  async function cargar() {
+    setLoading(true);
+    const uid = user.id;
+    const bid = currentBusiness.id;
     const fechaInicio = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-    const temps        = data.temperaturas.filter(r => r.fecha >= fechaInicio);
-    const limpiezas    = data.limpiezas.filter(r => r.fecha >= fechaInicio);
-    const recepciones  = data.recepciones.filter(r => r.fecha >= fechaInicio);
-    const aguas        = data.aguas.filter(r => r.fecha >= fechaInicio);
-    const residuos     = data.residuos.filter(r => r.fecha >= fechaInicio);
-    const mantenimientos = data.mantenimientos.filter(r => r.fecha >= fechaInicio);
-    const congelaciones  = data.congelaciones.filter(r => r.fecha >= fechaInicio);
-    const alergenos    = data.alergenos.filter(r => (r.created_date || "") >= fechaInicio);
-    const checklists   = data.checklists.filter(r => r.fecha >= fechaInicio);
-    const auditorias   = data.auditorias.filter(r => r.fecha >= fechaInicio);
-    const incidencias  = data.incidencias.filter(r => (r.created_date || "") >= fechaInicio);
+    const [temps, limpiezas, recepciones, aguas, residuos, mantenimientos, congelaciones, alergenos, checklists, auditorias, incidencias] = await Promise.all([
+      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroResiduo.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid, created_date: { $gte: fechaInicio } }),
+      base44.entities.ChecklistEjecucion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.AuditoriaInterna.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio } }),
+      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid, created_date: { $gte: fechaInicio } }),
+    ]);
 
     const lista = [];
 
@@ -180,7 +191,8 @@ export default function ActividadRecienteBloque() {
     // Ordenar por hora desc (más reciente primero)
     lista.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     setEventos(lista);
-  }, [data]);
+    setLoading(false);
+  }
 
   if (loading) {
     return (

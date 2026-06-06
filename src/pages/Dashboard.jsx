@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { base44 } from "@/api/base44Client";
 import { AlertCircle, ClipboardCheck, Flame, Sparkles, Bot, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
 import TareasIncidenciasBloque from "@/components/dashboard/TareasIncidenciasBloque";
 import GraficosBloque from "@/components/dashboard/GraficosBloque";
@@ -8,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import DashboardBloque from "@/components/dashboard/DashboardBloque";
 import ActividadRecienteBloque from "@/components/dashboard/ActividadRecienteBloque";
-import { useDashboardData } from "@/contexts/DashboardDataContext";
 
 const DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -36,9 +36,8 @@ const BLOQUES_INICIALES = [
   { id: "actividad", title: "Actividad reciente", icon: Activity },
 ];
 
-function DashboardInner() {
+export default function Dashboard() {
   const { user, currentBusiness } = useBusiness();
-  const { data: dashData } = useDashboardData();
   const navigate = useNavigate();
   const nombre = user?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "usuario";
   const [bloques, setBloques] = useState(BLOQUES_INICIALES);
@@ -46,8 +45,12 @@ function DashboardInner() {
   const [incidenciasStats, setIncidenciasStats] = useState({ total: 0, criticas: 0, maxHoras: 0 });
   const [rachaStats, setRachaStats] = useState({ racha: null, mejorRacha: null });
 
-  // Resetear orden de bloques al cambiar de negocio
+  // Resetear stats y orden de bloques al cambiar de negocio o usuario
   useEffect(() => {
+    setTareasStats({ completadas: 0, total: 0 });
+    setIncidenciasStats({ total: 0, criticas: 0, maxHoras: 0 });
+    setRachaStats({ racha: null, mejorRacha: null });
+
     if (currentBusiness?.id) {
       const guardado = localStorage.getItem(`qualvia_bloques_orden_${currentBusiness.id}`);
       if (guardado) {
@@ -67,60 +70,88 @@ function DashboardInner() {
     setBloques(BLOQUES_INICIALES);
   }, [user?.id, currentBusiness?.id]);
 
-  // KPIs calculados desde los datos del contexto (sin llamadas extra a la API)
   useEffect(() => {
-    if (!dashData) return;
-    const ahora = new Date();
-    const hoy = ahora.toISOString().slice(0, 10);
-    const ejecuciones = dashData.ejecuciones;
-    const incidencias = dashData.incidencias;
+    if (!user?.id || !currentBusiness?.id) return;
 
-    // Stats de hoy
-    const hoyEj = ejecuciones.filter(e => e.fecha_dia === hoy);
-    setTareasStats({ completadas: hoyEj.filter(e => e.completada).length, total: hoyEj.length });
+    base44.entities.TareaEjecucion.filter({ user_id: user.id, business_id: currentBusiness.id }).then((ejecuciones) => {
+      const ahora = new Date();
+      const hoy = ahora.toISOString().slice(0, 10);
 
-    // Racha
-    const porDia = {};
-    ejecuciones.forEach(e => {
-      if (!e.fecha_dia) return;
-      if (!porDia[e.fecha_dia]) porDia[e.fecha_dia] = [];
-      porDia[e.fecha_dia].push(e);
+      // Agrupa ejecuciones por fecha_dia
+      const porDia = {};
+      ejecuciones.forEach(e => {
+        if (!e.fecha_dia) return;
+        if (!porDia[e.fecha_dia]) porDia[e.fecha_dia] = [];
+        porDia[e.fecha_dia].push(e);
+      });
+
+      // Función: ¿el día fue "completado"? (tiene tareas y todas completadas)
+      const diaOk = (iso) => {
+        const t = porDia[iso];
+        return t && t.length > 0 && t.every(e => e.completada);
+      };
+
+      // Racha actual: desde ayer hacia atrás
+      let racha = 0;
+      const ayer = new Date(ahora);
+      ayer.setDate(ayer.getDate() - 1);
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(ayer);
+        d.setDate(ayer.getDate() - i);
+        const iso = d.toISOString().slice(0, 10);
+        const t = porDia[iso];
+        if (!t || t.length === 0) continue; // sin tareas ese día → saltar
+        if (diaOk(iso)) { racha++; } else { break; }
+      }
+
+      // Mejor racha del mes actual
+      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+      const diasMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
+      let mejorRacha = 0;
+      let rachaTemp = 0;
+      for (let i = 0; i < diasMes; i++) {
+        const d = new Date(inicioMes);
+        d.setDate(inicioMes.getDate() + i);
+        const iso = d.toISOString().slice(0, 10);
+        if (iso >= hoy) break; // no contar hoy ni futuro
+        const t = porDia[iso];
+        if (!t || t.length === 0) continue; // sin tareas → saltar
+        if (diaOk(iso)) {
+          rachaTemp++;
+          if (rachaTemp > mejorRacha) mejorRacha = rachaTemp;
+        } else {
+          rachaTemp = 0;
+        }
+      }
+
+      setRachaStats({ racha, mejorRacha });
     });
-    const diaOk = (iso) => { const t = porDia[iso]; return t && t.length > 0 && t.every(e => e.completada); };
+  }, [user?.id, currentBusiness?.id]);
 
-    let racha = 0;
-    const ayer = new Date(ahora);
-    ayer.setDate(ayer.getDate() - 1);
-    for (let i = 0; i < 365; i++) {
-      const d = new Date(ayer); d.setDate(ayer.getDate() - i);
-      const iso = d.toISOString().slice(0, 10);
-      const t = porDia[iso];
-      if (!t || t.length === 0) continue;
-      if (diaOk(iso)) { racha++; } else { break; }
-    }
+  useEffect(() => {
+    if (!user?.id || !currentBusiness?.id) return;
+    const hoy = new Date().toISOString().slice(0, 10);
+    base44.entities.TareaEjecucion.filter({ user_id: user.id, business_id: currentBusiness.id, fecha_dia: hoy })
+      .then((ej) => {
+        setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length });
+      });
+  }, [user?.id, currentBusiness?.id]);
 
-    const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-    const diasMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
-    let mejorRacha = 0, rachaTemp = 0;
-    for (let i = 0; i < diasMes; i++) {
-      const d = new Date(inicioMes); d.setDate(inicioMes.getDate() + i);
-      const iso = d.toISOString().slice(0, 10);
-      if (iso >= hoy) break;
-      const t = porDia[iso];
-      if (!t || t.length === 0) continue;
-      if (diaOk(iso)) { rachaTemp++; if (rachaTemp > mejorRacha) mejorRacha = rachaTemp; } else { rachaTemp = 0; }
-    }
-    setRachaStats({ racha, mejorRacha });
-
-    // Incidencias activas
-    const activas = incidencias.filter(i => i.estado !== "cerrada");
-    const criticas = activas.filter(i => i.prioridad === "critica").length;
-    const maxHoras = activas.reduce((max, i) => {
-      const h = Math.floor((Date.now() - new Date(i.fecha || i.created_date).getTime()) / 3600000);
-      return h > max ? h : max;
-    }, 0);
-    setIncidenciasStats({ total: activas.length, criticas, maxHoras });
-  }, [dashData]);
+  useEffect(() => {
+    if (!user?.id || !currentBusiness?.id) return;
+    base44.entities.Incidencia.filter(
+      { user_id: user.id, business_id: currentBusiness.id, estado: { $ne: "cerrada" } },
+      "-fecha",
+      100
+    ).then((activas) => {
+      const criticas = activas.filter((i) => i.prioridad === "critica").length;
+      const maxHoras = activas.reduce((max, i) => {
+        const h = Math.floor((Date.now() - new Date(i.fecha || i.created_date).getTime()) / 3600000);
+        return h > max ? h : max;
+      }, 0);
+      setIncidenciasStats({ total: activas.length, criticas, maxHoras });
+    });
+  }, [user?.id, currentBusiness?.id]);
 
   function onDragEnd(result) {
     if (!result.destination) return;
@@ -329,8 +360,4 @@ function DashboardInner() {
 
     </div>
   );
-}
-
-export default function Dashboard() {
-  return <DashboardInner />;
 }

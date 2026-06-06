@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Line, ComposedChart, Legend,
 } from "recharts";
 import { AlertTriangle, Maximize2, ArrowLeft } from "lucide-react";
-import { useDashboardData } from "@/contexts/DashboardDataContext";
+import { base44 } from "@/api/base44Client";
+import { useBusiness } from "@/contexts/BusinessContext";
 
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
@@ -77,12 +78,37 @@ const CustomTooltipInc = ({ active, payload, label }) => {
 };
 
 export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) {
-  const { data, loading } = useDashboardData();
+  const { user, currentBusiness } = useBusiness();
   const [periodo, setPeriodo] = useState("semestral");
+  const [todasIncidencias, setTodasIncidencias] = useState([]);
+  const [tendencia, setTendencia] = useState(null);
+  const [resumen, setResumen] = useState({ mesPico: null, tasaResolucion: 0, tiempoMedio: null });
+  const [loading, setLoading] = useState(true);
 
-  const todasIncidencias = data?.incidencias ?? [];
+  useEffect(() => {
+    if (!user?.id || !currentBusiness?.id) return;
+    cargar();
+  }, [user?.id, currentBusiness?.id]);
 
-  // Calcular todo con useMemo para evitar loops de useEffect+setState
+  async function cargar() {
+    setLoading(true);
+    const uid = user.id;
+    const bid = currentBusiness.id;
+    const todas = await base44.entities.Incidencia.filter({ user_id: uid, business_id: bid });
+    setTodasIncidencias(todas);
+
+    const cerradasTotal = todas.filter(i => i.estado === "cerrada").length;
+    const tasaResolucion = todas.length > 0 ? Math.round((cerradasTotal / todas.length) * 100) : 0;
+    const totalConFecha = todas.filter(i => i.fecha_cierre && i.fecha && new Date(i.fecha_cierre) > new Date(i.fecha));
+    const tiempoMedio = totalConFecha.length > 0
+      ? Math.round(totalConFecha.reduce((s, i) => s + (new Date(i.fecha_cierre) - new Date(i.fecha)) / (1000 * 3600 * 24), 0) / totalConFecha.length)
+      : null;
+
+    setResumen({ tasaResolucion, tiempoMedio });
+    setLoading(false);
+  }
+
+  // Recalcular data y tendencia cuando cambia periodo o datos
   const dataExpandido = useMemo(() => {
     const buckets = getPeriodoBuckets(periodo);
     return buckets.map(({ label, inicio, fin }) => {
@@ -105,31 +131,23 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
     [dataExpandido]
   );
 
-  // Calcular tendencia, resumen y mesPico con useMemo — sin setState, sin loops
-  const { tendenciaCalc, resumenCalc } = useMemo(() => {
-    const todas = todasIncidencias;
-    const cerradasTotal = todas.filter(i => i.estado === "cerrada").length;
-    const tasaResolucion = todas.length > 0 ? Math.round((cerradasTotal / todas.length) * 100) : 0;
-    const totalConFecha = todas.filter(i => i.fecha_cierre && i.fecha && new Date(i.fecha_cierre) > new Date(i.fecha));
-    const tiempoMedio = totalConFecha.length > 0
-      ? Math.round(totalConFecha.reduce((s, i) => s + (new Date(i.fecha_cierre) - new Date(i.fecha)) / (1000 * 3600 * 24), 0) / totalConFecha.length)
-      : null;
-
+  // Recalcular tendencia y mesPico
+  useEffect(() => {
+    if (!dataExpandido.length) return;
     const mesesConDatos = dataExpandido.filter(d => d.total > 0);
-    let tendenciaCalc = null;
     if (mesesConDatos.length >= 2) {
       const mitad = Math.floor(mesesConDatos.length / 2);
       const primera = mesesConDatos.slice(0, mitad).reduce((s, d) => s + d.total, 0);
       const segunda = mesesConDatos.slice(mitad).reduce((s, d) => s + d.total, 0);
-      tendenciaCalc = segunda < primera ? "baja" : segunda > primera ? "sube" : "igual";
+      if (segunda < primera) setTendencia("baja");
+      else if (segunda > primera) setTendencia("sube");
+      else setTendencia("igual");
+    } else {
+      setTendencia(null);
     }
-
-    const mesPicoItem = dataExpandido.reduce((max, d) => d.total > (max?.total ?? 0) ? d : max, null);
-    return {
-      tendenciaCalc,
-      resumenCalc: { tasaResolucion, tiempoMedio, mesPico: mesPicoItem?.total > 0 ? mesPicoItem.label : null },
-    };
-  }, [dataExpandido, todasIncidencias]);
+    const mesPico = dataExpandido.reduce((max, d) => d.total > (max?.total ?? 0) ? d : max, null);
+    setResumen(prev => ({ ...prev, mesPico: mesPico?.total > 0 ? mesPico.label : null }));
+  }, [dataExpandido]);
 
   const hayDatos = dataCompacto.some(d => d.total > 0);
 
@@ -201,23 +219,23 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
               </ComposedChart>
             </ResponsiveContainer>
 
-            {tendenciaCalc && (
-              <p className="text-sm font-medium" style={{ color: tendenciaInfo[tendenciaCalc].color }}>
-                {tendenciaInfo[tendenciaCalc].texto}
+            {tendencia && (
+              <p className="text-sm font-medium" style={{ color: tendenciaInfo[tendencia].color }}>
+                {tendenciaInfo[tendencia].texto}
               </p>
             )}
 
             <div className="grid grid-cols-3 gap-3 pt-2">
               <div className="bg-[#F8F5F0] rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-[#0A3E47]">{resumenCalc.mesPico ?? "—"}</p>
+                <p className="text-lg font-bold text-[#0A3E47]">{resumen.mesPico ?? "—"}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">Período con más incidencias</p>
               </div>
               <div className="bg-[#F8F5F0] rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-[#0A3E47]">{resumenCalc.tasaResolucion}%</p>
+                <p className="text-lg font-bold text-[#0A3E47]">{resumen.tasaResolucion}%</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">Tasa de resolución</p>
               </div>
               <div className="bg-[#F8F5F0] rounded-xl p-3 text-center">
-                <p className="text-lg font-bold text-[#0A3E47]">{resumenCalc.tiempoMedio != null ? `${resumenCalc.tiempoMedio}d` : "—"}</p>
+                <p className="text-lg font-bold text-[#0A3E47]">{resumen.tiempoMedio != null ? `${resumen.tiempoMedio}d` : "—"}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">Tiempo medio resolución</p>
               </div>
             </div>
