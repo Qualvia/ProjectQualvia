@@ -69,6 +69,32 @@ export default function Dashboard() {
     setBloques(BLOQUES_INICIALES);
   }, [currentBusiness?.id]);
 
+  // Suscripción en tiempo real a Incidencia — invalida cache y recarga KPIs al cerrar/crear/actualizar
+  useEffect(() => {
+    if (!user?.id || !currentBusiness?.id) return;
+    const bid = currentBusiness.id;
+    const uid = user.id;
+    const cacheKey = `${uid}_${bid}`;
+    const unsubscribe = base44.entities.Incidencia.subscribe(() => {
+      // Invalida cache para forzar recarga en el próximo efecto
+      delete _cache[cacheKey];
+      const hoy = new Date().toISOString().slice(0, 10);
+      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid, estado: { $ne: "cerrada" } }, "-fecha", 100)
+        .then((activas) => {
+          const criticas = activas.filter(i => i.prioridad === "critica").length;
+          const maxHoras = activas.reduce((max, i) => {
+            const h = Math.floor((Date.now() - new Date(i.fecha || i.created_date).getTime()) / 3600000);
+            return h > max ? h : max;
+          }, 0);
+          const newIncidenciasStats = { total: activas.length, criticas, maxHoras };
+          setIncidenciasStats(newIncidenciasStats);
+          // Actualizar cache si existe
+          if (_cache[cacheKey]) _cache[cacheKey].incidenciasStats = newIncidenciasStats;
+        });
+    });
+    return () => unsubscribe();
+  }, [user?.id, currentBusiness?.id]);
+
   // Un único useEffect para todos los KPIs — con cache por negocio
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
