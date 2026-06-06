@@ -51,7 +51,7 @@ export function DashboardDataProvider({ children }) {
       base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
       base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
       base44.entities.RegistroResiduo.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
-      base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
+      base44.entities.RegistroAlergeno.filter({ user_id: uid, business_id: bid, created_date: { $gte: fechaInicio90 } }),
       base44.entities.ChecklistEjecucion.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
       base44.entities.AuditoriaInterna.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio90 } }),
       base44.entities.EquipoTemperatura.filter({ user_id: uid, business_id: bid }),
