@@ -3,6 +3,7 @@ import { Clock, AlertTriangle, ShieldCheck, Plus, ChevronRight, Settings, Chevro
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { useDashboardData } from "@/contexts/DashboardDataContext";
 import ProgramarTareaDialog from "./ProgramarTareaDialog";
 import AnadirTareaPuntualDialog from "./AnadirTareaPuntualDialog";
 import GestionarTareasDialog from "./GestionarTareasDialog";
@@ -61,6 +62,7 @@ function tareaProgramadaCorrespondeHoy(tarea) {
 
 export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
   const { user, currentBusiness } = useBusiness();
+  const { data: dashData, recargar } = useDashboardData();
   const navigate = useNavigate();
 
   const [ejecuciones, setEjecuciones] = useState([]);
@@ -73,7 +75,14 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
 
   const hoy = hoyISO();
 
-  // ── Carga principal ──────────────────────────────────────────────────────
+  // ── Incidencias desde contexto ───────────────────────────────────────────
+  useEffect(() => {
+    if (!dashData) return;
+    setIncidencias(dashData.incidencias.filter(i => i.estado !== "cerrada"));
+  }, [dashData]);
+
+  // ── Carga principal de tareas (única parte que sigue llamando a la API, ──
+  // porque necesita crear ejecuciones nuevas para las tareas programadas) ───
   const cargarTareas = useCallback(async () => {
     if (!user?.id || !currentBusiness?.id) return;
     setLoading(true);
@@ -81,7 +90,7 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
     const uid = user.id;
     const bid = currentBusiness.id;
 
-    // 1. Ejecuciones ya existentes hoy para este user+business
+    // 1. Ejecuciones ya existentes hoy
     const existentes = await base44.entities.TareaEjecucion.filter({
       user_id: uid,
       business_id: bid,
@@ -90,14 +99,14 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
 
     const idsYaCreados = new Set(existentes.map((e) => e.tarea_id).filter(Boolean));
 
-    // 2. Tareas programadas activas de este user+business
+    // 2. Tareas programadas activas
     const programadas = await base44.entities.TareaProgramada.filter({
       user_id: uid,
       business_id: bid,
       activa: true,
     });
 
-    // 3. Generar ejecuciones para las que corresponden hoy y aún no existen
+    // 3. Crear ejecuciones faltantes para hoy
     const nuevas = [];
     for (const tp of programadas) {
       if (!idsYaCreados.has(tp.id) && tareaProgramadaCorrespondeHoy(tp)) {
@@ -123,20 +132,9 @@ export default function TareasIncidenciasBloque({ onEjecucionesChange }) {
     setLoading(false);
   }, [user?.id, currentBusiness?.id, hoy]);
 
-  // ── Carga de incidencias ─────────────────────────────────────────────────
-  const cargarIncidencias = useCallback(async () => {
-    if (!user?.id || !currentBusiness?.id) return;
-    const todas = await base44.entities.Incidencia.filter({
-      user_id: user.id,
-      business_id: currentBusiness.id,
-    });
-    setIncidencias(todas.filter((i) => i.estado !== "cerrada"));
-  }, [user?.id, currentBusiness?.id]);
-
   useEffect(() => {
     cargarTareas();
-    cargarIncidencias();
-  }, [cargarTareas, cargarIncidencias]);
+  }, [cargarTareas]);
 
   // ── Toggle completada ────────────────────────────────────────────────────
   async function toggleTarea(ejecucion) {

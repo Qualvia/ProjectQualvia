@@ -4,8 +4,7 @@ import {
   CartesianGrid, ReferenceLine, ReferenceArea, Legend,
 } from "recharts";
 import { Thermometer, Maximize2, ArrowLeft } from "lucide-react";
-import { base44 } from "@/api/base44Client";
-import { useBusiness } from "@/contexts/BusinessContext";
+import { useDashboardData } from "@/contexts/DashboardDataContext";
 
 const LINE_COLORS = ["#0A3E47", "#6BB68A", "#D97706", "#9333EA", "#0891B2", "#DC2626", "#65A30D"];
 
@@ -58,7 +57,7 @@ const CustomTooltipTemp = ({ active, payload, label }) => {
 };
 
 export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) {
-  const { user, currentBusiness } = useBusiness();
+  const { data: dashData, loading } = useDashboardData();
   const [data, setData] = useState([]);
   const [equipos, setEquipos] = useState([]);
   const [todosEquipos, setTodosEquipos] = useState([]);
@@ -66,32 +65,22 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
   const [tiposDisponibles, setTiposDisponibles] = useState([]);
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [resumen, setResumen] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState("7d");
-  // Guardamos los registros recientes para recalcular dominio Y
   const [registrosRecientes, setRegistrosRecientes] = useState([]);
   const [filtroTipoCompacto, setFiltroTipoCompacto] = useState(null);
 
   useEffect(() => {
-    if (!user?.id || !currentBusiness?.id) return;
-    // Delay para evitar rate limit al cargar el dashboard completo
-    const timer = setTimeout(() => cargar(), 900);
-    return () => clearTimeout(timer);
-  }, [user?.id, currentBusiness?.id, periodo]);
+    if (!dashData) return;
+    calcular();
+  }, [dashData, periodo]);
 
-  async function cargar() {
-    setLoading(true);
-    const uid = user.id;
-    const bid = currentBusiness.id;
+  function calcular() {
     const diasNum = PERIODOS.find(p => p.value === periodo)?.dias || 7;
-
     const fechaInicio = new Date();
     fechaInicio.setDate(fechaInicio.getDate() - diasNum);
 
-    const [registros, eqs] = await Promise.all([
-      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
-      base44.entities.EquipoTemperatura.filter({ user_id: uid, business_id: bid }),
-    ]);
+    const registros = dashData.temperaturas;
+    const eqs = dashData.equipos;
 
     const recientes = registros.filter(r => r.fecha && new Date(r.fecha) >= fechaInicio);
     const dias = getLastNDays(diasNum);
@@ -165,7 +154,6 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
       };
     });
     setResumen(res);
-    setLoading(false);
   }
 
   const equiposMostrar = filtroTipo === "todos" ? equipos : equipos.filter(e => e.tipo === filtroTipo);

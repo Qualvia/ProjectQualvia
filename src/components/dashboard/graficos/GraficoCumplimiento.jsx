@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ClipboardCheck, Maximize2, ArrowLeft, HelpCircle, ChevronDown } from "lucide-react";
-import { base44 } from "@/api/base44Client";
-import { useBusiness } from "@/contexts/BusinessContext";
+import { useDashboardData } from "@/contexts/DashboardDataContext";
 
 function getWeekNumber(date) {
   const d = new Date(date);
@@ -51,26 +50,20 @@ const PERIODOS_EXP = [
 ];
 
 export default function GraficoCumplimiento({ expandido, onExpand, onCollapse }) {
-  const { user, currentBusiness } = useBusiness();
+  const { data, loading } = useDashboardData();
   const [score, setScore] = useState(0);
   const [semanas, setSemanas] = useState([]);
   const [metricas, setMetricas] = useState({ tareasPorc: 0, diasActivos: 0, totalDias: 0, incCerradas: 0, incTotal: 0 });
   const [onboarding, setOnboarding] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [periodoExp, setPeriodoExp] = useState("mensual");
   const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
-    if (!user?.id || !currentBusiness?.id) return;
-    // Delay para evitar rate limit al cargar el dashboard completo
-    const timer = setTimeout(() => cargar(), 600);
-    return () => clearTimeout(timer);
-  }, [user?.id, currentBusiness?.id, periodoExp]);
+    if (!data) return;
+    calcular();
+  }, [data, periodoExp]);
 
-  async function cargar() {
-    setLoading(true);
-    const uid = user.id;
-    const bid = currentBusiness.id;
+  function calcular() {
     const ahora = new Date();
 
     // Calcular rango según periodoExp
@@ -90,22 +83,18 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
     }
     const inicio = inicioDate.toISOString();
     const fin = finDate.toISOString();
-    const mesActual = isoYYYYMM(ahora);
-    // Para tareas del periodo (usando fecha_dia)
     const inicioISO = inicioDate.toISOString().slice(0, 10);
     const finISO = finDate.toISOString().slice(0, 10);
     const totalDias = Math.round((finDate - inicioDate) / (1000 * 3600 * 24)) + 1;
 
-    const [todasEj, todasInc, todosTemp, todosLimp, todosAgua, todosRecep, todosMant, todosCong] = await Promise.all([
-      base44.entities.TareaEjecucion.filter({ user_id: uid, business_id: bid }),
-      base44.entities.Incidencia.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroLimpieza.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroAgua.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroRecepcion.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroMantenimiento.filter({ user_id: uid, business_id: bid }),
-      base44.entities.RegistroCongelacion.filter({ user_id: uid, business_id: bid }),
-    ]);
+    const todasEj  = data.ejecuciones;
+    const todasInc = data.incidencias;
+    const todosTemp  = data.temperaturas;
+    const todosLimp  = data.limpiezas;
+    const todosAgua  = data.aguas;
+    const todosRecep = data.recepciones;
+    const todosMant  = data.mantenimientos;
+    const todosCong  = data.congelaciones;
 
     // --- ONBOARDING CHECK ---
     const todosRegistrosGlobal = [...todosTemp, ...todosLimp, ...todosAgua, ...todosRecep, ...todosMant, ...todosCong];
@@ -266,7 +255,6 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
       };
     });
     setSemanas(semanasData);
-    setLoading(false);
   }
 
   const pieData = [

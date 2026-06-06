@@ -4,8 +4,7 @@ import {
   CartesianGrid, Line, ComposedChart, Legend,
 } from "recharts";
 import { AlertTriangle, Maximize2, ArrowLeft } from "lucide-react";
-import { base44 } from "@/api/base44Client";
-import { useBusiness } from "@/contexts/BusinessContext";
+import { useDashboardData } from "@/contexts/DashboardDataContext";
 
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
@@ -78,25 +77,15 @@ const CustomTooltipInc = ({ active, payload, label }) => {
 };
 
 export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) {
-  const { user, currentBusiness } = useBusiness();
+  const { data, loading } = useDashboardData();
   const [periodo, setPeriodo] = useState("semestral");
   const [todasIncidencias, setTodasIncidencias] = useState([]);
   const [tendencia, setTendencia] = useState(null);
   const [resumen, setResumen] = useState({ mesPico: null, tasaResolucion: 0, tiempoMedio: null });
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.id || !currentBusiness?.id) return;
-    // Delay para evitar rate limit al cargar el dashboard completo
-    const timer = setTimeout(() => cargar(), 1500);
-    return () => clearTimeout(timer);
-  }, [user?.id, currentBusiness?.id]);
-
-  async function cargar() {
-    setLoading(true);
-    const uid = user.id;
-    const bid = currentBusiness.id;
-    const todas = await base44.entities.Incidencia.filter({ user_id: uid, business_id: bid });
+    if (!data) return;
+    const todas = data.incidencias;
     setTodasIncidencias(todas);
 
     const cerradasTotal = todas.filter(i => i.estado === "cerrada").length;
@@ -107,8 +96,7 @@ export default function GraficoIncidencias({ expandido, onExpand, onCollapse }) 
       : null;
 
     setResumen({ tasaResolucion, tiempoMedio });
-    setLoading(false);
-  }
+  }, [data]);
 
   // Recalcular data y tendencia cuando cambia periodo o datos
   const dataExpandido = useMemo(() => {
