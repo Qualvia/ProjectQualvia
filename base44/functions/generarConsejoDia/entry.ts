@@ -40,7 +40,7 @@ Genera el consejo del día.`;
       "anthropic-version": "2023-06-01"
     },
     body: JSON.stringify({
-      model: "claude-haiku-4-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 150,
       system: "Eres el asistente de calidad alimentaria de Qualvia. Genera un consejo del día breve, práctico y muy personalizado para el negocio según su situación real. Si hay incidencias abiertas más de 48h, menciónalas con una acción concreta. Si lleva mucho sin auditoría, sugiérela. Si tiene tareas pendientes, anima a completarlas. Solo el consejo, sin saludos ni introducciones. Máximo 2 frases en español.",
       messages: [{ role: "user", content: userPrompt }]
