@@ -87,7 +87,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
     fechaInicio.setDate(fechaInicio.getDate() - diasNum);
 
     const [registros, eqs] = await Promise.all([
-      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid }),
+      base44.entities.RegistroTemperatura.filter({ user_id: uid, business_id: bid, fecha: { $gte: fechaInicio.toISOString() } }),
       base44.entities.EquipoTemperatura.filter({ user_id: uid, business_id: bid }),
     ]);
 

@@ -76,7 +76,14 @@ export default function Dashboard() {
     const uid = user.id;
     const cacheKey = `${uid}_${bid}`;
 
-    // Si ya tenemos datos en cache para este negocio, usarlos directamente
+    const hoy = new Date().toISOString().slice(0, 10);
+
+    // Invalidar cache si es de otro día
+    if (_cache[cacheKey] && _cache[cacheKey].fecha !== hoy) {
+      delete _cache[cacheKey];
+    }
+
+    // Si ya tenemos datos en cache para este negocio y día, usarlos directamente
     if (_cache[cacheKey]) {
       const c = _cache[cacheKey];
       setTareasStats(c.tareasStats);
@@ -84,8 +91,6 @@ export default function Dashboard() {
       setRachaStats(c.rachaStats);
       return;
     }
-
-    const hoy = new Date().toISOString().slice(0, 10);
 
     // 3 consultas en paralelo — solo la primera vez por negocio
     Promise.all([
@@ -138,8 +143,8 @@ export default function Dashboard() {
       }
       const newRachaStats = { racha, mejorRacha };
 
-      // Guardar en cache (válida para esta sesión)
-      _cache[cacheKey] = { tareasStats: newTareasStats, incidenciasStats: newIncidenciasStats, rachaStats: newRachaStats };
+      // Guardar en cache con fecha para invalidar al día siguiente
+      _cache[cacheKey] = { tareasStats: newTareasStats, incidenciasStats: newIncidenciasStats, rachaStats: newRachaStats, fecha: hoy };
 
       setTareasStats(newTareasStats);
       setIncidenciasStats(newIncidenciasStats);

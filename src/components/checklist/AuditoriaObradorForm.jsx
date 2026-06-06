@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { ArrowLeft, ClipboardList } from "lucide-react";
+import { registrarActividad } from "@/utils/registrarActividad";
 
 const SECCIONES = [
   {
@@ -162,6 +163,15 @@ export default function AuditoriaObradorForm({ onCancel, onGuardado }) {
       observaciones_generales: observaciones,
       fecha: new Date().toISOString(),
     });
+    base44.entities.RegistroActividad.create({
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      tipo: "auditoria",
+      quien: usuarioActivo?.nombre || user?.full_name || user?.email?.split("@")[0] || "Usuario",
+      accion: "auditoría interna · Obrador",
+      detalle: `Puntuación: ${puntuacion}%`,
+      fecha: new Date().toISOString(),
+    }).catch(() => {});
 
     setSaving(false);
     onGuardado?.();
