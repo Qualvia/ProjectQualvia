@@ -74,10 +74,12 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
 
   useEffect(() => {
     if (!user?.id || !currentBusiness?.id) return;
-    cargar();
+    let cancelled = false;
+    const timer = setTimeout(() => { if (!cancelled) cargar(cancelled); }, 600);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [user?.id, currentBusiness?.id, periodo]);
 
-  async function cargar() {
+  async function cargar(cancelledRef) {
     setLoading(true);
     const uid = user.id;
     const bid = currentBusiness.id;
@@ -162,6 +164,7 @@ export default function GraficoTemperatura({ expandido, onExpand, onCollapse }) 
         color: LINE_COLORS[i % LINE_COLORS.length],
       };
     });
+    if (cancelledRef) return;
     setResumen(res);
     setLoading(false);
   }
