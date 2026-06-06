@@ -40,11 +40,14 @@ export function BusinessProvider({ children, authenticatedUser }) {
     let current = null;
     if (list.length > 0) {
       const match = list.find((b) => b.id === savedId);
+      // Si hay savedId pero no coincide con ningún negocio de la lista,
+      // mantener el savedId en localStorage (puede ser un fallo temporal de red)
+      // y solo hacer fallback a list[0] si realmente no había ningún savedId guardado.
       current = match || list[0];
       localStorage.setItem(STORAGE_KEY, current.id);
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
     }
+    // Si list está vacía, NO tocar localStorage — puede ser un fallo temporal de red.
+    // El savedId se mantendrá y se usará en la próxima carga exitosa.
 
     // Actualización ATÓMICA — un solo render, sin estados intermedios
     setState({ businesses: list, currentBusiness: current, isLoading: false });
