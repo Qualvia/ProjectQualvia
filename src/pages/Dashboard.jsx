@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { base44 } from "@/api/base44Client";
-import { AlertCircle, ClipboardCheck, Flame, Sparkles, Bot, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
+import { AlertCircle, ClipboardCheck, Flame, Sparkles, Clock, BarChart2, Activity, ClipboardList, FileText, Users, BarChart } from "lucide-react";
 import TareasIncidenciasBloque from "@/components/dashboard/TareasIncidenciasBloque";
 import GraficosBloque from "@/components/dashboard/GraficosBloque";
 import { useNavigate } from "react-router-dom";
@@ -44,12 +44,16 @@ export default function Dashboard() {
   const [tareasStats, setTareasStats] = useState({ completadas: 0, total: 0 });
   const [incidenciasStats, setIncidenciasStats] = useState({ total: 0, criticas: 0, maxHoras: 0 });
   const [rachaStats, setRachaStats] = useState({ racha: null, mejorRacha: null });
+  const [consejo, setConsejo] = useState(CONSEJO);
+  const [cargandoConsejo, setCargandoConsejo] = useState(false);
 
   // Resetear stats y orden de bloques al cambiar de negocio o usuario
   useEffect(() => {
     setTareasStats({ completadas: 0, total: 0 });
     setIncidenciasStats({ total: 0, criticas: 0, maxHoras: 0 });
     setRachaStats({ racha: null, mejorRacha: null });
+    setConsejo(CONSEJO);
+    setCargandoConsejo(false);
 
     if (currentBusiness?.id) {
       const guardado = localStorage.getItem(`qualvia_bloques_orden_${currentBusiness.id}`);
@@ -135,6 +139,59 @@ export default function Dashboard() {
       .then((ej) => {
         setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length });
       });
+  }, [user?.id, currentBusiness?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !currentBusiness?.id) return;
+    const hoy = new Date().toISOString().slice(0, 10);
+
+    async function cargarConsejo() {
+      const resultado = await base44.entities.ConsejoDia.filter({ user_id: user.id, business_id: currentBusiness.id, fecha: hoy });
+      if (resultado.length > 0) {
+        setConsejo(resultado[0].consejo);
+        return;
+      }
+
+      setCargandoConsejo(true);
+      try {
+        const [perfiles, incidencias, auditorias] = await Promise.all([
+          base44.entities.BusinessProfile.filter({ business_id: currentBusiness.id }),
+          base44.entities.Incidencia.filter({ user_id: user.id, business_id: currentBusiness.id, estado: { $ne: "cerrada" } }, "-fecha", 10),
+          base44.entities.AuditoriaInterna.filter({ user_id: user.id, business_id: currentBusiness.id }, "-fecha", 1),
+        ]);
+
+        const ultima_auditoria_dias = auditorias[0]?.fecha
+          ? Math.floor((Date.now() - new Date(auditorias[0].fecha)) / 86400000)
+          : null;
+
+        const incidencias_activas = incidencias.map(i => ({
+          tipo: i.tipo,
+          prioridad: i.prioridad,
+          horas: Math.floor((Date.now() - new Date(i.fecha || i.created_date)) / 3600000),
+        }));
+
+        const res = await base44.functions.invoke("generarConsejoDia", {
+          business_id: currentBusiness.id,
+          user_id: user.id,
+          nombre_negocio: currentBusiness.name,
+          tipo_negocio: perfiles[0]?.tipo_negocio || "",
+          ciudad: perfiles[0]?.ciudad || "",
+          incidencias_activas,
+          tareas_completadas: tareasStats.completadas,
+          tareas_total: tareasStats.total,
+          ultima_auditoria_dias,
+        });
+
+        if (res?.data?.ok) {
+          setConsejo(res.data.consejo);
+          base44.entities.ConsejoDia.create({ user_id: user.id, business_id: currentBusiness.id, fecha: hoy, consejo: res.data.consejo });
+        }
+      } finally {
+        setCargandoConsejo(false);
+      }
+    }
+
+    cargarConsejo();
   }, [user?.id, currentBusiness?.id]);
 
   useEffect(() => {
@@ -270,11 +327,13 @@ export default function Dashboard() {
       {/* Consejo del día */}
       <div className="bg-gradient-to-b from-[#1a6b5a] to-[#6BB68A] rounded-2xl p-5 flex gap-4 items-start">
         <div className="bg-white/20 rounded-xl p-2.5 shrink-0">
-          <Bot className="w-5 h-5 text-white" />
+          <Sparkles className="w-5 h-5 text-white" />
         </div>
         <div>
           <p className="text-sm font-semibold text-white mb-1">Consejo inteligente del día</p>
-          <p className="text-sm text-white/85 leading-relaxed">{CONSEJO}</p>
+          <p className={`text-sm text-white/85 leading-relaxed ${cargandoConsejo ? "animate-pulse opacity-70" : ""}`}>
+            {cargandoConsejo ? "Generando consejo personalizado..." : consejo}
+          </p>
         </div>
       </div>
 
