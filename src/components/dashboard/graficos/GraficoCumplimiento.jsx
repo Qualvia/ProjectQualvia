@@ -275,16 +275,7 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
 
   const donutColor = score >= 70 ? "#6BB68A" : score >= 40 ? "#F59E0B" : "#F87171";
 
-  const OnboardingChips = () => (
-    <div className="flex gap-1.5 flex-wrap justify-center mt-2">
-      {["Temperatura", "Limpieza", "Tareas"].map(chip => (
-        <span key={chip} className="flex items-center gap-1 text-[10px] text-muted-foreground border border-muted-foreground/30 rounded-full px-2 py-0.5">
-          <span className="w-3 h-3 rounded-full border border-muted-foreground/40 flex-shrink-0" />
-          {chip}
-        </span>
-      ))}
-    </div>
-  );
+
 
   if (expandido) {
     return (
@@ -348,7 +339,6 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
             {onboarding && (
               <>
                 <p className="text-[11px] text-muted-foreground text-center mt-2 leading-tight">Registra los primeros días para ver tu score</p>
-                <OnboardingChips />
               </>
             )}
           </div>
@@ -414,7 +404,6 @@ export default function GraficoCumplimiento({ expandido, onExpand, onCollapse })
             </div>
           </div>
           <p className="text-[10px] text-muted-foreground text-center leading-tight px-2">Registra los primeros días para ver tu score</p>
-          <OnboardingChips />
         </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center gap-1">
