@@ -44,7 +44,6 @@ export default function Dashboard() {
   const [tareasStats, setTareasStats] = useState({ completadas: 0, total: 0 });
   const [incidenciasStats, setIncidenciasStats] = useState({ total: 0, criticas: 0, maxHoras: 0 });
   const [rachaStats, setRachaStats] = useState({ racha: null, mejorRacha: null });
-  const [kpisListos, setKpisListos] = useState(false);
   const [consejo, setConsejo] = useState(CONSEJO);
   const [cargandoConsejo, setCargandoConsejo] = useState(false);
   const consejoCargando = useRef(false);
@@ -54,7 +53,6 @@ export default function Dashboard() {
     setTareasStats({ completadas: 0, total: 0 });
     setIncidenciasStats({ total: 0, criticas: 0, maxHoras: 0 });
     setRachaStats({ racha: null, mejorRacha: null });
-    setKpisListos(false);
     setConsejo(null);
     setCargandoConsejo(false);
     consejoCargando.current = false;
@@ -139,7 +137,6 @@ export default function Dashboard() {
         return h > max ? h : max;
       }, 0);
       setIncidenciasStats({ total: incidenciasActivas.length, criticas, maxHoras });
-      setKpisListos(true);
 
       // Consejo: usar caché si existe
       if (consejoCache.length > 0) {
@@ -342,11 +339,7 @@ export default function Dashboard() {
                         title={bloque.title}
                         icon={bloque.icon}
                         dragHandleProps={provided.dragHandleProps}>
-                        {!kpisListos ? (
-                          <div className="px-5 py-8 flex items-center justify-center">
-                            <div className="w-5 h-5 border-2 border-gray-200 border-t-[#0A3E47] rounded-full animate-spin" />
-                          </div>
-                        ) : bloque.id === "tareas" ? (
+                        {bloque.id === "tareas" ? (
                           <TareasIncidenciasBloque onEjecucionesChange={(ej) => setTareasStats({ completadas: ej.filter(e => e.completada).length, total: ej.length })} />
                         ) : bloque.id === "graficos" ? (
                           <GraficosBloque />
