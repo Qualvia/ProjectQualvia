@@ -59,11 +59,15 @@ export default function ActividadRecienteBloque() {
     setLoading(true);
     setEventos([]);
 
-    // UNA sola consulta: los 20 más recientes de este negocio/usuario
+    // Inicio y fin del día actual (medianoche local)
+    const ahora = new Date();
+    const inicioDia = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0).toISOString();
+    const finDia = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 59, 999).toISOString();
+
     base44.entities.RegistroActividad.filter(
-      { user_id: uid, business_id: bid },
+      { user_id: uid, business_id: bid, fecha: { $gte: inicioDia, $lte: finDia } },
       "-fecha",
-      20
+      50
     ).then((data) => {
       setEventos(data);
       setLoading(false);
@@ -74,7 +78,15 @@ export default function ActividadRecienteBloque() {
       if (event.type === "create"
         && event.data?.business_id === bid
         && event.data?.user_id === uid) {
-        setEventos((prev) => [event.data, ...prev].slice(0, 20));
+        // Solo añadir si el evento es de hoy
+        const fechaEvento = new Date(event.data?.fecha);
+        const hoyInicio = new Date();
+        hoyInicio.setHours(0, 0, 0, 0);
+        const hoyFin = new Date();
+        hoyFin.setHours(23, 59, 59, 999);
+        if (fechaEvento >= hoyInicio && fechaEvento <= hoyFin) {
+          setEventos((prev) => [event.data, ...prev]);
+        }
       }
     });
 
@@ -93,8 +105,8 @@ export default function ActividadRecienteBloque() {
     return (
       <div className="px-5 py-10 flex flex-col items-center gap-2">
         <Activity className="w-8 h-8 text-muted-foreground/30" />
-        <p className="text-sm text-muted-foreground">Sin actividad registrada aún</p>
-        <p className="text-xs text-muted-foreground/70">Los registros aparecerán aquí en tiempo real</p>
+        <p className="text-sm text-muted-foreground">Sin actividad hoy</p>
+        <p className="text-xs text-muted-foreground/70">Los registros de hoy aparecerán aquí en tiempo real</p>
       </div>
     );
   }
@@ -104,7 +116,7 @@ export default function ActividadRecienteBloque() {
   return (
     <div className="px-5 py-2">
       <p className="text-[11px] text-muted-foreground py-2">
-        {eventos.length} evento{eventos.length !== 1 ? "s" : ""} recientes
+        {eventos.length} evento{eventos.length !== 1 ? "s" : ""} hoy
       </p>
       {visibles.map((ev, i) => (
         <EventoItem key={ev.id || i} evento={ev} isLast={i === visibles.length - 1 && (verTodos || eventos.length <= 8)} />
