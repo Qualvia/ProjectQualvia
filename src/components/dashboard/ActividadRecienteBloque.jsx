@@ -59,22 +59,30 @@ export default function ActividadRecienteBloque() {
     setLoading(true);
     setEventos([]);
 
-    // UNA sola consulta: los 20 más recientes de este negocio/usuario
+    // Inicio y fin del día actual
+    const hoyStr = new Date().toISOString().slice(0, 10);
+    const inicioDia = new Date(hoyStr + "T00:00:00.000Z").toISOString();
+    const finDia = new Date(hoyStr + "T23:59:59.999Z").toISOString();
+
     base44.entities.RegistroActividad.filter(
-      { user_id: uid, business_id: bid },
+      { user_id: uid, business_id: bid, fecha: { $gte: inicioDia, $lte: finDia } },
       "-fecha",
-      20
+      50
     ).then((data) => {
       setEventos(data);
       setLoading(false);
     });
 
-    // Suscripción en tiempo real: aparece al instante cuando alguien registra algo
+    // Suscripción en tiempo real: aparece al instante cuando alguien registra algo hoy
     const unsubscribe = base44.entities.RegistroActividad.subscribe((event) => {
       if (event.type === "create"
         && event.data?.business_id === bid
         && event.data?.user_id === uid) {
-        setEventos((prev) => [event.data, ...prev].slice(0, 20));
+        const fechaEvento = event.data?.fecha ? new Date(event.data.fecha).toISOString().slice(0, 10) : null;
+        const hoyActual = new Date().toISOString().slice(0, 10);
+        if (fechaEvento === hoyActual) {
+          setEventos((prev) => [event.data, ...prev].slice(0, 50));
+        }
       }
     });
 
