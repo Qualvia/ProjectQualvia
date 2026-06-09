@@ -13,14 +13,22 @@ Deno.serve(async (req) => {
     apiKey: Deno.env.get("ANTHROPIC_API_KEY")
   });
 
-  // Contexto dinámico según intención
+  // Comprobar si el último mensaje del usuario contiene palabras clave operacionales
+  const PALABRAS_CLAVE = ["temperatura", "limpieza", "incidencia", "registro", "recepción", "recepcion", "agua", "plagas", "mantenimiento", "formación", "formacion", "alérgenos", "alergenos", "lote", "congelación", "congelacion", "residuo", "auditoría", "auditoria", "inspección", "inspeccion", "cumplimiento", "documento"];
+  const ultimoMensajeUsuario = [...mensajes].reverse().find(m => m.role === "user");
+  const textoUltimo = (ultimoMensajeUsuario?.content || "").toLowerCase();
+  const tieneContextoRelevante = PALABRAS_CLAVE.some(p => textoUltimo.includes(p));
+
+  // Contexto dinámico según intención (solo si el mensaje es relevante)
   let contexto_dinamico = "";
-  if (intencion === "registros" && contexto_negocio.ultimos_registros) {
-    contexto_dinamico = `\nÚltimos registros del negocio:\n${JSON.stringify(contexto_negocio.ultimos_registros)}`;
-  } else if (intencion === "incidencias" && contexto_negocio.incidencias) {
-    contexto_dinamico = `\nIncidencias activas:\n${JSON.stringify(contexto_negocio.incidencias)}`;
-  } else if (intencion === "resumen" && contexto_negocio.kpis) {
-    contexto_dinamico = `\nEstado actual del negocio:\n${JSON.stringify(contexto_negocio.kpis)}`;
+  if (tieneContextoRelevante) {
+    if (intencion === "registros" && contexto_negocio.ultimos_registros) {
+      contexto_dinamico = `\nÚltimos registros del negocio:\n${JSON.stringify(contexto_negocio.ultimos_registros)}`;
+    } else if (intencion === "incidencias" && contexto_negocio.incidencias) {
+      contexto_dinamico = `\nIncidencias activas:\n${JSON.stringify(contexto_negocio.incidencias)}`;
+    } else if (intencion === "resumen" && contexto_negocio.kpis) {
+      contexto_dinamico = `\nEstado actual del negocio:\n${JSON.stringify(contexto_negocio.kpis)}`;
+    }
   }
 
   // Memoria de sesión anterior
@@ -76,7 +84,7 @@ ${memoria}${contexto_dinamico}`;
 
   const response = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 2048,
+    max_tokens: 1024,
     system: [
       {
         type: "text",
@@ -88,7 +96,7 @@ ${memoria}${contexto_dinamico}`;
         text: system_dinamico
       }
     ],
-    messages: mensajes
+    messages: mensajes.slice(-8)
   });
 
   return new Response(
