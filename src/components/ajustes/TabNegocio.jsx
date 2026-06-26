@@ -172,7 +172,7 @@ export default function TabNegocio() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
 
       {/* Banner */}
       <div className="rounded-2xl bg-secondary p-5 flex items-center gap-4">

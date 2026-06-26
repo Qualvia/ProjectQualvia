@@ -22,7 +22,7 @@ function OperarioGuard({ children }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <p className="text-base font-medium text-foreground">No tienes permiso para acceder a esta sección</p>
-        <a href="/" className="px-5 py-2.5 rounded-xl bg-[#6BB68A] text-white text-sm font-semibold hover:bg-[#5aa377] transition-colors">Volver</a>
+        <a href="/registros" className="px-5 py-2.5 rounded-xl bg-[#6BB68A] text-white text-sm font-semibold hover:bg-[#5aa377] transition-colors">Volver</a>
       </div>
     );
   }

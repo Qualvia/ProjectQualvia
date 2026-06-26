@@ -41,7 +41,7 @@ function Card({ children }) {
 
 export default function TabSeguridad() {
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
 
       {/* Seguridad y Privacidad */}
       <div className="space-y-3">

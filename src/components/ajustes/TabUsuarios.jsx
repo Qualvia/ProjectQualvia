@@ -134,7 +134,7 @@ export default function TabUsuarios() {
   }
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8">
 
       {/* Banner negocio activo */}
       <div className="rounded-2xl bg-secondary p-4 flex items-center gap-4">

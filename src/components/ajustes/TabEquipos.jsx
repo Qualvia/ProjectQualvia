@@ -114,7 +114,7 @@ export default function TabEquipos() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
 
       {/* Header banner */}
       <div className="rounded-2xl bg-secondary p-5 flex items-center gap-4">
