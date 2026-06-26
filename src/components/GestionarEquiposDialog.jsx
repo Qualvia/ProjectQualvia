@@ -14,6 +14,7 @@ const TIPOS_PRODUCTO = ["Desinfectante", "Desengrasante", "Detergente", "Sanitiz
 import { Droplets, Waves, Bug, Sparkles, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { validateUpload } from "@/utils/uploadValidation";
 
 const TABS = [
   { id: "equipos", label: "Equipos de temperatura" },
@@ -173,6 +174,8 @@ export default function GestionarEquiposDialog({ open, onOpenChange, initialTab 
   async function handleFotoUpload(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const check = validateUpload(file);
+    if (!check.ok) { alert(check.error); e.target.value = ""; return; }
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setForm((prev) => ({ ...prev, foto_url: file_url }));
   }

@@ -6,6 +6,7 @@ import {
   LayoutList, LayoutGrid
 } from "lucide-react";
 import { format } from "date-fns";
+import { validateUpload } from "@/utils/uploadValidation";
 
 function getFileIcon(tipo, large = false) {
   const cls = large ? "w-8 h-8" : "w-6 h-6";
@@ -141,6 +142,8 @@ export default function VistaArchivos({ carpeta, onVolver }) {
     if (!files.length) return;
     setUploading(true);
     for (const file of files) {
+      const check = validateUpload(file);
+      if (!check.ok) { alert(check.error); e.target.value = ""; return; }
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.entities.RecursoArchivo.create({
         user_id: user.id,
@@ -209,6 +212,7 @@ export default function VistaArchivos({ carpeta, onVolver }) {
           ref={fileInputRef}
           type="file"
           multiple
+          accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.doc,.docx,.xls,.xlsx,.txt,.csv"
           className="hidden"
           onChange={handleUpload}
         />

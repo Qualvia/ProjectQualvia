@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Wrench, Upload, Loader2, FileText } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
+import { validateUpload } from "@/utils/uploadValidation";
 
 export default function EmpresaMantenimientoDialog({ open, onOpenChange }) {
   const { currentBusiness, user } = useBusiness();
@@ -27,6 +28,8 @@ export default function EmpresaMantenimientoDialog({ open, onOpenChange }) {
   async function handleUpload(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const check = validateUpload(file);
+    if (!check.ok) { alert(check.error); e.target.value = ""; return; }
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setForm((prev) => ({ ...prev, contrato_url: file_url }));

@@ -5,6 +5,7 @@ import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { Loader2, Upload } from "lucide-react";
 import { registrarActividad } from "@/utils/registrarActividad";
 import { format } from "date-fns";
+import { validateUpload } from "@/utils/uploadValidation";
 
 const TIPOS = ["Temperatura", "Limpieza", "Recepción", "Agua", "Plagas", "Mantenimiento", "Formación", "Alérgenos", "Lotes", "Congelación", "Residuos", "Otro"];
 const PRIORIDADES = [
@@ -37,6 +38,8 @@ export default function NuevoRegistroIncidencia({ onCancel, onSaved, nextNumero,
   async function handleUpload(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const check = validateUpload(file);
+    if (!check.ok) { alert(check.error); e.target.value = ""; return; }
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setEvidenciaUrl(file_url);
@@ -150,7 +153,7 @@ export default function NuevoRegistroIncidencia({ onCancel, onSaved, nextNumero,
           <label className="flex items-center gap-3 p-3 rounded-xl border border-input bg-white cursor-pointer hover:border-[#6BB68A] transition-colors text-sm text-muted-foreground">
             {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
             {uploading ? "Subiendo..." : "Seleccionar archivo"}
-            <input type="file" className="hidden" onChange={handleUpload} />
+            <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.doc,.docx,.xls,.xlsx,.txt,.csv" onChange={handleUpload} />
           </label>
         )}
       </div>
