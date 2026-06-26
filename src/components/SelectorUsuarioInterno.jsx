@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
@@ -16,9 +16,14 @@ export default function SelectorUsuarioInterno() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
 
-  // Al cambiar de negocio, resetear al usuario principal
+  const prevBusinessId = useRef(null);
+
   useEffect(() => {
-    setUsuarioActivo(null);
+    if (!currentBusiness?.id) return;
+    if (prevBusinessId.current !== null && prevBusinessId.current !== currentBusiness.id) {
+      setUsuarioActivo(null);
+    }
+    prevBusinessId.current = currentBusiness.id;
   }, [currentBusiness?.id]);
 
   useEffect(() => {
