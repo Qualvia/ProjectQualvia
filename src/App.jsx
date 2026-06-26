@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -22,7 +22,7 @@ function OperarioGuard({ children }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <p className="text-base font-medium text-foreground">No tienes permiso para acceder a esta sección</p>
-        <a href="/registros" className="px-5 py-2.5 rounded-xl bg-[#6BB68A] text-white text-sm font-semibold hover:bg-[#5aa377] transition-colors">Volver</a>
+        <Link to="/registros" className="px-5 py-2.5 rounded-xl bg-[#6BB68A] text-white text-sm font-semibold hover:bg-[#5aa377] transition-colors">Volver</Link>
       </div>
     );
   }
