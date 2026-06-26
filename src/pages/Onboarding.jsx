@@ -46,7 +46,7 @@ export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
-  const { user, setCurrentBusiness, setBusinesses } = useBusiness();
+  const { user, setCurrentBusiness, setBusinesses, reloadBusinesses } = useBusiness();
   const navigate = useNavigate();
 
   function set(field, val) {
@@ -108,11 +108,9 @@ export default function Onboarding() {
       facebook: form.facebook,
     });
 
-    setBusinesses((prev) => [...prev, business]);
-    setCurrentBusiness(business);
     setSaving(false);
-    // Pequeña pausa para que el backend indexe el Business antes de navegar
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 800));
+    await reloadBusinesses(user);
     navigate("/");
   }
 
