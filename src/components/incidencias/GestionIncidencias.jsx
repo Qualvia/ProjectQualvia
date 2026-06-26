@@ -9,6 +9,7 @@ import {
 import { format, subWeeks, subMonths, subQuarters, subYears, startOfDay, endOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 import NuevoRegistroIncidencia from "./NuevoRegistroIncidencia";
+import ListaRegistrosSkeleton from "@/components/ListaRegistrosSkeleton";
 import CerrarIncidenciaDialog from "./CerrarIncidenciaDialog";
 import SeguimientoIncidenciaDialog from "./SeguimientoIncidenciaDialog";
 
@@ -330,7 +331,7 @@ export default function GestionIncidencias({ refreshKey, onIncidenciasChange, sh
         )}
 
         <div className="p-4 space-y-3">
-          {loading && <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>}
+          {loading && <ListaRegistrosSkeleton count={3} />}
           {!loading && filtradas.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-8">No hay incidencias registradas.</p>
           )}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { Loader2, Trash2, Filter, CalendarDays, User, ChevronDown } from "lucide-react";
+import ListaRegistrosSkeleton from "@/components/ListaRegistrosSkeleton";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -115,7 +116,7 @@ export default function ListaRegistrosAlergenos({ refreshKey }) {
 
   const filtrados = useMemo(() => aplicarFiltros(registros, filtros), [registros, filtros]);
 
-  if (loading) return <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
+  if (loading) return <ListaRegistrosSkeleton />;
   if (registros.length === 0) return null;
 
   return (
