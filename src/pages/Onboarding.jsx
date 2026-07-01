@@ -236,8 +236,8 @@ function Step2({ form, set }) {
       </Field>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Código Postal *">
-          <Input placeholder="28001" value={form.codigo_postal} onChange={(e) => {
-            const val = e.target.value;
+          <Input placeholder="28001" inputMode="numeric" value={form.codigo_postal} onChange={(e) => {
+            const val = e.target.value.replace(/\D/g, "");
             set("codigo_postal", val);
             if (val.length >= 2) {
               const prov = cpToProvincia(val);
@@ -258,7 +258,7 @@ function Step2({ form, set }) {
         </Select>
       </Field>
       <Field label="Teléfono *">
-        <Input placeholder="600 000 000" value={form.telefono} onChange={(e) => set("telefono", e.target.value)} />
+        <Input placeholder="600 000 000" inputMode="numeric" value={form.telefono} onChange={(e) => set("telefono", e.target.value.replace(/\D/g, ""))} />
       </Field>
     </div>
   );
