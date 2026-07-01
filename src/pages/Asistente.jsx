@@ -28,6 +28,31 @@ function detectarIntencion(texto) {
   return "general";
 }
 
+const PROVINCIA_TO_CCAA = {
+  "Álava": "País Vasco", "Albacete": "Castilla-La Mancha", "Alicante": "Valencia",
+  "Almería": "Andalucía", "Asturias": "Asturias", "Ávila": "Castilla y León",
+  "Badajoz": "Extremadura", "Baleares": "Baleares", "Barcelona": "Cataluña",
+  "Burgos": "Castilla y León", "Cáceres": "Extremadura", "Cádiz": "Andalucía",
+  "Cantabria": "Cantabria", "Castellón": "Valencia", "Ciudad Real": "Castilla-La Mancha",
+  "Córdoba": "Andalucía", "Cuenca": "Castilla-La Mancha", "Girona": "Cataluña",
+  "Granada": "Andalucía", "Guadalajara": "Castilla-La Mancha", "Gipuzkoa": "País Vasco",
+  "Huelva": "Andalucía", "Huesca": "Aragón", "Jaén": "Andalucía",
+  "A Coruña": "Galicia", "La Rioja": "La Rioja", "Las Palmas": "Canarias",
+  "León": "Castilla y León", "Lleida": "Cataluña", "Lugo": "Galicia",
+  "Madrid": "Madrid", "Málaga": "Andalucía", "Murcia": "Murcia",
+  "Navarra": "Navarra", "Ourense": "Galicia", "Palencia": "Castilla y León",
+  "Pontevedra": "Galicia", "Salamanca": "Castilla y León",
+  "Santa Cruz de Tenerife": "Canarias", "Segovia": "Castilla y León",
+  "Sevilla": "Andalucía", "Soria": "Castilla y León", "Tarragona": "Cataluña",
+  "Teruel": "Aragón", "Toledo": "Castilla-La Mancha", "Valencia": "Valencia",
+  "Valladolid": "Castilla y León", "Vizcaya": "País Vasco", "Zamora": "Castilla y León",
+  "Zaragoza": "Aragón", "Ceuta": "Ceuta", "Melilla": "Melilla",
+};
+
+function provinciaToCCAA(provincia) {
+  return PROVINCIA_TO_CCAA[provincia] || "";
+}
+
 const QUALVIA_AVATAR = "https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/4bfbe29ea_IconJPEG01-01.jpg";
 
 function TypingIndicator() {
@@ -143,7 +168,8 @@ export default function Asistente() {
         nombre: currentBusiness.name || "",
         tipo_negocio: perfil.tipo_negocio || "",
         ciudad: perfil.ciudad || "",
-        comunidad_autonoma: perfil.comunidad_autonoma || ""
+        provincia: perfil.provincia || "",
+        comunidad_autonoma: provinciaToCCAA(perfil.provincia) || perfil.comunidad_autonoma || ""
       });
 
       // Cargar memoria previa

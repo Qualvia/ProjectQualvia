@@ -17,11 +17,16 @@ const TIPOS_NEGOCIO = [
   "Obrador", "Industria alimentaria", "Otro",
 ];
 
-const CCAA = [
-  "Andalucía", "Aragón", "Asturias", "Baleares", "Canarias", "Cantabria",
-  "Castilla-La Mancha", "Castilla y León", "Cataluña", "Extremadura",
-  "Galicia", "La Rioja", "Madrid", "Murcia", "Navarra", "País Vasco",
-  "Valencia", "Ceuta", "Melilla",
+const PROVINCIAS = [
+  "Álava", "Albacete", "Alicante", "Almería", "Asturias", "Ávila", "Badajoz",
+  "Baleares", "Barcelona", "Burgos", "Cáceres", "Cádiz", "Cantabria",
+  "Castellón", "Ciudad Real", "Córdoba", "Cuenca", "Girona", "Granada",
+  "Guadalajara", "Gipuzkoa", "Huelva", "Huesca", "Jaén", "A Coruña",
+  "La Rioja", "Las Palmas", "León", "Lleida", "Lugo", "Madrid", "Málaga",
+  "Murcia", "Navarra", "Ourense", "Palencia", "Pontevedra", "Salamanca",
+  "Santa Cruz de Tenerife", "Segovia", "Sevilla", "Soria", "Tarragona",
+  "Teruel", "Toledo", "Valencia", "Valladolid", "Vizcaya", "Zamora",
+  "Zaragoza", "Ceuta", "Melilla",
 ];
 
 const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -49,7 +54,7 @@ function SectionHeader({ icon: Icon, title, color = "text-[#0A3E47]" }) {
 const EMPTY_PROFILE = {
   razon_social: "", tipo_negocio: "", actividad_principal: "", productos_principales: "",
   cif_nif: "", rgseaa: "", direccion: "", codigo_postal: "", ciudad: "",
-  comunidad_autonoma: "", superficie: "", capacidad_clientes: "", num_empleados: "",
+  provincia: "", superficie: "", capacidad_clientes: "", num_empleados: "",
   horario_inicio: "", horario_fin: "", dias_apertura: [],
   persona_contacto: "", telefono: "", email_contacto: "",
 };
@@ -82,7 +87,7 @@ export default function TabNegocio() {
           direccion: p?.direccion || "",
           codigo_postal: p?.codigo_postal || "",
           ciudad: p?.ciudad || "",
-          comunidad_autonoma: p?.comunidad_autonoma || "",
+          provincia: p?.provincia || "",
           superficie: p?.superficie != null ? String(p.superficie) : "",
           capacidad_clientes: p?.capacidad_clientes != null ? String(p.capacidad_clientes) : "",
           num_empleados: p?.num_empleados != null ? String(p.num_empleados) : "",
@@ -126,7 +131,7 @@ export default function TabNegocio() {
       direccion: form.direccion,
       codigo_postal: form.codigo_postal,
       ciudad: form.ciudad,
-      comunidad_autonoma: form.comunidad_autonoma,
+      provincia: form.provincia,
       superficie: form.superficie ? Number(form.superficie) : undefined,
       capacidad_clientes: form.capacidad_clientes ? Number(form.capacidad_clientes) : undefined,
       num_empleados: form.num_empleados ? Number(form.num_empleados) : undefined,
@@ -240,11 +245,11 @@ export default function TabNegocio() {
           <Field label="Código Postal">
             <Input placeholder="28001" value={form.codigo_postal} onChange={(e) => set("codigo_postal", e.target.value)} />
           </Field>
-          <Field label="Comunidad Autónoma">
-            <Select value={form.comunidad_autonoma} onValueChange={(v) => set("comunidad_autonoma", v)}>
+          <Field label="Provincia">
+            <Select value={form.provincia} onValueChange={(v) => set("provincia", v)}>
               <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
               <SelectContent>
-                {CCAA.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                {PROVINCIAS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
               </SelectContent>
             </Select>
           </Field>
