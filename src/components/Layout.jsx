@@ -192,7 +192,7 @@ export default function Layout() {
         </header>
 
         <main className="flex-1 overflow-y-auto bg-background">
-          <Outlet />
+          <div className="max-w-[1600px] mx-auto w-full"><Outlet /></div>
         </main>
       </div>
     </div>);
