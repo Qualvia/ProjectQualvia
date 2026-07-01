@@ -82,6 +82,15 @@
     },
     "facebook": {
       "type": "string"
+    },
+    "consentimiento_aceptado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Aceptaci\u00f3n de Pol\u00edtica de Privacidad y Aviso Legal"
+    },
+    "consentimiento_fecha": {
+      "type": "string",
+      "description": "Fecha/hora ISO de aceptaci\u00f3n del consentimiento"
     }
   },
   "required": [

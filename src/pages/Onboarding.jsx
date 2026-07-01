@@ -8,8 +8,12 @@ import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Check, ChevronLeft, ChevronRight, ShieldCheck, MapPin, User, Building2 } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, ShieldCheck, MapPin, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 
 const LOGO_URL = "https://media.base44.com/images/public/69de1a640d6bfab7b0c8ec08/5c8196497_ChatGPTImage24may202620_29_16.png";
 
@@ -58,6 +62,7 @@ const PROVINCIAS = [
 const EMPTY = {
   persona_contacto: "", name: "", tipo_negocio: "", cif_nif: "",
   direccion: "", codigo_postal: "", ciudad: "", provincia: "", telefono: "",
+  acepta_legal: false,
 };
 
 export default function Onboarding() {
@@ -74,6 +79,9 @@ export default function Onboarding() {
   function canNext() {
     if (step === 1) {
       return form.persona_contacto.trim() && form.name.trim() && form.tipo_negocio && form.cif_nif.trim();
+    }
+    if (step === 2) {
+      return form.acepta_legal === true;
     }
     return true;
   }
@@ -100,6 +108,8 @@ export default function Onboarding() {
       provincia: form.provincia,
       telefono: form.telefono,
       email_contacto: user.email || "",
+      consentimiento_aceptado: form.acepta_legal,
+      consentimiento_fecha: new Date().toISOString(),
     });
 
     // Marcar el nuevo negocio como activo antes de recargar para que el dashboard lo abra
@@ -213,8 +223,11 @@ export default function Onboarding() {
             ) : (
               <Button
                 onClick={handleFinish}
-                disabled={saving}
-                className="bg-[#6BB68A] hover:bg-[#5aa377] text-white gap-2 rounded-xl h-11 px-6 font-semibold shadow-md shadow-[#6BB68A]/20 transition-all"
+                disabled={saving || !canNext()}
+                className={cn(
+                  "gap-2 rounded-xl h-11 px-6 font-semibold transition-all",
+                  canNext() && !saving ? "bg-[#6BB68A] hover:bg-[#5aa377] text-white shadow-md shadow-[#6BB68A]/20" : "bg-muted text-muted-foreground"
+                )}
               >
                 {saving ? (
                   <>
@@ -247,8 +260,8 @@ function Field({ label, children }) {
 function StepHeader({ icon: Icon, title, subtitle }) {
   return (
     <div className="flex items-start gap-3.5 mb-7">
-      <div className="w-11 h-11 rounded-xl bg-[#0A3E47]/8 flex items-center justify-center shrink-0">
-        <Icon className="w-5 h-5 text-[#0A3E47]" />
+      <div className="w-12 h-12 rounded-xl bg-[#0A3E47]/8 flex items-center justify-center shrink-0">
+        <Icon className="w-6 h-6 text-[#0A3E47]" />
       </div>
       <div>
         <h2 className="text-xl md:text-2xl font-bold text-[#1B1B1B] leading-tight">{title}</h2>
@@ -305,6 +318,7 @@ function Step1({ form, set }) {
 }
 
 function Step2({ form, set }) {
+  const [modal, setModal] = useState(null); // "privacidad" | "legal" | null
   return (
     <div className="space-y-5">
       <StepHeader
@@ -365,6 +379,55 @@ function Step2({ form, set }) {
           />
         </Field>
       </div>
+
+      {/* Checkbox aceptación legal */}
+      <div className="pt-3">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <Checkbox
+            checked={form.acepta_legal}
+            onCheckedChange={(v) => set("acepta_legal", v === true)}
+            className="mt-0.5 border-[#0A3E47]/30 data-[state=checked]:bg-[#0A3E47] data-[state=checked]:border-[#0A3E47]"
+          />
+          <span className="text-sm text-[#1B1B1B] leading-relaxed">
+            He leído y acepto la{" "}
+            <button type="button" onClick={() => setModal("privacidad")} className="underline text-[#0A3E47] font-medium hover:text-[#0A3E47]/70">Política de Privacidad</button>
+            {" "}y el{" "}
+            <button type="button" onClick={() => setModal("legal")} className="underline text-[#0A3E47] font-medium hover:text-[#0A3E47]/70">Aviso Legal</button>
+          </span>
+        </label>
+      </div>
+
+      {/* Modal Política de Privacidad */}
+      <Dialog open={modal === "privacidad"} onOpenChange={(o) => !o && setModal(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Política de Privacidad</DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-muted-foreground space-y-3 max-h-[50vh] overflow-y-auto">
+            <p className="font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">[TEXTO PENDIENTE DE REDACTAR]</p>
+            <p>Este es un texto provisional. La versión definitiva de este documento se añadirá antes del lanzamiento público de Qualvia.</p>
+          </div>
+          <div className="flex justify-end pt-2">
+            <Button variant="outline" onClick={() => setModal(null)}>Cerrar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Aviso Legal */}
+      <Dialog open={modal === "legal"} onOpenChange={(o) => !o && setModal(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Aviso Legal</DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-muted-foreground space-y-3 max-h-[50vh] overflow-y-auto">
+            <p className="font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">[TEXTO PENDIENTE DE REDACTAR]</p>
+            <p>Este es un texto provisional. La versión definitiva de este documento se añadirá antes del lanzamiento público de Qualvia.</p>
+          </div>
+          <div className="flex justify-end pt-2">
+            <Button variant="outline" onClick={() => setModal(null)}>Cerrar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
