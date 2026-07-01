@@ -133,7 +133,7 @@ export default function Registros() {
       </div>
 
       {/* Grid de registros */}
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(110px,130px))] gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-6 gap-2">
         {REGISTROS.filter(({ id }) => !(esOperario && id === "incidencias")).map(({ id, label, icon: Icon, color }) => {
           const isActive = active === id;
           const isIncidencia = id === "incidencias";
