@@ -123,10 +123,8 @@ export default function Onboarding() {
           <div className="absolute -bottom-16 -left-10 w-40 h-40 rounded-full bg-[#6BB68A]/5 blur-2xl" />
 
           {/* Logo */}
-          <div className="relative mb-10">
-            <div className="w-full max-w-[160px]">
-              <img src={LOGO_URL} alt="Qualvia" className="w-full h-auto object-contain" />
-            </div>
+          <div className="relative mb-10 flex justify-center">
+            <img src={LOGO_URL} alt="Qualvia" className="w-full max-w-[240px] h-auto object-contain" />
           </div>
 
           {/* Step nav */}

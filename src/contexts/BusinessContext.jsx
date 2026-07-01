@@ -83,20 +83,22 @@ export function BusinessProvider({ children, authenticatedUser }) {
   }, [user]);
 
   const deleteBusiness = useCallback(async (id) => {
+    // Borrado optimista: actualizar UI al instante, el borrado real va en segundo plano
+    setState((prev) => {
+      const updated = prev.businesses.filter((b) => b.id !== id);
+      let next = prev.currentBusiness;
+      if (prev.currentBusiness?.id === id) {
+        next = updated[0] || null;
+        if (next) localStorage.setItem(STORAGE_KEY, next.id);
+        else localStorage.removeItem(STORAGE_KEY);
+      }
+      return { ...prev, businesses: updated, currentBusiness: next };
+    });
+
     try {
       await base44.functions.invoke('deleteBusinessAndChildren', { business_id: id });
-      setState((prev) => {
-        const updated = prev.businesses.filter((b) => b.id !== id);
-        let next = prev.currentBusiness;
-        if (prev.currentBusiness?.id === id) {
-          next = updated[0] || null;
-          if (next) localStorage.setItem(STORAGE_KEY, next.id);
-          else localStorage.removeItem(STORAGE_KEY);
-        }
-        return { ...prev, businesses: updated, currentBusiness: next };
-      });
     } catch (error) {
-      // Si falla, recargar lista desde servidor para mantener sincronización
+      // Si falla, recargar lista desde servidor para restaurar el estado real
       await loadBusinesses(user);
       throw error;
     }

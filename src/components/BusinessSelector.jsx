@@ -24,17 +24,15 @@ import { useNavigate } from "react-router-dom";
 export default function BusinessSelector() {
   const { businesses, currentBusiness, setCurrentBusiness, deleteBusiness } = useBusiness();
   const [bizToDelete, setBizToDelete] = useState(null);
-  const [deleting, setDeleting] = useState(false);
   const [bizToSwitch, setBizToSwitch] = useState(null);
   const navigate = useNavigate();
 
   if (!currentBusiness) return null;
 
-  async function handleConfirmDelete() {
-    setDeleting(true);
-    await deleteBusiness(bizToDelete.id);
+  function handleConfirmDelete() {
+    const id = bizToDelete.id;
     setBizToDelete(null);
-    setDeleting(false);
+    deleteBusiness(id); // optimista: la lista se actualiza al instante
   }
 
   return (
@@ -118,13 +116,12 @@ export default function BusinessSelector() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleting ? "Eliminando..." : "Eliminar"}
+              Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
