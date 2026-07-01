@@ -24,6 +24,10 @@
     "notificaciones": {
       "type": "boolean",
       "default": true
+    },
+    "pin": {
+      "type": "string",
+      "description": "PIN de seguridad del propietario para cambiar de usuario"
     }
   },
   "required": [

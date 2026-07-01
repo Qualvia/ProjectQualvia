@@ -15,7 +15,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  UserCog, Plus, Pencil, Trash2, Loader2, Save, User, Shield, Lock,
+  UserCog, Plus, Pencil, Trash2, Loader2, Save, User, Shield, Lock, Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +52,8 @@ export default function TabUsuarios() {
   const [perfil, setPerfil] = useState({ nombre: user?.full_name || "", cargo: "", telefono: "", pin_actual: "", nuevo_pin: "" });
   const [savingPerfil, setSavingPerfil] = useState(false);
   const [savedPerfil, setSavedPerfil] = useState(false);
+  const [perfilError, setPerfilError] = useState("");
+  const [showPinInfo, setShowPinInfo] = useState(false);
 
   useEffect(() => {
     if (!currentBusiness) return;
@@ -69,6 +71,7 @@ export default function TabUsuarios() {
         telefono: p?.telefono || "",
         pin_actual: "",
         nuevo_pin: "",
+        tiene_pin: !!p?.pin,
       });
     });
   }, [user]);
@@ -116,16 +119,36 @@ export default function TabUsuarios() {
   async function handleSavePerfil() {
     if (!user) return;
     setSavingPerfil(true);
-    // Guardar cargo y teléfono en UserPreferences
+    setPerfilError("");
     const prefs = await base44.entities.UserPreferences.filter({ user_id: user.id });
-    const prefData = { cargo: perfil.cargo, telefono: perfil.telefono };
-    if (prefs[0]) {
-      await base44.entities.UserPreferences.update(prefs[0].id, { ...prefs[0], ...prefData });
+    const existing = prefs[0];
+    const storedPin = existing?.pin || "";
+
+    let newPin = storedPin;
+    // Crear o cambiar el PIN de acceso del propietario
+    if (perfil.nuevo_pin) {
+      if (perfil.nuevo_pin.length !== 4 || !/^\d{4}$/.test(perfil.nuevo_pin)) {
+        setSavingPerfil(false);
+        setPerfilError("El nuevo PIN debe tener 4 números.");
+        return;
+      }
+      if (storedPin && perfil.pin_actual !== storedPin) {
+        setSavingPerfil(false);
+        setPerfilError("El PIN actual no coincide con el guardado.");
+        return;
+      }
+      newPin = perfil.nuevo_pin;
+    }
+
+    const prefData = { cargo: perfil.cargo, telefono: perfil.telefono, pin: newPin };
+    if (existing) {
+      await base44.entities.UserPreferences.update(existing.id, { ...existing, ...prefData });
     } else {
       await base44.entities.UserPreferences.create({ user_id: user.id, ...prefData });
     }
     setSavingPerfil(false);
     setSavedPerfil(true);
+    setPerfil((p) => ({ ...p, pin_actual: "", nuevo_pin: "", tiene_pin: !!newPin }));
     setTimeout(() => setSavedPerfil(false), 3000);
   }
 
@@ -240,13 +263,37 @@ export default function TabUsuarios() {
             <div className="flex items-center gap-2 mb-1">
               <Shield className="w-4 h-4 text-[#0A3E47]" />
               <p className="font-semibold text-sm text-[#0A3E47]">Seguridad de acceso rápido</p>
+              <button
+                type="button"
+                onClick={() => setShowPinInfo(true)}
+                className="ml-0.5 text-muted-foreground hover:text-[#0A3E47] transition-colors"
+                aria-label="Información sobre el PIN de acceso"
+              >
+                <Info className="w-4 h-4" />
+              </button>
             </div>
             <Field label="PIN actual" icon={Lock}>
-              <Input type="password" maxLength={4} placeholder="••••" value={perfil.pin_actual} onChange={(e) => setPerfil(p => ({ ...p, pin_actual: e.target.value }))} />
+              <Input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder={perfil.tiene_pin ? "Introduce tu PIN actual" : "Aún no tienes PIN"}
+                value={perfil.pin_actual}
+                disabled={!perfil.tiene_pin}
+                onChange={(e) => setPerfil(p => ({ ...p, pin_actual: e.target.value.replace(/\D/g, "") }))}
+              />
             </Field>
             <Field label="Cambiar PIN" icon={Pencil}>
-              <Input type="password" maxLength={4} placeholder="4 números" value={perfil.nuevo_pin} onChange={(e) => setPerfil(p => ({ ...p, nuevo_pin: e.target.value }))} />
+              <Input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="4 números"
+                value={perfil.nuevo_pin}
+                onChange={(e) => setPerfil(p => ({ ...p, nuevo_pin: e.target.value.replace(/\D/g, "") }))}
+              />
             </Field>
+            {perfilError && <p className="text-sm text-destructive">{perfilError}</p>}
           </div>
 
           <button
@@ -297,6 +344,55 @@ export default function TabUsuarios() {
               {saving ? "Guardando..." : editingId ? "Guardar cambios" : "Crear Usuario"}
             </button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Información PIN de acceso */}
+      <Dialog open={showPinInfo} onOpenChange={setShowPinInfo}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-[#0A3E47]" />
+              Seguridad de acceso rápido
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm text-foreground pt-2">
+            <p>
+              El <strong>PIN de acceso</strong> protege tu cuenta de propietario para que nadie pueda cambiar
+              al usuario principal sin permiso.
+            </p>
+            <div className="space-y-2">
+              <p className="font-semibold text-[#0A3E47]">¿Cómo se crea?</p>
+              <p>
+                Escribe un PIN de 4 números en <strong>"Cambiar PIN"</strong> y pulsa
+                <strong> "Guardar cambios de perfil"</strong>. La primera vez no necesitas rellenar
+                <strong> "PIN actual"</strong>.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="font-semibold text-[#0A3E47]">¿Cómo se cambia?</p>
+              <p>
+                Introduce tu PIN actual en <strong>"PIN actual"</strong> y el nuevo en
+                <strong> "Cambiar PIN"</strong>, luego guarda.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="font-semibold text-[#0A3E47]">¿Cuándo se pide?</p>
+              <p>
+                Una vez activado, cada vez que alguien intente <strong>cambiar al usuario principal</strong>
+                (propietario) se le pedirá este PIN. Los usuarios internos siguen usando su propio PIN.
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Si olvidas tu PIN, contacta con soporte para restablecerlo.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowPinInfo(false)}
+            className="w-full py-2.5 rounded-xl bg-[#0A3E47] hover:bg-[#0A3E47]/90 text-white font-semibold text-sm transition-colors"
+          >
+            Entendido
+          </button>
         </DialogContent>
       </Dialog>
 

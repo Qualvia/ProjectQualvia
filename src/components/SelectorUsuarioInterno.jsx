@@ -15,6 +15,7 @@ export default function SelectorUsuarioInterno() {
   const [seleccionado, setSeleccionado] = useState(null);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const [propietarioPin, setPropietarioPin] = useState(null); // null = sin barrera; string = PIN requerido
 
   const prevBusinessId = useRef(null);
 
@@ -35,6 +36,7 @@ export default function SelectorUsuarioInterno() {
   function handleOpen() {
     setStep("lista");
     setSeleccionado(null);
+    setPropietarioPin(null);
     setPin("");
     setError("");
     setOpen(true);
@@ -42,17 +44,45 @@ export default function SelectorUsuarioInterno() {
 
   function handleSelectUsuario(u) {
     setSeleccionado(u);
+    setPropietarioPin(null);
     setPin("");
     setError("");
     setStep("pin");
   }
 
-  function handleSelectPropietario() {
-    setUsuarioActivo(null);
-    setOpen(false);
+  async function handleSelectPropietario() {
+    // Comprobar si el propietario tiene PIN de seguridad activado
+    try {
+      const prefs = await base44.entities.UserPreferences.filter({ user_id: user.id });
+      const storedPin = prefs[0]?.pin || "";
+      if (storedPin) {
+        setSeleccionado(null);
+        setPropietarioPin(storedPin);
+        setPin("");
+        setError("");
+        setStep("pin");
+      } else {
+        setUsuarioActivo(null);
+        setOpen(false);
+      }
+    } catch {
+      setUsuarioActivo(null);
+      setOpen(false);
+    }
   }
 
   function handleAcceder() {
+    // Cambio al usuario principal (propietario)
+    if (propietarioPin !== null) {
+      if (pin !== propietarioPin) {
+        setError("PIN incorrecto");
+        return;
+      }
+      setUsuarioActivo(null);
+      setOpen(false);
+      return;
+    }
+    // Cambio a un usuario interno
     if (!seleccionado) return;
     if (seleccionado.pin && pin !== seleccionado.pin) {
       setError("PIN incorrecto");
@@ -118,11 +148,20 @@ export default function SelectorUsuarioInterno() {
             </div>
           )}
 
-          {step === "pin" && seleccionado && (
+          {step === "pin" && (seleccionado || propietarioPin !== null) && (
             <div className="space-y-6">
               <div className="text-center">
-                <h2 className="text-xl font-bold text-foreground">Hola, {seleccionado.nombre}</h2>
-                <p className="text-sm text-muted-foreground mt-1">Introduce tu PIN para continuar</p>
+                {propietarioPin !== null ? (
+                  <>
+                    <h2 className="text-xl font-bold text-foreground">Acceso de propietario</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Introduce el PIN del propietario para continuar</p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-xl font-bold text-foreground">Hola, {seleccionado.nombre}</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Introduce tu PIN para continuar</p>
+                  </>
+                )}
               </div>
               <div className="flex justify-center">
                 <input
@@ -139,7 +178,7 @@ export default function SelectorUsuarioInterno() {
               {error && <p className="text-center text-sm text-destructive">{error}</p>}
               <div className="flex items-center justify-between pt-2">
                 <button
-                  onClick={() => setStep("lista")}
+                  onClick={() => { setPropietarioPin(null); setStep("lista"); }}
                   className="text-sm font-semibold text-foreground hover:text-muted-foreground transition-colors"
                 >
                   Atrás
