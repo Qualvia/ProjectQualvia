@@ -78,6 +78,7 @@ export default function Onboarding() {
       ciudad: form.ciudad,
       provincia: form.provincia,
       telefono: form.telefono,
+      email_contacto: user.email || "",
     });
 
     setSaving(false);
