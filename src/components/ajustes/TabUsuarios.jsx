@@ -231,14 +231,8 @@ export default function TabUsuarios() {
           </div>
 
           <div className="space-y-4">
-            <Field label="Nombre completo">
-              <Input value={perfil.nombre} disabled className="bg-secondary/50" />
-            </Field>
-            <Field label="Cargo">
-              <Input placeholder="Ej: Gerente" value={perfil.cargo} onChange={(e) => setPerfil(p => ({ ...p, cargo: e.target.value }))} />
-            </Field>
-            <Field label="Teléfono personal">
-              <Input placeholder="600 000 000" value={perfil.telefono} onChange={(e) => setPerfil(p => ({ ...p, telefono: e.target.value }))} />
+            <Field label="Persona de contacto">
+              <Input placeholder="Nombre del responsable" value={perfil.nombre} disabled className="bg-secondary/50" />
             </Field>
           </div>
 
