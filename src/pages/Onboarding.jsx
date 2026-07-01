@@ -22,6 +22,25 @@ const TIPOS_NEGOCIO = [
   "Obrador", "Industria alimentaria", "Otro",
 ];
 
+const CP_TO_PROVINCIA = {
+  "01": "Álava", "02": "Albacete", "03": "Alicante", "04": "Almería", "05": "Ávila",
+  "06": "Badajoz", "07": "Baleares", "08": "Barcelona", "09": "Burgos", "10": "Cáceres",
+  "11": "Cádiz", "12": "Castellón", "13": "Ciudad Real", "14": "Córdoba", "15": "A Coruña",
+  "16": "Cuenca", "17": "Girona", "18": "Granada", "19": "Guadalajara", "20": "Gipuzkoa",
+  "21": "Huelva", "22": "Huesca", "23": "Jaén", "24": "León", "25": "Lleida",
+  "26": "La Rioja", "27": "Lugo", "28": "Madrid", "29": "Málaga", "30": "Murcia",
+  "31": "Navarra", "32": "Ourense", "33": "Asturias", "34": "Palencia", "35": "Las Palmas",
+  "36": "Pontevedra", "37": "Salamanca", "38": "Santa Cruz de Tenerife", "39": "Cantabria",
+  "40": "Segovia", "41": "Sevilla", "42": "Soria", "43": "Tarragona", "44": "Teruel",
+  "45": "Toledo", "46": "Valencia", "47": "Valladolid", "48": "Vizcaya", "49": "Zamora",
+  "50": "Zaragoza", "51": "Ceuta", "52": "Melilla",
+};
+
+function cpToProvincia(cp) {
+  const prefix = cp.slice(0, 2);
+  return CP_TO_PROVINCIA[prefix] || "";
+}
+
 const PROVINCIAS = [
   "Álava", "Albacete", "Alicante", "Almería", "Asturias", "Ávila", "Badajoz",
   "Baleares", "Barcelona", "Burgos", "Cáceres", "Cádiz", "Cantabria",
@@ -199,7 +218,7 @@ function Step1({ form, set }) {
         </Select>
       </Field>
       <Field label="CIF/NIF *">
-        <Input placeholder="B12345678" value={form.cif_nif} onChange={(e) => set("cif_nif", e.target.value)} />
+        <Input placeholder="B12345678 / 12345678A" value={form.cif_nif} onChange={(e) => set("cif_nif", e.target.value)} />
       </Field>
     </div>
   );
@@ -217,7 +236,14 @@ function Step2({ form, set }) {
       </Field>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Código Postal *">
-          <Input placeholder="28001" value={form.codigo_postal} onChange={(e) => set("codigo_postal", e.target.value)} />
+          <Input placeholder="28001" value={form.codigo_postal} onChange={(e) => {
+            const val = e.target.value;
+            set("codigo_postal", val);
+            if (val.length >= 2) {
+              const prov = cpToProvincia(val);
+              if (prov) set("provincia", prov);
+            }
+          }} />
         </Field>
         <Field label="Ciudad *">
           <Input placeholder="Madrid" value={form.ciudad} onChange={(e) => set("ciudad", e.target.value)} />
