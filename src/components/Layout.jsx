@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { base44 } from "@/api/base44Client";
@@ -60,7 +61,9 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {showTour && <TourGuide onClose={() => setShowTour(false)} />}
+      <AnimatePresence>
+        {showTour && <TourGuide onClose={() => setShowTour(false)} />}
+      </AnimatePresence>
 
       {/* Mobile overlay */}
       {sidebarOpen &&
