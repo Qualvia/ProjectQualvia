@@ -11,7 +11,6 @@ import {
   X,
   ArrowRight,
   ArrowLeft,
-  Check,
 } from "lucide-react";
 
 const STEPS = [
@@ -19,37 +18,37 @@ const STEPS = [
     icon: Sparkles,
     title: "Bienvenida a Qualvia",
     text: "Tu aliada inteligente para el control de calidad y seguridad alimentaria. Te lo enseñamos en 1 minuto.",
-    badge: "Qualvia",
+    accent: "from-[#6BB68A] to-[#5aa377]",
   },
   {
     icon: LayoutDashboard,
     title: "Dashboard",
     text: "Tu punto de partida cada día. Un vistazo y sabes si todo está bajo control.",
-    badge: "01",
+    accent: "from-[#0A3E47] to-[#0d4d5a]",
   },
   {
     icon: ClipboardList,
     title: "Registros",
     text: "Aquí anotas tu día a día: temperaturas, limpieza, plagas, mercancías... Antes de tu primer registro, configura tus equipos y zonas en Gestionar equipos/zonas.",
-    badge: "02",
+    accent: "from-[#6BB68A] to-[#4a9d6e]",
   },
   {
     icon: FileText,
     title: "Documentos",
     text: "Tu plan APPCC y tus informes, listos cuando llegue una inspección.",
-    badge: "03",
+    accent: "from-[#0A3E47] to-[#125968]",
   },
   {
     icon: CheckSquare,
     title: "Checklist",
     text: "Tus rutinas de apertura, cierre y auditorías internas, para no dejarte nada.",
-    badge: "04",
+    accent: "from-[#6BB68A] to-[#5aa377]",
   },
   {
     icon: Bot,
     title: "Asistente",
     text: "Tu experto en seguridad alimentaria, disponible 24/7. Pregúntale lo que necesites.",
-    badge: "05",
+    accent: "from-[#0A3E47] to-[#0d4d5a]",
   },
 ];
 
@@ -74,23 +73,9 @@ export default function TourGuide({ onClose }) {
   const isLast = step === STEPS.length - 1;
 
   const slideVariants = {
-    enter: (dir) => ({ opacity: 0, x: dir > 0 ? 50 : -50 }),
-    center: { opacity: 1, x: 0 },
-    exit: (dir) => ({ opacity: 0, x: dir > 0 ? -50 : 50 }),
-  };
-
-  const stagger = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.06, delayChildren: 0.05 },
-    },
-    exit: { opacity: 0, transition: { duration: 0.15 } },
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
+    enter: (dir) => ({ opacity: 0, x: dir > 0 ? 40 : -40, scale: 0.96 }),
+    center: { opacity: 1, x: 0, scale: 1 },
+    exit: (dir) => ({ opacity: 0, x: dir > 0 ? -40 : 40, scale: 0.96 }),
   };
 
   return (
@@ -98,109 +83,86 @@ export default function TourGuide({ onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A3E47]/55 backdrop-blur-md p-4"
+      transition={{ duration: 0.25 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0A3E47]/50 backdrop-blur-md p-4"
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 20 }}
+        initial={{ opacity: 0, scale: 0.92, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.94, y: 20 }}
-        transition={{ type: "spring", damping: 24, stiffness: 260 }}
-        className="relative w-[92vw] max-w-[480px] bg-[#FAFAF7] rounded-[24px] shadow-[0_28px_80px_-16px_rgba(10,62,71,0.5)] overflow-hidden"
+        exit={{ opacity: 0, scale: 0.92, y: 16 }}
+        transition={{ type: "spring", damping: 26, stiffness: 280 }}
+        className="relative w-[90vw] max-w-[460px] bg-[#FAFAF7] rounded-[20px] shadow-[0_24px_70px_-12px_rgba(10,62,71,0.45)] overflow-hidden"
       >
-        {/* Panel decorativo superior — arena cálida */}
-        <div className="relative h-[140px] bg-gradient-to-br from-[#EDE6DA] via-[#E4DCC8] to-[#D8CFB8] overflow-hidden">
-          {/* Formas decorativas */}
-          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-[#6BB68A]/12 blur-2xl" />
-          <div className="absolute top-8 left-10 w-24 h-24 rounded-full bg-[#0A3E47]/8 blur-xl" />
-          <div
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 2px 2px, #0A3E47 1px, transparent 0)",
-              backgroundSize: "22px 22px",
-            }}
-          />
-
-          {/* Badge de paso */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, scale: 0.7, y: -8 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.7, y: -8 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="absolute top-5 left-6 px-3 py-1 rounded-full bg-[#0A3E47] text-[#FAFAF7] text-[11px] font-bold tracking-wider"
-            >
-              {current.badge}
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Botón X */}
-          <button
-            onClick={close}
-            className="absolute top-4 right-4 z-30 w-9 h-9 rounded-full flex items-center justify-center bg-[#0A3E47]/8 text-[#0A3E47]/60 hover:bg-[#0A3E47]/15 hover:text-[#0A3E47] transition-all duration-200"
-            aria-label="Saltar tour"
-          >
-            <X className="w-4 h-4" strokeWidth={2.2} />
-          </button>
-
-          {/* Icono principal — sobresaliendo del panel */}
+        {/* Barra de progreso superior */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[#0A3E47]/8 z-20">
           <motion.div
-            key={`icon-${step}`}
-            initial={{ scale: 0.5, opacity: 0, rotate: -8 }}
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            transition={{ type: "spring", damping: 16, stiffness: 220, delay: 0.05 }}
-            className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-16 h-16 rounded-[18px] bg-[#0A3E47] flex items-center justify-center shadow-[0_12px_28px_-8px_rgba(10,62,71,0.45)] ring-4 ring-[#FAFAF7]"
-          >
-            <Icon className="w-8 h-8 text-[#6BB68A]" strokeWidth={1.7} />
-          </motion.div>
+            className="h-full bg-[#6BB68A]"
+            initial={{ width: "0%" }}
+            animate={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          />
         </div>
 
-        {/* Contenido */}
-        <div className="px-8 pt-14 pb-7 min-h-[230px] flex flex-col">
+        {/* Botón X para saltar */}
+        <button
+          onClick={close}
+          className="absolute top-4 right-4 z-30 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground/70 hover:text-[#0A3E47] hover:bg-[#0A3E47]/8 transition-all duration-200"
+          aria-label="Saltar tour"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        {/* Contenido con transición */}
+        <div className="px-8 pt-9 pb-7 min-h-[340px] flex flex-col">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={step}
               custom={direction}
-              variants={stagger}
-              initial="hidden"
-              animate="show"
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
               exit="exit"
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-col items-center text-center flex-1"
             >
-              <motion.div variants={slideVariants}>
-                <motion.h2
-                  variants={item}
-                  className="text-[23px] font-bold text-[#0A3E47] mb-2.5 tracking-tight leading-tight"
-                >
-                  {current.title}
-                </motion.h2>
-                <motion.p
-                  variants={item}
-                  className="text-[14px] text-[#1B1B1B]/60 leading-relaxed max-w-[350px]"
-                >
-                  {current.text}
-                </motion.p>
+              {/* Icono */}
+              <motion.div
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.08, type: "spring", damping: 18, stiffness: 260 }}
+                className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${current.accent} flex items-center justify-center mb-5 shadow-lg`}
+                style={{ boxShadow: "0 10px 24px -6px rgba(10,62,71,0.3)" }}
+              >
+                <Icon className="w-8 h-8 text-white" strokeWidth={1.8} />
               </motion.div>
+
+              {/* Step counter */}
+              <span className="text-[11px] font-semibold tracking-widest uppercase text-[#6BB68A] mb-2">
+                Paso {step + 1} de {STEPS.length}
+              </span>
+
+              {/* Título */}
+              <h2 className="text-[22px] font-bold text-[#0A3E47] mb-2.5 tracking-tight leading-tight">
+                {current.title}
+              </h2>
+
+              {/* Texto */}
+              <p className="text-[14px] text-muted-foreground leading-relaxed max-w-[340px]">
+                {current.text}
+              </p>
             </motion.div>
           </AnimatePresence>
 
-          {/* Progreso — dots + barra */}
+          {/* Dots de progreso */}
           <div className="flex items-center justify-center gap-2 my-6">
             {STEPS.map((_, i) => (
               <motion.span
                 key={i}
                 animate={{
-                  width: i === step ? 26 : 7,
-                  backgroundColor:
-                    i === step
-                      ? "#0A3E47"
-                      : i < step
-                      ? "#6BB68A"
-                      : "rgba(10,62,71,0.15)",
+                  width: i === step ? 22 : 7,
+                  backgroundColor: i === step ? "#0A3E47" : "rgba(10,62,71,0.2)",
                 }}
-                transition={{ duration: 0.32, ease: "easeOut" }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className="h-[7px] rounded-full"
               />
             ))}
@@ -211,7 +173,7 @@ export default function TourGuide({ onClose }) {
             {!isFirst ? (
               <button
                 onClick={() => go(step - 1)}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold text-[#0A3E47]/55 hover:text-[#0A3E47] transition-colors duration-200"
+                className="flex items-center gap-1.5 px-3.5 py-2.5 text-[13px] font-semibold text-muted-foreground hover:text-[#0A3E47] transition-colors duration-200"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Atrás
@@ -220,22 +182,13 @@ export default function TourGuide({ onClose }) {
               <span className="w-20" />
             )}
             <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => (isLast ? close() : go(step + 1))}
-              className="flex items-center gap-1.5 px-7 py-3 rounded-xl bg-[#0A3E47] hover:bg-[#0d4d5a] text-white text-[13px] font-semibold transition-colors duration-200 shadow-[0_8px_20px_-6px_rgba(10,62,71,0.4)]"
+              className="flex items-center gap-1.5 px-6 py-3 rounded-xl bg-[#0A3E47] hover:bg-[#0d4d5a] text-white text-[13px] font-semibold transition-colors duration-200 shadow-md"
             >
-              {isLast ? (
-                <>
-                  <Check className="w-4 h-4" strokeWidth={2.5} />
-                  Empezar
-                </>
-              ) : (
-                <>
-                  Siguiente
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              {isLast ? "Empezar" : "Siguiente"}
+              {isLast ? <Sparkles className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             </motion.button>
           </div>
         </div>
