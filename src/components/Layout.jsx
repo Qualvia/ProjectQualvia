@@ -5,6 +5,7 @@ import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 import { base44 } from "@/api/base44Client";
 import BusinessSelector from "@/components/BusinessSelector";
 import SelectorUsuarioInterno from "@/components/SelectorUsuarioInterno";
+import TourGuide from "@/components/TourGuide";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -33,6 +34,7 @@ export default function Layout() {
   const { esOperario } = useUsuarioInterno();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showTour, setShowTour] = useState(() => !user?.tour_completado);
   const navigate = useNavigate();
 
   const NAV_ITEMS = esOperario ?
@@ -58,6 +60,8 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      {showTour && <TourGuide onClose={() => setShowTour(false)} />}
+
       {/* Mobile overlay */}
       {sidebarOpen &&
       <div

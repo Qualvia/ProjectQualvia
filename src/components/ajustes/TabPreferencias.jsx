@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Globe, Thermometer, Weight, Droplets, Bell, Loader2, Save, CheckCircle2, Settings2 } from "lucide-react";
+import { Globe, Thermometer, Weight, Droplets, Bell, Loader2, Save, CheckCircle2, Settings2, PlayCircle } from "lucide-react";
 
 const EMPTY = {
   idioma: "Español",
@@ -151,6 +151,18 @@ export default function TabPreferencias() {
 
         <PreferenceRow icon={Bell} title="Notificaciones generales" description="Recibir alertas y recordatorios">
           <Switch checked={form.notificaciones} onCheckedChange={(v) => set("notificaciones", v)} />
+        </PreferenceRow>
+
+        <PreferenceRow icon={PlayCircle} title="Tour de bienvenida" description="Vuelve a ver la guía inicial de Qualvia">
+          <button
+            onClick={async () => {
+              await base44.auth.updateMe({ tour_completado: false });
+              window.location.href = "/";
+            }}
+            className="px-4 py-2 rounded-xl bg-[#0A3E47] hover:bg-[#0A3E47]/90 text-white text-sm font-semibold transition-colors"
+          >
+            Ver tour
+          </button>
         </PreferenceRow>
       </div>
 

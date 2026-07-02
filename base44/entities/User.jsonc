@@ -7,6 +7,11 @@
         "admin",
         "user"
       ]
+    },
+    "tour_completado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indica si el usuario ya complet\u00f3 el tour de bienvenida"
     }
   },
   "required": [
