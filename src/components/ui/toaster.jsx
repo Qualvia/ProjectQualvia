@@ -18,7 +18,7 @@ export function Toaster() {
           <Toast key={id} {...props}>
             <div className="flex items-start gap-3 w-full">
               {icon && (
-                <div className="shrink-0 mt-0.5 w-9 h-9 rounded-xl bg-[#6BB68A]/12 flex items-center justify-center">
+                <div className="shrink-0 mt-0.5 w-8 h-8 rounded-lg bg-[#6BB68A]/12 flex items-center justify-center">
                   {icon}
                 </div>
               )}

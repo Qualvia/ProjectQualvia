@@ -71,7 +71,7 @@ export default function Layout() {
             toast({
               title: "Casi listo",
               description: "Añade tu número de registro sanitario y los datos de tu negocio en Ajustes. Con esa info, tus documentos e informes saldrán personalizados y listos para una inspección.",
-              icon: <Sparkles className="w-5 h-5 text-[#6BB68A]" />,
+              icon: <Sparkles className="w-4 h-4 text-[#6BB68A]" />,
               action: (
                 <ToastAction onClick={() => navigate("/ajustes")}>
                   Completar datos

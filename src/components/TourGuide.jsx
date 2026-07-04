@@ -17,7 +17,7 @@ import {
 const STEPS = [
   {
     icon: Sparkles,
-    title: "Bienvenida a Qualvia",
+    title: "¡Empecemos!",
     text: "Tu aliada inteligente para el control de calidad y seguridad alimentaria. Te lo enseñamos en 1 minuto.",
     gradient: "from-[#6BB68A] via-[#5aa377] to-[#0A3E47]",
     glow: "rgba(107,182,138,0.45)",
@@ -26,29 +26,29 @@ const STEPS = [
     icon: LayoutDashboard,
     title: "Dashboard",
     text: "Tu punto de partida cada día. Un vistazo y sabes si todo está bajo control: tareas, incidencias y actividad reciente.",
-    gradient: "from-[#0A3E47] via-[#125968] to-[#0d4d5a]",
-    glow: "rgba(10,62,71,0.4)",
+    gradient: "from-[#6BB68A] via-[#5aa377] to-[#0A3E47]",
+    glow: "rgba(107,182,138,0.45)",
   },
   {
     icon: ClipboardList,
     title: "Registros",
     text: "Anota tu día a día: temperaturas, limpieza, plagas, mercancías... Antes de tu primer registro, configura equipos y zonas en Gestionar equipos/zonas.",
-    gradient: "from-[#6BB68A] via-[#4a9d6e] to-[#0A3E47]",
-    glow: "rgba(107,182,138,0.4)",
+    gradient: "from-[#6BB68A] via-[#5aa377] to-[#0A3E47]",
+    glow: "rgba(107,182,138,0.45)",
   },
   {
     icon: FileText,
     title: "Documentos",
     text: "Tu plan APPCC y tus informes, siempre a mano y listos cuando llegue una inspección.",
-    gradient: "from-[#0A3E47] via-[#125968] to-[#0A3E47]",
-    glow: "rgba(10,62,71,0.35)",
+    gradient: "from-[#6BB68A] via-[#5aa377] to-[#0A3E47]",
+    glow: "rgba(107,182,138,0.45)",
   },
   {
     icon: CheckSquare,
     title: "Checklist",
     text: "Tus rutinas de apertura, cierre y auditorías internas, para no dejarte nada en el tintero.",
-    gradient: "from-[#6BB68A] via-[#5aa377] to-[#0d4d5a]",
-    glow: "rgba(107,182,138,0.4)",
+    gradient: "from-[#6BB68A] via-[#5aa377] to-[#0A3E47]",
+    glow: "rgba(107,182,138,0.45)",
   },
   {
     icon: Bot,
@@ -193,7 +193,7 @@ export default function TourGuide({ onClose }) {
           </button>
 
           {/* Barra de progreso segmentada */}
-          <div className="flex items-center gap-1.5 mb-7 mt-1">
+          <div className="flex items-center gap-1.5 mb-6 mt-8 pr-10">
             {STEPS.map((_, i) => (
               <div key={i} className="flex-1 h-1.5 rounded-full bg-[#0A3E47]/10 overflow-hidden">
                 <motion.div
@@ -263,7 +263,7 @@ export default function TourGuide({ onClose }) {
             >
               {isLast ? (
                 <>
-                  Empezar ahora
+                  ¡Empecemos!
                   <Check className="w-4 h-4" />
                 </>
               ) : (
