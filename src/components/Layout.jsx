@@ -16,7 +16,8 @@ import {
   Settings,
   Menu,
   X,
-  LogOut } from
+  LogOut,
+  Sparkles } from
 "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
@@ -66,15 +67,18 @@ export default function Layout() {
       <AnimatePresence>
         {showTour && <TourGuide onClose={() => {
           setShowTour(false);
-          toast({
-            title: "Casi listo",
-            description: "Añade tu número de registro sanitario y los datos de tu negocio en Ajustes. Con esa info, tus documentos e informes saldrán personalizados y listos para una inspección.",
-            action: (
-              <ToastAction onClick={() => navigate("/ajustes")}>
-                Completar datos
-              </ToastAction>
-            ),
-          });
+          setTimeout(() => {
+            toast({
+              title: "Casi listo",
+              description: "Añade tu número de registro sanitario y los datos de tu negocio en Ajustes. Con esa info, tus documentos e informes saldrán personalizados y listos para una inspección.",
+              icon: <Sparkles className="w-5 h-5 text-[#6BB68A]" />,
+              action: (
+                <ToastAction onClick={() => navigate("/ajustes")}>
+                  Completar datos
+                </ToastAction>
+              ),
+            });
+          }, 2000);
         }} />}
       </AnimatePresence>
 
