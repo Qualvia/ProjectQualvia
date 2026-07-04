@@ -68,12 +68,13 @@ export default function Layout() {
         {showTour && <TourGuide onClose={() => {
           setShowTour(false);
           setTimeout(() => {
-            toast({
+            let t;
+            t = toast({
               title: "Casi listo",
-              description: "Añade tu número de registro sanitario y los datos de tu negocio en Ajustes. Con esa info, tus documentos e informes saldrán personalizados y listos para una inspección.",
+              description: "Añade tu registro sanitario en Ajustes — tus documentos saldrán personalizados y listos para inspección.",
               icon: <Sparkles className="w-4 h-4 text-[#6BB68A]" />,
               action: (
-                <ToastAction onClick={() => navigate("/ajustes")}>
+                <ToastAction onClick={() => { t.dismiss(); navigate("/ajustes"); }}>
                   Completar datos
                 </ToastAction>
               ),

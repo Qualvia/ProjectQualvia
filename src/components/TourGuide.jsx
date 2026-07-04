@@ -263,7 +263,7 @@ export default function TourGuide({ onClose }) {
             >
               {isLast ? (
                 <>
-                  ¡Empecemos!
+                  ¡Vamos allá!
                   <Check className="w-4 h-4" />
                 </>
               ) : (
