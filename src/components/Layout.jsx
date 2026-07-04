@@ -19,6 +19,8 @@ import {
   LogOut } from
 "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 const ALL_NAV_ITEMS = [
@@ -62,7 +64,18 @@ export default function Layout() {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <AnimatePresence>
-        {showTour && <TourGuide onClose={() => setShowTour(false)} />}
+        {showTour && <TourGuide onClose={() => {
+          setShowTour(false);
+          toast({
+            title: "Casi listo",
+            description: "Añade tu número de registro sanitario y los datos de tu negocio en Ajustes. Con esa info, tus documentos e informes saldrán personalizados y listos para una inspección.",
+            action: (
+              <ToastAction onClick={() => navigate("/ajustes")}>
+                Completar datos
+              </ToastAction>
+            ),
+          });
+        }} />}
       </AnimatePresence>
 
       {/* Mobile overlay */}
