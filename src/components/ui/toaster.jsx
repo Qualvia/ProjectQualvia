@@ -13,9 +13,9 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, icon, ...props }) {
+      {toasts.map(function ({ id, title, description, action, icon, open, ...props }) {
         return (
-          <Toast key={id} {...props}>
+          <Toast key={id} data-state={open ? "open" : "closed"} {...props}>
             <div className="flex items-start gap-2.5 w-full">
               {icon && (
                 <div className="shrink-0 mt-0.5 w-7 h-7 rounded-lg bg-[#6BB68A]/12 flex items-center justify-center">
