@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, Check, X, Plus, Trash2, Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
@@ -28,6 +29,7 @@ const PASOS = [
 export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const { user, currentBusiness } = useBusiness();
   const { usuarioActivo } = useUsuarioInterno();
+  const { toast } = useToast();
 
   const [pasoActual] = useState(1);
   const [perfilCargado, setPerfilCargado] = useState(false);
@@ -41,7 +43,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
 
   const detectado = usuarioActivo
     ? { nombre: usuarioActivo.nombre || "", rol: usuarioActivo.rol || "" }
-    : { nombre: contactoNegocio || user?.full_name || "", rol: "Propietario" };
+    : { nombre: user?.full_name || contactoNegocio || "", rol: "Propietario" };
 
   const [editandoResponsable, setEditandoResponsable] = useState(false);
   const [responsableNombre, setResponsableNombre] = useState(detectado.nombre);
@@ -79,7 +81,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
         setContactoNegocio(contacto);
         // Solo autodetectar si no hay config guardada y no hay usuario interno
         if (!configId && !usuarioActivo) {
-          setResponsableNombre((prev) => (prev ? prev : contacto || user?.full_name || ""));
+          setResponsableNombre((prev) => (prev ? prev : user?.full_name || contacto || ""));
         }
       })
       .catch(() => {})
@@ -128,9 +130,12 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
         if (created?.id) setConfigId(created.id);
       }
     } catch (e) {
-      // el error burbuja para mostrarlo
       setSaving(false);
-      throw e;
+      toast({
+        title: "No se pudo guardar. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+      return;
     }
     setSaving(false);
     console.log("Paso 1 — Datos guardados:", {
