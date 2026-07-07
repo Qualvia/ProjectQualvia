@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, Check, X, Plus, Trash2, Loader2 } from "lucide-react";
+import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, ChevronLeft, Check, X, Plus, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -18,12 +18,38 @@ import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 const TOTAL_PASOS = 7;
 const PASOS = [
   "Equipo y responsable",
-  "Peligros del proceso",
-  "Puntos de control crítico",
-  "Límites críticos",
-  "Vigilancia",
-  "Acciones correctivas",
-  "Verificación y registros",
+  "Actividad y circuito",
+  "Productos y consumidor",
+  "Categorías de proceso",
+  "Equipos críticos",
+  "Proveedores y agua",
+  "Formación y cambios",
+];
+
+const PROCESOS_HABITUALES_OPCIONES = [
+  "Recepción de mercancías",
+  "Almacenamiento en frío",
+  "Almacenamiento en seco",
+  "Preparación en frío",
+  "Cocción",
+  "Enfriado",
+  "Regeneración",
+  "Mantenimiento en caliente",
+  "Distribución/servicio",
+  "Envasado",
+];
+
+const SEPARACION_OPCIONES = [
+  { value: "si", label: "Sí" },
+  { value: "no", label: "No" },
+  { value: "parcial", label: "Parcialmente" },
+];
+
+const RANGO_OPCIONES = [
+  { value: "1-10", label: "1-10" },
+  { value: "11-25", label: "11-25" },
+  { value: "26-50", label: "26-50" },
+  { value: "50+", label: "Más de 50" },
 ];
 
 export default function FormularioPlanAPPCC({ open, onOpenChange }) {
@@ -31,7 +57,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const { usuarioActivo } = useUsuarioInterno();
   const { toast } = useToast();
 
-  const [pasoActual] = useState(1);
+  const [pasoActual, setPasoActual] = useState(1);
   const [perfilCargado, setPerfilCargado] = useState(false);
   const [configId, setConfigId] = useState(null);
   const [configCargada, setConfigCargada] = useState(false);
@@ -41,6 +67,11 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const [tieneFormacion, setTieneFormacion] = useState(null); // "si" | "no" | null
   const [personasFormacion, setPersonasFormacion] = useState([]); // [{ id, nombre }]
   const [nuevaPersona, setNuevaPersona] = useState("");
+
+  // --- Paso 2: Actividad y circuito ---
+  const [procesosHabituales, setProcesosHabituales] = useState([]);
+  const [separacionCircuitos, setSeparacionCircuitos] = useState(null); // "si" | "no" | "parcial" | null
+  const [rangoReferencias, setRangoReferencias] = useState(null); // "1-10" | "11-25" | "26-50" | "50+" | null
 
   // --- Responsable ---
   // Prioridad: config guardada → usuario interno activo → persona_contacto del BusinessProfile → propietario
@@ -70,6 +101,9 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           setPersonasFormacion(
             (config.formacion_personas || []).map((nombre) => ({ id: Date.now() + Math.random(), nombre }))
           );
+          setProcesosHabituales(config.procesos_habituales || []);
+          setSeparacionCircuitos(config.separacion_circuitos || null);
+          setRangoReferencias(config.rango_referencias || null);
         }
       })
       .catch(() => {})
@@ -104,15 +138,27 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
     setPersonasFormacion((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const puedeAvanzar = responsableNombre.trim() !== "" && tieneFormacion !== null;
+  const puedeAvanzarPaso1 = responsableNombre.trim() !== "" && tieneFormacion !== null;
+  const puedeAvanzarPaso2 =
+    procesosHabituales.length > 0 && separacionCircuitos !== null && rangoReferencias !== null;
+
+  const puedeAvanzar = pasoActual === 1 ? puedeAvanzarPaso1 : pasoActual === 2 ? puedeAvanzarPaso2 : true;
+
+  const toggleProceso = (proceso) => {
+    setProcesosHabituales((prev) =>
+      prev.includes(proceso) ? prev.filter((p) => p !== proceso) : [...prev, proceso]
+    );
+  };
 
   const handleSiguiente = async () => {
-    if (!responsableNombre.trim()) {
-      setEditandoResponsable(true);
-      setErrorResponsable(true);
-      return;
+    if (pasoActual === 1) {
+      if (!responsableNombre.trim()) {
+        setEditandoResponsable(true);
+        setErrorResponsable(true);
+        return;
+      }
+      setErrorResponsable(false);
     }
-    setErrorResponsable(false);
     setSaving(true);
     const payload = {
       user_id: user.id,
@@ -121,6 +167,9 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       responsable_rol: responsableRol,
       tiene_formacion_appcc: tieneFormacion,
       formacion_personas: personasFormacion.map((p) => p.nombre),
+      procesos_habituales: procesosHabituales,
+      separacion_circuitos: separacionCircuitos,
+      rango_referencias: rangoReferencias,
     };
     try {
       if (configId) {
@@ -138,13 +187,15 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       return;
     }
     setSaving(false);
-    console.log("Paso 1 — Datos guardados:", {
-      responsable: { nombre: responsableNombre, rol: responsableRol },
-      formacion: {
-        respuesta: tieneFormacion,
-        personas: personasFormacion.map((p) => p.nombre),
-      },
-    });
+    if (pasoActual < TOTAL_PASOS) {
+      setPasoActual((prev) => prev + 1);
+    }
+  };
+
+  const handleAtras = () => {
+    if (pasoActual > 1) {
+      setPasoActual((prev) => prev - 1);
+    }
   };
 
   return (
@@ -196,6 +247,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
         {/* --- Cuerpo con slide --- */}
         <div className="px-6 py-5 space-y-6 max-h-[52vh] overflow-y-auto">
           <div key={pasoActual} className="animate-in fade-in-0 slide-in-from-right-4 duration-500 space-y-6">
+            {pasoActual === 1 && (
+              <>
             {/* Sección: Equipo y responsable */}
             <section>
               <div className="flex items-center gap-2 mb-4">
@@ -361,18 +414,113 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                 </div>
               )}
             </section>
+              </>
+            )}
+
+            {pasoActual === 2 && (
+              <>
+            {/* Sección: Procesos habituales */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
+                ¿Qué procesos habituales se realizan en tu negocio?
+              </p>
+              <p className="text-[12px] text-[#6B6B6B] mb-4">
+                Selecciona todos los que apliquen.
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {PROCESOS_HABITUALES_OPCIONES.map((proceso) => {
+                  const activo = procesosHabituales.includes(proceso);
+                  return (
+                    <button
+                      key={proceso}
+                      type="button"
+                      onClick={() => toggleProceso(proceso)}
+                      className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 ${
+                        activo
+                          ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                          : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                      }`}
+                    >
+                      {activo && <Check className="w-3.5 h-3.5" />}
+                      {proceso}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Sección: Separación de circuitos */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
+                ¿Existe separación de circuitos (limpio/sucio)?
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {SEPARACION_OPCIONES.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSeparacionCircuitos(opt.value)}
+                    className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      separacionCircuitos === opt.value
+                        ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                        : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* Sección: Rango de referencias */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
+                ¿Cuántas referencias o productos distintos manejas aproximadamente?
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {RANGO_OPCIONES.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setRangoReferencias(opt.value)}
+                    className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      rangoReferencias === opt.value
+                        ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                        : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+              </>
+            )}
           </div>
         </div>
 
         {/* --- Footer --- */}
         <div className="px-6 py-4 border-t border-[#EDE6DA] bg-[#FAFAF7] flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#0A3E47] transition-colors"
-          >
-            Cancelar
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#0A3E47] transition-colors"
+            >
+              Cancelar
+            </button>
+            {pasoActual > 1 && (
+              <button
+                type="button"
+                onClick={handleAtras}
+                disabled={saving}
+                className="flex items-center gap-1 text-[14px] font-medium text-[#0A3E47] hover:text-[#0A3E47]/70 transition-colors disabled:opacity-40"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Atrás
+              </button>
+            )}
+          </div>
           <Button
             onClick={handleSiguiente}
             disabled={!puedeAvanzar || saving}

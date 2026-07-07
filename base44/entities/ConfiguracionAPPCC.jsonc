@@ -27,6 +27,30 @@
       "items": {
         "type": "string"
       }
+    },
+    "procesos_habituales": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "separacion_circuitos": {
+      "type": "string",
+      "enum": [
+        "si",
+        "no",
+        "parcial"
+      ],
+      "description": "si | no | parcial"
+    },
+    "rango_referencias": {
+      "type": "string",
+      "enum": [
+        "1-10",
+        "11-25",
+        "26-50",
+        "50+"
+      ]
     }
   },
   "required": [
