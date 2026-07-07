@@ -144,9 +144,9 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0 rounded-2xl bg-[#FAF9F6] [&>button]:hidden">
+      <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0 rounded-2xl bg-[#FAFAF7] [&>button]:hidden">
         {/* --- Barra de progreso superior --- */}
-        <div className="px-6 pt-5 pb-4 border-b border-[#EFEBE4]">
+        <div className="px-6 pt-5 pb-4 border-b border-[#EDE6DA]">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[13px] font-medium text-[#4A4A4A]">
               Paso {pasoActual} de {TOTAL_PASOS}
@@ -158,15 +158,15 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[#9A9A9A] hover:text-[#1A3C34] hover:bg-[#1A3C34]/8 transition-colors"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-[#9A9A9A] hover:text-[#0A3E47] hover:bg-[#0A3E47]/8 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
           </div>
-          <div className="h-1.5 rounded-full bg-[#EFEBE4] overflow-hidden">
+          <div className="h-1.5 rounded-full bg-[#EDE6DA] overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#1A3C34] transition-all duration-700 ease-out"
+              className="h-full rounded-full bg-[#0A3E47] transition-all duration-700 ease-out"
               style={{ width: `${(pasoActual / TOTAL_PASOS) * 100}%` }}
             />
           </div>
@@ -175,10 +175,10 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
         {/* --- Cabecera del documento --- */}
         <div className="px-6 pt-6 pb-2">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1A3C34] flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-[#0A3E47] flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5 text-white" />
             </div>
-            <DialogTitle className="text-[#1A3C34] text-xl font-bold leading-tight">
+            <DialogTitle className="text-[#0A3E47] text-xl font-bold leading-tight">
               Formulario previo — Plan APPCC
             </DialogTitle>
           </div>
@@ -194,19 +194,19 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
             {/* Sección: Equipo y responsable */}
             <section>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-7 h-7 rounded-full bg-[#EFEBE4] flex items-center justify-center shrink-0">
-                  <UserCog className="w-4 h-4 text-[#1A3C34]" />
+                <div className="w-7 h-7 rounded-full bg-[#EDE6DA] flex items-center justify-center shrink-0">
+                  <UserCog className="w-4 h-4 text-[#0A3E47]" />
                 </div>
-                <h3 className="text-sm font-bold text-[#1A3C34]">Equipo y responsable</h3>
+                <h3 className="text-sm font-bold text-[#0A3E47]">Equipo y responsable</h3>
               </div>
 
               {/* Alert box / editable */}
               {!editandoResponsable ? (
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-[#BDE3D8] bg-[#E7F6F2] px-4 py-3.5">
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-[#6BB68A]/30 bg-[#6BB68A]/10 px-4 py-3.5">
                   <div className="flex items-center gap-3 min-w-0">
-                    <CheckCircle2 className="w-5 h-5 text-[#1A3C34] shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-[#0A3E47] shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-[#1A3C34] leading-tight">
+                      <p className="text-[13px] font-semibold text-[#0A3E47] leading-tight">
                         Responsable detectado desde tu equipo
                       </p>
                       <p className="text-[12px] text-[#4A4A4A] truncate">
@@ -217,13 +217,13 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                   <button
                     type="button"
                     onClick={() => setEditandoResponsable(true)}
-                    className="shrink-0 px-3.5 py-1.5 rounded-full border border-[#1A3C34] text-[12px] font-semibold text-[#1A3C34] hover:bg-[#1A3C34] hover:text-white transition-colors"
+                    className="shrink-0 px-3.5 py-1.5 rounded-full border border-[#0A3E47] text-[12px] font-semibold text-[#0A3E47] hover:bg-[#0A3E47] hover:text-white transition-colors"
                   >
                     Cambiar
                   </button>
                 </div>
               ) : (
-                <div className="rounded-xl border border-[#EFEBE4] bg-white px-4 py-4 space-y-3 animate-in fade-in-0 duration-300">
+                <div className="rounded-xl border border-[#EDE6DA] bg-white px-4 py-4 space-y-3 animate-in fade-in-0 duration-300">
                   <div className="space-y-1.5">
                     <Label className="text-[12px] text-[#6B6B6B]">Nombre del responsable</Label>
                     <Input
@@ -237,7 +237,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                       className={
                         errorResponsable
                           ? "border-[#c0392b] focus-visible:ring-[#c0392b]"
-                          : "border-[#EFEBE4] focus-visible:ring-[#1A3C34]"
+                          : "border-[#EDE6DA] focus-visible:ring-[#0A3E47]"
                       }
                     />
                     {errorResponsable && (
@@ -252,14 +252,14 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                       value={responsableRol}
                       onChange={(e) => setResponsableRol(e.target.value)}
                       placeholder="Ej. Gerente, Técnico de calidad…"
-                      className="border-[#EFEBE4] focus-visible:ring-[#1A3C34]"
+                      className="border-[#EDE6DA] focus-visible:ring-[#0A3E47]"
                     />
                   </div>
                   <div className="flex justify-end">
                     <button
                       type="button"
                       onClick={() => setEditandoResponsable(false)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1A3C34] text-white text-[12px] font-semibold hover:bg-[#24504a] transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A3E47] text-white text-[12px] font-semibold hover:bg-[#0A3E47] transition-colors"
                     >
                       <Check className="w-3.5 h-3.5" />
                       Confirmar
@@ -282,8 +282,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                   onClick={() => setTieneFormacion("si")}
                   className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                     tieneFormacion === "si"
-                      ? "bg-[#1A3C34] text-white border-2 border-[#1A3C34]"
-                      : "bg-white text-[#1A3C34] border-2 border-[#1A3C34] hover:bg-[#1A3C34]/5"
+                      ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                      : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
                   }`}
                 >
                   Sí
@@ -293,8 +293,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                   onClick={() => setTieneFormacion("no")}
                   className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                     tieneFormacion === "no"
-                      ? "bg-[#1A3C34] text-white border-2 border-[#1A3C34]"
-                      : "bg-white text-[#1A3C34] border-2 border-[#1A3C34] hover:bg-[#1A3C34]/5"
+                      ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                      : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
                   }`}
                 >
                   No
@@ -309,11 +309,11 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                       {personasFormacion.map((p) => (
                         <div
                           key={p.id}
-                          className="flex items-center justify-between gap-2 rounded-lg border border-[#BDE3D8] bg-[#E7F6F2] px-3.5 py-2.5 animate-in fade-in-0 slide-in-from-top-1 duration-200"
+                          className="flex items-center justify-between gap-2 rounded-lg border border-[#6BB68A]/30 bg-[#6BB68A]/10 px-3.5 py-2.5 animate-in fade-in-0 slide-in-from-top-1 duration-200"
                         >
                           <div className="flex items-center gap-2 min-w-0">
-                            <CheckCircle2 className="w-4 h-4 text-[#1A3C34] shrink-0" />
-                            <span className="text-[13px] font-medium text-[#1A3C34] truncate">
+                            <CheckCircle2 className="w-4 h-4 text-[#0A3E47] shrink-0" />
+                            <span className="text-[13px] font-medium text-[#0A3E47] truncate">
                               {p.nombre}
                             </span>
                           </div>
@@ -341,13 +341,13 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                         }
                       }}
                       placeholder="Nombre de la persona o de la asesoría"
-                      className="border-[#EFEBE4] focus-visible:ring-[#1A3C34]"
+                      className="border-[#EDE6DA] focus-visible:ring-[#0A3E47]"
                     />
                     <button
                       type="button"
                       onClick={anadirPersona}
                       disabled={!nuevaPersona.trim()}
-                      className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1A3C34] text-white text-[13px] font-semibold hover:bg-[#24504a] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0A3E47] text-white text-[13px] font-semibold hover:bg-[#0A3E47] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                       Añadir
@@ -360,18 +360,18 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
         </div>
 
         {/* --- Footer --- */}
-        <div className="px-6 py-4 border-t border-[#EFEBE4] bg-[#FAF9F6] flex items-center justify-between gap-3">
+        <div className="px-6 py-4 border-t border-[#EDE6DA] bg-[#FAFAF7] flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#1A3C34] transition-colors"
+            className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#0A3E47] transition-colors"
           >
             Cancelar
           </button>
           <Button
             onClick={handleSiguiente}
             disabled={!puedeAvanzar || saving}
-            className="bg-[#75A986] hover:bg-[#659974] !text-white px-6 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="bg-[#6BB68A] hover:bg-[#5aa377] !text-white px-6 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? (
               <>
