@@ -86,7 +86,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
         setContactoNegocio(contacto);
         // Solo autodetectar si no hay config guardada y no hay usuario interno
         if (!configId && !usuarioActivo) {
-          setResponsableNombre((prev) => (prev ? prev : user?.full_name || contacto || ""));
+          setResponsableNombre(contacto || user?.full_name || "");
         }
       })
       .catch(() => {})
