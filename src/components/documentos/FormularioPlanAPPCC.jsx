@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, Check, X, Plus, Trash2 } from "lucide-react";
+import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, Check, X, Plus, Trash2, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
@@ -31,9 +31,12 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
 
   const [pasoActual] = useState(1);
   const [perfilCargado, setPerfilCargado] = useState(false);
+  const [configId, setConfigId] = useState(null);
+  const [configCargada, setConfigCargada] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // --- Responsable ---
-  // Prioridad: usuario interno activo → persona_contacto del BusinessProfile → propietario
+  // Prioridad: config guardada → usuario interno activo → persona_contacto del BusinessProfile → propietario
   const [contactoNegocio, setContactoNegocio] = useState("");
 
   const detectado = usuarioActivo
@@ -45,7 +48,28 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const [responsableRol, setResponsableRol] = useState(detectado.rol);
   const [errorResponsable, setErrorResponsable] = useState(false);
 
-  // Cargar persona_contacto del BusinessProfile al abrir el modal
+  // Cargar ConfiguracionAPPCC existente — tiene prioridad sobre la autodetección
+  useEffect(() => {
+    if (!open || !currentBusiness) return;
+    setConfigCargada(false);
+    base44.entities.ConfiguracionAPPCC.filter({ business_id: currentBusiness.id })
+      .then((data) => {
+        const config = data[0];
+        if (config) {
+          setConfigId(config.id);
+          setResponsableNombre(config.responsable_nombre || "");
+          setResponsableRol(config.responsable_rol || "Propietario");
+          setTieneFormacion(config.tiene_formacion_appcc || null);
+          setPersonasFormacion(
+            (config.formacion_personas || []).map((nombre) => ({ id: Date.now() + Math.random(), nombre }))
+          );
+        }
+      })
+      .catch(() => {})
+      .finally(() => setConfigCargada(true));
+  }, [open, currentBusiness]);
+
+  // Cargar persona_contacto del BusinessProfile al abrir el modal — solo si no hay config guardada
   useEffect(() => {
     if (!open || !currentBusiness) return;
     setPerfilCargado(false);
@@ -53,14 +77,14 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       .then((data) => {
         const contacto = data[0]?.persona_contacto || "";
         setContactoNegocio(contacto);
-        // Solo sobrescribir si no hay usuario interno y el input no ha sido editado manualmente
-        if (!usuarioActivo) {
-          setResponsableNombre(contacto || user?.full_name || "");
+        // Solo autodetectar si no hay config guardada y no hay usuario interno
+        if (!configId && !usuarioActivo) {
+          setResponsableNombre((prev) => (prev ? prev : contacto || user?.full_name || ""));
         }
       })
       .catch(() => {})
       .finally(() => setPerfilCargado(true));
-  }, [open, currentBusiness]);
+  }, [open, currentBusiness, configId]);
 
   // --- Formación APPCC ---
   const [tieneFormacion, setTieneFormacion] = useState(null); // "si" | "no" | null
@@ -80,14 +104,36 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
 
   const puedeAvanzar = responsableNombre.trim() !== "" && tieneFormacion !== null;
 
-  const handleSiguiente = () => {
+  const handleSiguiente = async () => {
     if (!responsableNombre.trim()) {
       setEditandoResponsable(true);
       setErrorResponsable(true);
       return;
     }
     setErrorResponsable(false);
-    console.log("Paso 1 — Datos capturados:", {
+    setSaving(true);
+    const payload = {
+      user_id: user.id,
+      business_id: currentBusiness.id,
+      responsable_nombre: responsableNombre,
+      responsable_rol: responsableRol,
+      tiene_formacion_appcc: tieneFormacion,
+      formacion_personas: personasFormacion.map((p) => p.nombre),
+    };
+    try {
+      if (configId) {
+        await base44.entities.ConfiguracionAPPCC.update(configId, payload);
+      } else {
+        const created = await base44.entities.ConfiguracionAPPCC.create(payload);
+        if (created?.id) setConfigId(created.id);
+      }
+    } catch (e) {
+      // el error burbuja para mostrarlo
+      setSaving(false);
+      throw e;
+    }
+    setSaving(false);
+    console.log("Paso 1 — Datos guardados:", {
       responsable: { nombre: responsableNombre, rol: responsableRol },
       formacion: {
         respuesta: tieneFormacion,
@@ -324,11 +370,20 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           </button>
           <Button
             onClick={handleSiguiente}
-            disabled={!puedeAvanzar}
+            disabled={!puedeAvanzar || saving}
             className="bg-[#75A986] hover:bg-[#659974] !text-white px-6 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Siguiente
-            <ChevronRight className="w-4 h-4" />
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Guardando…
+              </>
+            ) : (
+              <>
+                Siguiente
+                <ChevronRight className="w-4 h-4" />
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>
