@@ -9,11 +9,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, UserCog, GraduationCap, ChevronRight, Pencil, Check } from "lucide-react";
+import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, Pencil, Check, X } from "lucide-react";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 
 const TOTAL_PASOS = 7;
+const PASOS = [
+  "Equipo y responsable",
+  "Peligros del proceso",
+  "Puntos de control crítico",
+  "Límites críticos",
+  "Vigilancia",
+  "Acciones correctivas",
+  "Verificación y registros",
+];
 
 export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const { user } = useBusiness();
@@ -41,172 +50,172 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
     });
   };
 
-  const handleCancelar = () => onOpenChange(false);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0">
-        {/* Cabecera con degradado */}
-        <div className="bg-gradient-to-br from-[#0A3E47] to-[#0d4d5a] px-6 py-5">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <DialogTitle className="text-white text-lg font-bold leading-tight">
-                Generar Plan APPCC
-              </DialogTitle>
-              <DialogDescription className="text-white/75 text-sm">
-                Completa la información paso a paso para generar tu documento.
-              </DialogDescription>
-            </div>
-          </div>
-
-          {/* Indicador de progreso */}
-          <div className="flex items-center gap-2 mt-4">
-            <div className="flex-1 h-1.5 rounded-full bg-white/20 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[#6BB68A] transition-all duration-500"
-                style={{ width: `${(pasoActual / TOTAL_PASOS) * 100}%` }}
-              />
-            </div>
-            <span className="text-white/80 text-xs font-medium tabular-nums shrink-0">
+      <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0 rounded-2xl bg-[#F9F8F4]">
+        {/* --- Barra de progreso superior --- */}
+        <div className="px-6 pt-5 pb-4 border-b border-[#E8E2D9]">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[13px] font-medium text-[#4A4A4A]">
               Paso {pasoActual} de {TOTAL_PASOS}
             </span>
+            <span className="text-[13px] font-medium text-[#4A4A4A]">
+              {PASOS[pasoActual - 1]}
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-[#E8E2D9] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[#0D3B3E] transition-all duration-700 ease-out"
+              style={{ width: `${(pasoActual / TOTAL_PASOS) * 100}%` }}
+            />
           </div>
         </div>
 
-        {/* Cuerpo */}
-        <div className="px-6 py-6 space-y-7 max-h-[60vh] overflow-y-auto">
-          {/* Sección: Equipo y responsable */}
-          <section>
-            <div className="flex items-center gap-2 mb-1">
-              <UserCog className="w-4 h-4 text-[#0A3E47]" />
-              <h3 className="text-sm font-bold text-[#0A3E47]">Equipo y responsable</h3>
+        {/* --- Cabecera del documento --- */}
+        <div className="px-6 pt-6 pb-2">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-[#0D3B3E] flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5 text-white" />
             </div>
-            <p className="text-xs text-muted-foreground mb-4">
-              Hemos detectado al responsable a partir de tu sesión. Puedes editarlo si lo necesitas.
-            </p>
+            <div>
+              <DialogTitle className="text-[#0D3B3E] text-xl font-bold leading-tight">
+                Formulario previo — Plan APPCC
+              </DialogTitle>
+            </div>
+          </div>
+          <DialogDescription className="text-[13px] text-[#6B6B6B] leading-relaxed">
+            Para dejar tu Plan APPCC bien afinado, necesitamos confirmar algunos datos reales de tu
+            negocio. Lo que ya sabemos por tus registros no te lo volveremos a preguntar.
+          </DialogDescription>
+        </div>
 
-            <div className="rounded-xl border border-border bg-[#FAFAF7] p-4">
+        {/* --- Cuerpo con slide --- */}
+        <div className="px-6 py-5 space-y-6 max-h-[52vh] overflow-y-auto">
+          <div key={pasoActual} className="animate-in fade-in-0 slide-in-from-right-4 duration-500 space-y-6">
+            {/* Sección: Equipo y responsable */}
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-7 h-7 rounded-full bg-[#E8E2D9] flex items-center justify-center shrink-0">
+                  <UserCog className="w-4 h-4 text-[#0D3B3E]" />
+                </div>
+                <h3 className="text-sm font-bold text-[#0D3B3E]">Equipo y responsable</h3>
+              </div>
+
+              {/* Alert box / editable */}
               {!editandoResponsable ? (
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                      Responsable
-                    </Label>
-                    <p className="font-semibold text-[#0A3E47] text-sm leading-tight truncate">
-                      {responsableNombre || "Sin nombre"}
-                    </p>
-                    <p className="text-xs text-muted-foreground capitalize">{responsableRol}</p>
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-[#BDE3D8] bg-[#E7F6F2] px-4 py-3.5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <CheckCircle2 className="w-5 h-5 text-[#0D3B3E] shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-[#0D3B3E] leading-tight">
+                        Responsable detectado desde tu equipo
+                      </p>
+                      <p className="text-[12px] text-[#4A4A4A] truncate">
+                        {responsableNombre || "Sin nombre"} · {responsableRol}
+                      </p>
+                    </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-[#0A3E47] hover:bg-[#0A3E47]/8 shrink-0"
+                  <button
+                    type="button"
                     onClick={() => setEditandoResponsable(true)}
+                    className="shrink-0 px-3.5 py-1.5 rounded-full border border-[#0D3B3E] text-[12px] font-semibold text-[#0D3B3E] hover:bg-[#0D3B3E] hover:text-white transition-colors"
                   >
-                    <Pencil className="w-3.5 h-3.5" />
                     Cambiar
-                  </Button>
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="rounded-xl border border-[#E8E2D9] bg-white px-4 py-4 space-y-3 animate-in fade-in-0 duration-300">
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Nombre del responsable</Label>
+                    <Label className="text-[12px] text-[#6B6B6B]">Nombre del responsable</Label>
                     <Input
                       value={responsableNombre}
                       onChange={(e) => setResponsableNombre(e.target.value)}
                       placeholder="Ej. María García"
                       autoFocus
+                      className="border-[#E8E2D9] focus-visible:ring-[#0D3B3E]"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Rol / cargo</Label>
+                    <Label className="text-[12px] text-[#6B6B6B]">Rol / cargo</Label>
                     <Input
                       value={responsableRol}
                       onChange={(e) => setResponsableRol(e.target.value)}
                       placeholder="Ej. Gerente, Técnico de calidad…"
+                      className="border-[#E8E2D9] focus-visible:ring-[#0D3B3E]"
                     />
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-[#6BB68A] hover:bg-[#6BB68A]/10 shrink-0"
-                    onClick={() => setEditandoResponsable(false)}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    Confirmar
-                  </Button>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setEditandoResponsable(false)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0D3B3E] text-white text-[12px] font-semibold hover:bg-[#0d4d5a] transition-colors"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      Confirmar
+                    </button>
+                  </div>
                 </div>
               )}
-            </div>
-          </section>
+            </section>
 
-          {/* Sección: Formación APPCC */}
-          <section>
-            <div className="flex items-center gap-2 mb-1">
-              <GraduationCap className="w-4 h-4 text-[#0A3E47]" />
-              <h3 className="text-sm font-bold text-[#0A3E47]">Formación en APPCC</h3>
-            </div>
-            <p className="text-xs text-muted-foreground mb-4">
-              ¿Alguien del equipo tiene formación específica en APPCC o contáis con asesoría externa?
-            </p>
+            {/* Sección: Formación APPCC */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
+                ¿Alguien del equipo tiene formación específica en APPCC, o contáis con asesoría
+                externa?
+              </p>
 
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setTieneFormacion("si")}
-                className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
-                  tieneFormacion === "si"
-                    ? "border-[#6BB68A] bg-[#6BB68A]/10 text-[#0A3E47]"
-                    : "border-border bg-white text-muted-foreground hover:border-[#6BB68A]/50"
-                }`}
-              >
-                Sí
-              </button>
-              <button
-                type="button"
-                onClick={() => setTieneFormacion("no")}
-                className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
-                  tieneFormacion === "no"
-                    ? "border-[#6BB68A] bg-[#6BB68A]/10 text-[#0A3E47]"
-                    : "border-border bg-white text-muted-foreground hover:border-[#6BB68A]/50"
-                }`}
-              >
-                No
-              </button>
-            </div>
-
-            {tieneFormacion && (
-              <div className="mt-4 space-y-1.5 animate-in fade-in-0 duration-300">
-                <Label className="text-xs text-muted-foreground">
-                  {tieneFormacion === "si"
-                    ? "Indica el nombre de la persona o asesoría (opcional)"
-                    : "¿Planeas contratar asesoría externa? (opcional)"}
-                </Label>
-                <Input
-                  value={detalleFormacion}
-                  onChange={(e) => setDetalleFormacion(e.target.value)}
-                  placeholder={
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setTieneFormacion("si")}
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                     tieneFormacion === "si"
-                      ? "Ej. Juan Pérez — Curso APPCC homologado"
-                      : "Ej. Evaluando opciones de consultoría externa"
-                  }
-                />
+                      ? "bg-[#0D3B3E] text-white border-2 border-[#0D3B3E]"
+                      : "bg-white text-[#0D3B3E] border-2 border-[#0D3B3E] hover:bg-[#0D3B3E]/5"
+                  }`}
+                >
+                  Sí
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTieneFormacion("no")}
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    tieneFormacion === "no"
+                      ? "bg-[#0D3B3E] text-white border-2 border-[#0D3B3E]"
+                      : "bg-white text-[#0D3B3E] border-2 border-[#0D3B3E] hover:bg-[#0D3B3E]/5"
+                  }`}
+                >
+                  No
+                </button>
               </div>
-            )}
-          </section>
+
+              {tieneFormacion && (
+                <div className="mt-4 animate-in fade-in-0 slide-in-from-top-2 duration-400">
+                  <Input
+                    value={detalleFormacion}
+                    onChange={(e) => setDetalleFormacion(e.target.value)}
+                    placeholder="Opcional: nombre de la persona o de la asesoría"
+                    className="border-[#E8E2D9] focus-visible:ring-[#0D3B3E]"
+                  />
+                </div>
+              )}
+            </section>
+          </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-border bg-[#FAFAF7] flex items-center justify-between gap-3">
-          <Button variant="ghost" onClick={handleCancelar} className="text-muted-foreground hover:text-foreground">
+        {/* --- Footer --- */}
+        <div className="px-6 py-4 border-t border-[#E8E2D9] bg-[#F9F8F4] flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#0D3B3E] transition-colors"
+          >
             Cancelar
-          </Button>
+          </button>
           <Button
             onClick={handleSiguiente}
-            className="bg-[#6BB68A] hover:bg-[#5aa377] !text-white"
+            className="bg-[#75A986] hover:bg-[#659974] !text-white px-6"
           >
             Siguiente
             <ChevronRight className="w-4 h-4" />
