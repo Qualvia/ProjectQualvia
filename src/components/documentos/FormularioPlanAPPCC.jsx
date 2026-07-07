@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, Check } from "lucide-react";
+import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, Check, X, Plus, Trash2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
@@ -63,12 +63,27 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
 
   // --- Formación APPCC ---
   const [tieneFormacion, setTieneFormacion] = useState(null); // "si" | "no" | null
-  const [detalleFormacion, setDetalleFormacion] = useState("");
+  const [personasFormacion, setPersonasFormacion] = useState([]); // [{ id, nombre }]
+  const [nuevaPersona, setNuevaPersona] = useState("");
+
+  const anadirPersona = () => {
+    const valor = nuevaPersona.trim();
+    if (!valor) return;
+    setPersonasFormacion((prev) => [...prev, { id: Date.now(), nombre: valor }]);
+    setNuevaPersona("");
+  };
+
+  const eliminarPersona = (id) => {
+    setPersonasFormacion((prev) => prev.filter((p) => p.id !== id));
+  };
 
   const handleSiguiente = () => {
     console.log("Paso 1 — Datos capturados:", {
       responsable: { nombre: responsableNombre, rol: responsableRol },
-      formacion: { respuesta: tieneFormacion, detalle: detalleFormacion },
+      formacion: {
+        respuesta: tieneFormacion,
+        personas: personasFormacion.map((p) => p.nombre),
+      },
     });
   };
 
@@ -77,13 +92,22 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0 rounded-2xl bg-[#FAF9F6] [&>button]:hidden">
         {/* --- Barra de progreso superior --- */}
         <div className="px-6 pt-5 pb-4 border-b border-[#EFEBE4]">
-          <div className="flex items-center justify-between mb-3 pr-8">
+          <div className="flex items-center justify-between mb-3">
             <span className="text-[13px] font-medium text-[#4A4A4A]">
               Paso {pasoActual} de {TOTAL_PASOS}
             </span>
-            <span className="text-[13px] font-medium text-[#4A4A4A]">
-              {PASOS[pasoActual - 1]}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-[13px] font-medium text-[#4A4A4A]">
+                {PASOS[pasoActual - 1]}
+              </span>
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="w-7 h-7 rounded-full flex items-center justify-center text-[#9A9A9A] hover:text-[#1A3C34] hover:bg-[#1A3C34]/8 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
           <div className="h-1.5 rounded-full bg-[#EFEBE4] overflow-hidden">
             <div
@@ -94,18 +118,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
         </div>
 
         {/* --- Cabecera del documento --- */}
-        <div className="px-6 pt-6 pb-2 relative">
-          {/* Botón cerrar personalizado, bien separado del contenido */}
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="absolute right-5 top-5 w-8 h-8 rounded-full flex items-center justify-center text-[#9A9A9A] hover:text-[#1A3C34] hover:bg-[#1A3C34]/8 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
+        <div className="px-6 pt-6 pb-2">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-[#1A3C34] flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5 text-white" />
@@ -221,14 +234,58 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                 </button>
               </div>
 
-              {tieneFormacion && (
-                <div className="mt-4 animate-in fade-in-0 slide-in-from-top-2 duration-300">
-                  <Input
-                    value={detalleFormacion}
-                    onChange={(e) => setDetalleFormacion(e.target.value)}
-                    placeholder="Opcional: nombre de la persona o de la asesoría"
-                    className="border-[#EFEBE4] focus-visible:ring-[#1A3C34]"
-                  />
+              {tieneFormacion === "si" && (
+                <div className="mt-4 animate-in fade-in-0 slide-in-from-top-2 duration-300 space-y-3">
+                  {/* Lista de personas/asesorías añadidas */}
+                  {personasFormacion.length > 0 && (
+                    <div className="space-y-2">
+                      {personasFormacion.map((p) => (
+                        <div
+                          key={p.id}
+                          className="flex items-center justify-between gap-2 rounded-lg border border-[#BDE3D8] bg-[#E7F6F2] px-3.5 py-2.5 animate-in fade-in-0 slide-in-from-top-1 duration-200"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <CheckCircle2 className="w-4 h-4 text-[#1A3C34] shrink-0" />
+                            <span className="text-[13px] font-medium text-[#1A3C34] truncate">
+                              {p.nombre}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => eliminarPersona(p.id)}
+                            className="shrink-0 p-1 rounded-md text-[#9A9A9A] hover:text-[#c0392b] hover:bg-[#c0392b]/8 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Input + botón añadir */}
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={nuevaPersona}
+                      onChange={(e) => setNuevaPersona(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          anadirPersona();
+                        }
+                      }}
+                      placeholder="Nombre de la persona o de la asesoría"
+                      className="border-[#EFEBE4] focus-visible:ring-[#1A3C34]"
+                    />
+                    <button
+                      type="button"
+                      onClick={anadirPersona}
+                      disabled={!nuevaPersona.trim()}
+                      className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1A3C34] text-white text-[13px] font-semibold hover:bg-[#24504a] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Añadir
+                    </button>
+                  </div>
                 </div>
               )}
             </section>
