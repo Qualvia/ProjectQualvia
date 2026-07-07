@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { ShieldCheck, ClipboardList, BookOpen, Award, Sparkles, BarChart3, Download } from "lucide-react";
+import FormularioPlanAPPCC from "./FormularioPlanAPPCC";
 
 const DOCUMENTOS = [
   {
@@ -59,6 +60,8 @@ const DOCUMENTOS = [
 ];
 
 export default function TabDocumentos() {
+  const [modalAppccOpen, setModalAppccOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       {/* Banner informativo */}
@@ -102,7 +105,9 @@ export default function TabDocumentos() {
               </div>
               <button
                 className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors ${doc.btnColor}`}
-                onClick={() => {/* generación pendiente */}}
+                onClick={() => {
+                  if (doc.id === "appcc") setModalAppccOpen(true);
+                }}
               >
                 <Download className="w-4 h-4" />
                 Generar PDF
@@ -111,6 +116,8 @@ export default function TabDocumentos() {
           );
         })}
       </div>
+
+      <FormularioPlanAPPCC open={modalAppccOpen} onOpenChange={setModalAppccOpen} />
 
       {/* Aviso legal */}
       <div className="bg-secondary border border-border rounded-2xl px-5 py-4 flex items-start gap-3">
