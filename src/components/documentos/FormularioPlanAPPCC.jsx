@@ -37,6 +37,11 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const [configCargada, setConfigCargada] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // --- Formación APPCC ---
+  const [tieneFormacion, setTieneFormacion] = useState(null); // "si" | "no" | null
+  const [personasFormacion, setPersonasFormacion] = useState([]); // [{ id, nombre }]
+  const [nuevaPersona, setNuevaPersona] = useState("");
+
   // --- Responsable ---
   // Prioridad: config guardada → usuario interno activo → persona_contacto del BusinessProfile → propietario
   const [contactoNegocio, setContactoNegocio] = useState("");
@@ -87,11 +92,6 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       .catch(() => {})
       .finally(() => setPerfilCargado(true));
   }, [open, currentBusiness, configId]);
-
-  // --- Formación APPCC ---
-  const [tieneFormacion, setTieneFormacion] = useState(null); // "si" | "no" | null
-  const [personasFormacion, setPersonasFormacion] = useState([]); // [{ id, nombre }]
-  const [nuevaPersona, setNuevaPersona] = useState("");
 
   const anadirPersona = () => {
     const valor = nuevaPersona.trim();
