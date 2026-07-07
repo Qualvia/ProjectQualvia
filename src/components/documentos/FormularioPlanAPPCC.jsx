@@ -43,6 +43,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const [editandoResponsable, setEditandoResponsable] = useState(false);
   const [responsableNombre, setResponsableNombre] = useState(detectado.nombre);
   const [responsableRol, setResponsableRol] = useState(detectado.rol);
+  const [errorResponsable, setErrorResponsable] = useState(false);
 
   // Cargar persona_contacto del BusinessProfile al abrir el modal
   useEffect(() => {
@@ -77,7 +78,15 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
     setPersonasFormacion((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const puedeAvanzar = responsableNombre.trim() !== "" && tieneFormacion !== null;
+
   const handleSiguiente = () => {
+    if (!responsableNombre.trim()) {
+      setEditandoResponsable(true);
+      setErrorResponsable(true);
+      return;
+    }
+    setErrorResponsable(false);
     console.log("Paso 1 — Datos capturados:", {
       responsable: { nombre: responsableNombre, rol: responsableRol },
       formacion: {
@@ -173,11 +182,23 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                     <Label className="text-[12px] text-[#6B6B6B]">Nombre del responsable</Label>
                     <Input
                       value={responsableNombre}
-                      onChange={(e) => setResponsableNombre(e.target.value)}
+                      onChange={(e) => {
+                        setResponsableNombre(e.target.value);
+                        if (e.target.value.trim()) setErrorResponsable(false);
+                      }}
                       placeholder="Ej. María García"
                       autoFocus
-                      className="border-[#EFEBE4] focus-visible:ring-[#1A3C34]"
+                      className={
+                        errorResponsable
+                          ? "border-[#c0392b] focus-visible:ring-[#c0392b]"
+                          : "border-[#EFEBE4] focus-visible:ring-[#1A3C34]"
+                      }
                     />
+                    {errorResponsable && (
+                      <p className="text-[11px] text-[#c0392b] font-medium">
+                        Indica el nombre del responsable
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[12px] text-[#6B6B6B]">Rol / cargo</Label>
@@ -303,7 +324,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           </button>
           <Button
             onClick={handleSiguiente}
-            className="bg-[#75A986] hover:bg-[#659974] !text-white px-6"
+            disabled={!puedeAvanzar}
+            className="bg-[#75A986] hover:bg-[#659974] !text-white px-6 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Siguiente
             <ChevronRight className="w-4 h-4" />
