@@ -53,11 +53,12 @@ const RANGO_OPCIONES = [
 ];
 
 const CASOS_ESPECIALES_OPCIONES = [
-  "Comidas listas para consumo",
-  "Productos de alto riesgo (carnes/pescados crudos, cremas, salsas)",
-  "Población vulnerable (niños, ancianos, hospitales)",
-  "Uso intensivo de alérgenos",
-  "Ninguno de los anteriores",
+  { label: "Comidas listas para consumo", ejemplo: "Platos sin cocción posterior: ensaladas, sándwiches, bollería rellena" },
+  { label: "Productos de alto riesgo", ejemplo: "Carnes o pescados crudos, cremas, salsas caseras" },
+  { label: "Población vulnerable", ejemplo: "Niños, ancianos, hospitales, colectividades" },
+  { label: "Uso intensivo de alérgenos", ejemplo: "Varios alérgenos combinados en la misma zona: gluten, lácteos, frutos secos..." },
+  { label: "Menús o platos bajo pedido para alergias/intolerancias", ejemplo: "Ej: menú sin gluten, plato apto para celíacos garantizado" },
+  { label: "Ninguno de los anteriores", ejemplo: null },
 ];
 
 export default function FormularioPlanAPPCC({ open, onOpenChange }) {
@@ -555,21 +556,28 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                 Selecciona todos los que apliquen.
               </p>
               <div className="grid grid-cols-2 gap-2.5">
-                {CASOS_ESPECIALES_OPCIONES.map((caso) => {
-                  const activo = casosEspeciales.includes(caso);
+                {CASOS_ESPECIALES_OPCIONES.map((opt) => {
+                  const activo = casosEspeciales.includes(opt.label);
                   return (
                     <button
-                      key={caso}
+                      key={opt.label}
                       type="button"
-                      onClick={() => toggleCasoEspecial(caso)}
-                      className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 ${
+                      onClick={() => toggleCasoEspecial(opt.label)}
+                      className={`flex flex-col items-center justify-center gap-1 py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 text-center ${
                         activo
                           ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
                           : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
                       }`}
                     >
-                      {activo && <Check className="w-3.5 h-3.5" />}
-                      {caso}
+                      <span className="flex items-center gap-1.5">
+                        {activo && <Check className="w-3.5 h-3.5" />}
+                        {opt.label}
+                      </span>
+                      {opt.ejemplo && (
+                        <span className={`text-[11px] font-normal leading-snug ${activo ? "text-white/75" : "text-[#9A9A9A]"}`}>
+                          {opt.ejemplo}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
