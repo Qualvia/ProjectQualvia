@@ -27,6 +27,16 @@ const PASOS = [
   "Formación y cambios",
 ];
 
+const DESCRIPCIONES_PASO = [
+  "",
+  "Cuéntanos cómo trabajas día a día para ajustar los controles.",
+  "Identificamos productos de riesgo, alérgenos y casos especiales.",
+  "Clasificamos tus procesos para definir los puntos críticos.",
+  "Configuramos los equipos que requieren control de temperatura.",
+  "Registramos proveedores y el suministro de agua.",
+  "Formación del equipo y cambios relevantes del negocio.",
+];
+
 const PROCESOS_HABITUALES_OPCIONES = [
   "Recepción de mercancías",
   "Almacenamiento en frío",
@@ -286,18 +296,31 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
 
         {/* --- Cabecera del documento --- */}
         <div className="px-6 pt-6 pb-2">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-[#0A3E47] flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <DialogTitle className="text-[#0A3E47] text-xl font-bold leading-tight">
-              Formulario previo — Plan APPCC
-            </DialogTitle>
-          </div>
-          <DialogDescription className="text-[13px] text-[#6B6B6B] leading-relaxed">
-            Para dejar tu Plan APPCC bien afinado, necesitamos confirmar algunos datos reales de tu
-            negocio. Lo que ya sabemos por tus registros no te lo volveremos a preguntar.
-          </DialogDescription>
+          {pasoActual === 1 ? (
+            <>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-[#0A3E47] flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5 text-white" />
+                </div>
+                <DialogTitle className="text-[#0A3E47] text-xl font-bold leading-tight">
+                  Formulario previo — Plan APPCC
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-[13px] text-[#6B6B6B] leading-relaxed">
+                Para dejar tu Plan APPCC bien afinado, necesitamos confirmar algunos datos reales de
+                tu negocio. Lo que ya sabemos por tus registros no te lo volveremos a preguntar.
+              </DialogDescription>
+            </>
+          ) : (
+            <>
+              <DialogTitle className="text-[#0A3E47] text-xl font-bold leading-tight mb-1.5">
+                {PASOS[pasoActual - 1]}
+              </DialogTitle>
+              <DialogDescription className="text-[13px] text-[#6B6B6B] leading-relaxed">
+                {DESCRIPCIONES_PASO[pasoActual - 1]}
+              </DialogDescription>
+            </>
+          )}
         </div>
 
         {/* --- Cuerpo con slide --- */}
