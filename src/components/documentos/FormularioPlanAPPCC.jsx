@@ -41,9 +41,9 @@ const PROCESOS_HABITUALES_OPCIONES = [
 ];
 
 const SEPARACION_OPCIONES = [
-  { value: "si", label: "Sí", ejemplo: "Circuitos limpio y sucio totalmente separados físicamente" },
-  { value: "no", label: "No", ejemplo: "No hay separación física: comparten zonas y equipos" },
-  { value: "parcial", label: "Parcialmente", ejemplo: "Separación parcial por horarios o zonas compartidas" },
+  { value: "si", label: "Sí" },
+  { value: "no", label: "No" },
+  { value: "parcial", label: "Parcialmente" },
 ];
 
 const RANGO_OPCIONES = [
@@ -181,9 +181,16 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   };
 
   const toggleCasoEspecial = (caso) => {
-    setCasosEspeciales((prev) =>
-      prev.includes(caso) ? prev.filter((c) => c !== caso) : [...prev, caso]
-    );
+    const NINGUNO = "Ninguno de los anteriores";
+    setCasosEspeciales((prev) => {
+      if (caso === NINGUNO) {
+        return prev.includes(caso) ? prev.filter((c) => c !== caso) : [caso];
+      }
+      if (prev.includes(caso)) {
+        return prev.filter((c) => c !== caso);
+      }
+      return [...prev.filter((c) => c !== NINGUNO), caso];
+    });
   };
 
   const anadirAlergeno = () => {
@@ -500,9 +507,21 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
 
             {/* Sección: Separación de circuitos */}
             <section>
-              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
-                ¿Existe separación de circuitos (limpio/sucio)?
-              </p>
+              <div className="flex items-center gap-1.5 mb-4">
+                <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug">
+                  ¿Existe separación de circuitos (limpio/sucio)?
+                </p>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button type="button" className="shrink-0 inline-flex items-center">
+                      <Info className="w-4 h-4 text-[#9A9A9A] hover:text-[#0A3E47]" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto max-w-64 text-sm bg-white">
+                    Se refiere a evitar el cruce entre zonas limpias (manipulación de alimentos) y sucias (residuos, suciedad, embalajes) para prevenir la contaminación cruzada.
+                  </PopoverContent>
+                </Popover>
+              </div>
               <div className="grid grid-cols-3 gap-3">
                 {SEPARACION_OPCIONES.map((opt) => {
                   const activo = separacionCircuitos === opt.value;
@@ -511,30 +530,13 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                       key={opt.value}
                       type="button"
                       onClick={() => setSeparacionCircuitos(opt.value)}
-                      className={`flex items-center justify-center gap-1.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                         activo
                           ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
                           : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
                       }`}
                     >
                       {opt.label}
-                      {opt.ejemplo && (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button
-                              type="button"
-                              onClick={(e) => e.stopPropagation()}
-                              onPointerDown={(e) => e.stopPropagation()}
-                              className="shrink-0"
-                            >
-                              <Info className={`w-4 h-4 ${activo ? "text-white/70" : "text-[#9A9A9A]"}`} />
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto max-w-56 text-sm bg-white">
-                            {opt.ejemplo}
-                          </PopoverContent>
-                        </Popover>
-                      )}
                     </button>
                   );
                 })}
@@ -584,13 +586,13 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                       key={opt.label}
                       type="button"
                       onClick={() => toggleCasoEspecial(opt.label)}
-                      className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 text-center ${
+                      className={`py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 text-center ${
                         activo
                           ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
                           : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
                       }`}
                     >
-                      {activo && <Check className="w-3.5 h-3.5" />}
+                      {activo && <Check className="w-3.5 h-3.5 inline align-middle mr-1" />}
                       {opt.label}
                       {opt.ejemplo && (
                         <Popover>
@@ -599,7 +601,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                               type="button"
                               onClick={(e) => e.stopPropagation()}
                               onPointerDown={(e) => e.stopPropagation()}
-                              className="shrink-0"
+                              className="inline-flex align-middle ml-1"
                             >
                               <Info className={`w-4 h-4 ${activo ? "text-white/70" : "text-[#9A9A9A]"}`} />
                             </button>
