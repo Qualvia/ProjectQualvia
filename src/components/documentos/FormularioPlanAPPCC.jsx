@@ -548,7 +548,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
               <>
             {/* Sección: Productos y consumidor — casos especiales */}
             <section>
-              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-1">
                 ¿Se da alguno de estos casos especiales en tu negocio?
               </p>
               <p className="text-[12px] text-[#6B6B6B] mb-4">
