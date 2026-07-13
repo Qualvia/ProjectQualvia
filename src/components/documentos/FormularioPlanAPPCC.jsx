@@ -43,11 +43,16 @@ const PROCESOS_HABITUALES_OPCIONES = [
   "Almacenamiento en seco",
   "Preparación en frío",
   "Cocción",
+  "Fermentación/leudado",
+  "Horneado",
+  "Etiquetado",
   "Enfriado",
   "Regeneración",
   "Mantenimiento en caliente",
   "Distribución/servicio",
   "Envasado",
+  "Venta directa al consumidor en el mismo local",
+  "Distribución a otros negocios (B2B/mayorista)",
 ];
 
 const SEPARACION_OPCIONES = [
