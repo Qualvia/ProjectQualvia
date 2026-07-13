@@ -91,6 +91,22 @@
         "red_publica",
         "deposito_propio"
       ]
+    },
+    "personal_formado": {
+      "type": "string",
+      "enum": [
+        "si",
+        "no",
+        "parcial"
+      ],
+      "description": "si | no | parcial"
+    },
+    "cambios_recientes": {
+      "type": "string"
+    },
+    "confirmacion_veracidad": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

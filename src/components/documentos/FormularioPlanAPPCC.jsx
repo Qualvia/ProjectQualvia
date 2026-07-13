@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, ChevronLeft, Check, X, Plus, Trash2, Loader2, Info } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -139,7 +140,13 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   // --- Paso 6: Proveedores y agua ---
   const [proveedoresHomologados, setProveedoresHomologados] = useState(null); // "si" | "no" | "parcial" | null
   const [origenAgua, setOrigenAgua] = useState(null); // "red_publica" | "deposito_propio" | null
-  const [proveedoresInfo, setProveedoresInfo] = useState(null); // { total, conCertificacion }
+  const [proveedoresInfo, setProveedoresInfo] = useState(null); // { total, conCertificacion, lista }
+
+  // --- Paso 7: Formación y cambios ---
+  const [personalFormado, setPersonalFormado] = useState(null); // "si" | "no" | "parcial" | null
+  const [cambiosRecientes, setCambiosRecientes] = useState("");
+  const [confirmacionVeracidad, setConfirmacionVeracidad] = useState(false);
+  const [formacionInfo, setFormacionInfo] = useState(null); // { total, ultimoTema, ultimaFecha }
 
   // --- Responsable ---
   // Prioridad: config guardada → usuario interno activo → persona_contacto del BusinessProfile → propietario
@@ -180,6 +187,9 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           setOtrosEquipos(equiposGuardados.filter((e) => !EQUIPOS_OPCIONES.includes(e)));
           setProveedoresHomologados(config.proveedores_homologados || null);
           setOrigenAgua(config.origen_agua || null);
+          setPersonalFormado(config.personal_formado || null);
+          setCambiosRecientes(config.cambios_recientes || "");
+          setConfirmacionVeracidad(!!config.confirmacion_veracidad);
         }
         // Si NO hay config guardada con alérgenos, precargar desde los registros de alérgenos
         if (!config || !config.alergenos || config.alergenos.length === 0) {
@@ -210,6 +220,22 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           const total = lista.length;
           const conCertificacion = lista.filter((p) => p.homologado).length;
           setProveedoresInfo({ total, conCertificacion, lista });
+        } catch (e) {}
+        // Siempre: resumir formaciones registradas (total y más reciente)
+        try {
+          const formaciones = await base44.entities.RegistroFormacion.filter({ business_id: currentBusiness.id });
+          const ordenadas = (formaciones || []).slice().sort((a, b) => {
+            const fa = a.fecha_formacion || "";
+            const fb = b.fecha_formacion || "";
+            return fb.localeCompare(fa);
+          });
+          const total = ordenadas.length;
+          const ultima = ordenadas[0] || null;
+          setFormacionInfo({
+            total,
+            ultimoTema: ultima?.tema || "",
+            ultimaFecha: ultima?.fecha_formacion || "",
+          });
         } catch (e) {}
       })
       .catch(() => {})
@@ -251,6 +277,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const puedeAvanzarPaso4 = categoriasProceso.length > 0;
   const puedeAvanzarPaso5 = equiposCriticos.length > 0 || otrosEquipos.length > 0;
   const puedeAvanzarPaso6 = proveedoresHomologados !== null && origenAgua !== null;
+  const puedeAvanzarPaso7 = personalFormado !== null && confirmacionVeracidad === true;
 
   const puedeAvanzar =
     pasoActual === 1 ? puedeAvanzarPaso1
@@ -259,6 +286,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
     : pasoActual === 4 ? puedeAvanzarPaso4
     : pasoActual === 5 ? puedeAvanzarPaso5
     : pasoActual === 6 ? puedeAvanzarPaso6
+    : pasoActual === 7 ? puedeAvanzarPaso7
     : true;
 
   const toggleProceso = (proceso) => {
@@ -340,6 +368,9 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       equipos_criticos: [...equiposCriticos, ...otrosEquipos],
       proveedores_homologados: proveedoresHomologados,
       origen_agua: origenAgua,
+      personal_formado: personalFormado,
+      cambios_recientes: cambiosRecientes,
+      confirmacion_veracidad: confirmacionVeracidad,
     };
     try {
       if (configId) {
@@ -357,7 +388,12 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       return;
     }
     setSaving(false);
-    if (pasoActual < TOTAL_PASOS) {
+    if (pasoActual === TOTAL_PASOS) {
+      toast({
+        title: "Configuración guardada. Ya puedes generar tu Plan APPCC.",
+      });
+      onOpenChange(false);
+    } else if (pasoActual < TOTAL_PASOS) {
       setPasoActual((prev) => prev + 1);
     }
   };
@@ -1034,6 +1070,87 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
             </section>
               </>
             )}
+
+            {pasoActual === 7 && (
+              <>
+            {/* Sección: Formación del personal */}
+            <section>
+              {formacionInfo && formacionInfo.total > 0 && (
+                <div className="flex items-center gap-3 rounded-xl border border-[#6BB68A]/30 bg-[#6BB68A]/10 px-4 py-3.5 mb-4">
+                  <CheckCircle2 className="w-5 h-5 text-[#0A3E47] shrink-0" />
+                  <p className="text-[13px] font-medium text-[#0A3E47] leading-snug">
+                    Tienes {formacionInfo.total} formaciones registradas. La más reciente: {formacionInfo.ultimoTema || "—"}{formacionInfo.ultimaFecha ? ` (${formacionInfo.ultimaFecha})` : ""}.
+                  </p>
+                </div>
+              )}
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
+                ¿El personal está formado en higiene y manipulación de alimentos?
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: "si", label: "Sí" },
+                  { value: "no", label: "No" },
+                  { value: "parcial", label: "Parcialmente" },
+                ].map((opt) => {
+                  const activo = personalFormado === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setPersonalFormado(opt.value)}
+                      className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        activo
+                          ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                          : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Sección: Cambios recientes */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-1">
+                Cambios recientes en el negocio
+              </p>
+              <p className="text-[12px] text-[#6B6B6B] mb-4">
+                Opcional. Indica cualquier cambio relevante reciente.
+              </p>
+              <Textarea
+                value={cambiosRecientes}
+                onChange={(e) => setCambiosRecientes(e.target.value)}
+                placeholder="Ej: nuevo proveedor, cambio de carta, ampliación de local…"
+                rows={3}
+                className="border-[#EDE6DA] focus-visible:ring-[#0A3E47]"
+              />
+            </section>
+
+            {/* Sección: Confirmación de veracidad */}
+            <section>
+              <button
+                type="button"
+                onClick={() => setConfirmacionVeracidad((v) => !v)}
+                className="flex items-start gap-3 text-left w-full"
+              >
+                <span
+                  className={`mt-0.5 shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+                    confirmacionVeracidad
+                      ? "bg-[#0A3E47] border-[#0A3E47]"
+                      : "bg-white border-[#EDE6DA]"
+                  }`}
+                >
+                  {confirmacionVeracidad && <Check className="w-3.5 h-3.5 text-white" />}
+                </span>
+                <span className="text-[13px] text-[#1A1A1A] leading-snug">
+                  Confirmo que la información indicada es correcta y representa la actividad real del establecimiento.
+                </span>
+              </button>
+            </section>
+              </>
+            )}
           </div>
         </div>
 
@@ -1069,6 +1186,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Guardando…
               </>
+            ) : pasoActual === TOTAL_PASOS ? (
+              "Finalizar"
             ) : (
               <>
                 Siguiente
