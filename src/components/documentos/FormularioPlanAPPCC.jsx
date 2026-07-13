@@ -79,12 +79,14 @@ const CASOS_ESPECIALES_OPCIONES = [
 ];
 
 const CATEGORIAS_PROCESO_OPCIONES = [
-  { key: "caliente_inmediato", label: "Elaborados en caliente, servidos al momento", ejemplo: "Guisos, salteados, platos de cuchara" },
-  { key: "frio_sin_coccion", label: "Elaborados en frío, sin cocción", ejemplo: "Ensaladas, sándwiches, aperitivos fríos" },
-  { key: "crudo_alto_riesgo", label: "Producto crudo de alto riesgo", ejemplo: "Pescado crudo/sushi, carpaccios, carne poco hecha" },
-  { key: "produccion_anticipada", label: "Producción anticipada con conservación", ejemplo: "Cocinar hoy para servir en días posteriores" },
-  { key: "congelacion_descongelacion", label: "Congelación/descongelación habitual", ejemplo: "Uso de producto congelado como parte del proceso" },
-  { key: "panaderia_pasteleria", label: "Panadería/pastelería", ejemplo: "Masas, horneado, rellenos con huevo o lácteos" },
+  { key: "caliente_inmediato", label: "Caliente, servido al momento", ejemplo: "Guisos, salteados, platos de cuchara" },
+  { key: "frio_sin_coccion", label: "Frío, sin cocción", ejemplo: "Ensaladas, sándwiches, fríos" },
+  { key: "crudo_alto_riesgo", label: "Crudo de alto riesgo", ejemplo: "Pescado crudo, carpaccios, carne poco hecha" },
+  { key: "produccion_anticipada", label: "Producción anticipada", ejemplo: "Cocinar hoy, servir después" },
+  { key: "congelacion_descongelacion", label: "Congelación/descongelación", ejemplo: "Uso de producto congelado" },
+  { key: "panaderia_pasteleria", label: "Panadería/pastelería", ejemplo: "Masas, horneado, rellenos" },
+  { key: "fabricacion_distribucion", label: "Fabricación para distribución", ejemplo: "Envasado y etiquetado, sin servicio directo" },
+  { key: "envasado_vacio", label: "Envasado al vacío / atm. modificada", ejemplo: "Riesgo de Clostridium botulinum sin oxígeno" },
 ];
 
 export default function FormularioPlanAPPCC({ open, onOpenChange }) {
