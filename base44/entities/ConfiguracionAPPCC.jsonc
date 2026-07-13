@@ -75,6 +75,22 @@
       "items": {
         "type": "string"
       }
+    },
+    "proveedores_homologados": {
+      "type": "string",
+      "enum": [
+        "si",
+        "no",
+        "parcial"
+      ],
+      "description": "si | no | parcial"
+    },
+    "origen_agua": {
+      "type": "string",
+      "enum": [
+        "red_publica",
+        "deposito_propio"
+      ]
     }
   },
   "required": [

@@ -136,6 +136,11 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const [otrosEquipos, setOtrosEquipos] = useState([]);
   const [nuevoEquipo, setNuevoEquipo] = useState("");
 
+  // --- Paso 6: Proveedores y agua ---
+  const [proveedoresHomologados, setProveedoresHomologados] = useState(null); // "si" | "no" | "parcial" | null
+  const [origenAgua, setOrigenAgua] = useState(null); // "red_publica" | "deposito_propio" | null
+  const [proveedoresInfo, setProveedoresInfo] = useState(null); // { total, conCertificacion }
+
   // --- Responsable ---
   // Prioridad: config guardada → usuario interno activo → persona_contacto del BusinessProfile → propietario
   const [contactoNegocio, setContactoNegocio] = useState("");
@@ -173,6 +178,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           const equiposGuardados = config.equipos_criticos || [];
           setEquiposCriticos(equiposGuardados.filter((e) => EQUIPOS_OPCIONES.includes(e)));
           setOtrosEquipos(equiposGuardados.filter((e) => !EQUIPOS_OPCIONES.includes(e)));
+          setProveedoresHomologados(config.proveedores_homologados || null);
+          setOrigenAgua(config.origen_agua || null);
         }
         // Si NO hay config guardada con alérgenos, precargar desde los registros de alérgenos
         if (!config || !config.alergenos || config.alergenos.length === 0) {
@@ -191,6 +198,17 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
             setOtrosEquipos(tipos.filter((t) => !EQUIPOS_OPCIONES.includes(t)));
           } catch (e) {}
         }
+        // Siempre: resumir proveedores (total y con registro sanitario o certificación indicada)
+        try {
+          const proveedores = await base44.entities.Proveedor.filter({ business_id: currentBusiness.id });
+          const total = (proveedores || []).length;
+          const conCertificacion = (proveedores || []).filter((p) => {
+            const rs = (p.registro_sanitario || "").trim();
+            const cert = (p.certificaciones || "").trim();
+            return rs !== "" || cert !== "";
+          }).length;
+          setProveedoresInfo({ total, conCertificacion });
+        } catch (e) {}
       })
       .catch(() => {})
       .finally(() => setConfigCargada(true));
@@ -230,6 +248,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const puedeAvanzarPaso3 = casosEspeciales.length > 0;
   const puedeAvanzarPaso4 = categoriasProceso.length > 0;
   const puedeAvanzarPaso5 = equiposCriticos.length > 0 || otrosEquipos.length > 0;
+  const puedeAvanzarPaso6 = proveedoresHomologados !== null && origenAgua !== null;
 
   const puedeAvanzar =
     pasoActual === 1 ? puedeAvanzarPaso1
@@ -237,6 +256,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
     : pasoActual === 3 ? puedeAvanzarPaso3
     : pasoActual === 4 ? puedeAvanzarPaso4
     : pasoActual === 5 ? puedeAvanzarPaso5
+    : pasoActual === 6 ? puedeAvanzarPaso6
     : true;
 
   const toggleProceso = (proceso) => {
@@ -316,6 +336,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       alergenos: alergenos,
       categorias_proceso: categoriasProceso,
       equipos_criticos: [...equiposCriticos, ...otrosEquipos],
+      proveedores_homologados: proveedoresHomologados,
+      origen_agua: origenAgua,
     };
     try {
       if (configId) {
@@ -919,6 +941,77 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                   <Plus className="w-4 h-4" />
                   Añadir
                 </button>
+              </div>
+            </section>
+              </>
+            )}
+
+            {pasoActual === 6 && (
+              <>
+            {/* Sección: Proveedores */}
+            <section>
+              {proveedoresInfo && proveedoresInfo.total > 0 && (
+                <div className="flex items-center gap-3 rounded-xl border border-[#6BB68A]/30 bg-[#6BB68A]/10 px-4 py-3.5 mb-4">
+                  <CheckCircle2 className="w-5 h-5 text-[#0A3E47] shrink-0" />
+                  <p className="text-[13px] font-medium text-[#0A3E47] leading-snug">
+                    Tienes {proveedoresInfo.total} proveedores registrados, {proveedoresInfo.conCertificacion} con registro sanitario o certificación indicada.
+                  </p>
+                </div>
+              )}
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
+                ¿Tus proveedores principales están homologados o auditados?
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: "si", label: "Sí" },
+                  { value: "no", label: "No" },
+                  { value: "parcial", label: "Parcialmente" },
+                ].map((opt) => {
+                  const activo = proveedoresHomologados === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setProveedoresHomologados(opt.value)}
+                      className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        activo
+                          ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                          : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Sección: Agua */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
+                ¿Cuál es el origen del agua que utilizas?
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: "red_publica", label: "Red pública" },
+                  { value: "deposito_propio", label: "Depósito o aljibe propio" },
+                ].map((opt) => {
+                  const activo = origenAgua === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setOrigenAgua(opt.value)}
+                      className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        activo
+                          ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                          : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
             </section>
               </>
