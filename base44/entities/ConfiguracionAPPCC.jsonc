@@ -69,6 +69,12 @@
       "items": {
         "type": "string"
       }
+    },
+    "equipos_criticos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [

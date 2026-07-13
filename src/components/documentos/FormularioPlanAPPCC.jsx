@@ -89,6 +89,19 @@ const CATEGORIAS_PROCESO_OPCIONES = [
   { key: "envasado_vacio", label: "Envasado al vacío / atm. modificada", ejemplo: "Riesgo de Clostridium botulinum sin oxígeno" },
 ];
 
+const EQUIPOS_OPCIONES = [
+  "Cámara frigorífica",
+  "Nevera",
+  "Congelador",
+  "Vitrina refrigerada",
+  "Arcón congelador",
+  "Abatidor",
+  "Horno",
+  "Envasadora",
+  "Lavavajillas industrial",
+  "Amasadora/fermentadora",
+];
+
 export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const { user, currentBusiness } = useBusiness();
   const { usuarioActivo } = useUsuarioInterno();
@@ -117,6 +130,11 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
 
   // --- Paso 4: Categorías de proceso ---
   const [categoriasProceso, setCategoriasProceso] = useState([]);
+
+  // --- Paso 5: Equipos críticos ---
+  const [equiposCriticos, setEquiposCriticos] = useState([]);
+  const [otrosEquipos, setOtrosEquipos] = useState([]);
+  const [nuevoEquipo, setNuevoEquipo] = useState("");
 
   // --- Responsable ---
   // Prioridad: config guardada → usuario interno activo → persona_contacto del BusinessProfile → propietario
@@ -152,6 +170,9 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           setCasosEspeciales(config.casos_especiales || []);
           setAlergenos(config.alergenos || []);
           setCategoriasProceso(config.categorias_proceso || []);
+          const equiposGuardados = config.equipos_criticos || [];
+          setEquiposCriticos(equiposGuardados.filter((e) => EQUIPOS_OPCIONES.includes(e)));
+          setOtrosEquipos(equiposGuardados.filter((e) => !EQUIPOS_OPCIONES.includes(e)));
         }
         // Si NO hay config guardada con alérgenos, precargar desde los registros de alérgenos
         if (!config || !config.alergenos || config.alergenos.length === 0) {
@@ -159,6 +180,15 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
             const registros = await base44.entities.RegistroAlergeno.filter({ business_id: currentBusiness.id });
             const todos = (registros || []).flatMap((r) => r.alergenos || []);
             setAlergenos(Array.from(new Set(todos)));
+          } catch (e) {}
+        }
+        // Si NO hay config guardada, precargar equipos críticos desde EquipoTemperatura
+        if (!config) {
+          try {
+            const equipos = await base44.entities.EquipoTemperatura.filter({ business_id: currentBusiness.id });
+            const tipos = Array.from(new Set((equipos || []).map((e) => e.tipo).filter(Boolean)));
+            setEquiposCriticos(tipos.filter((t) => EQUIPOS_OPCIONES.includes(t)));
+            setOtrosEquipos(tipos.filter((t) => !EQUIPOS_OPCIONES.includes(t)));
           } catch (e) {}
         }
       })
@@ -199,12 +229,14 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
     procesosHabituales.length > 0 && separacionCircuitos !== null && rangoReferencias !== null;
   const puedeAvanzarPaso3 = casosEspeciales.length > 0;
   const puedeAvanzarPaso4 = categoriasProceso.length > 0;
+  const puedeAvanzarPaso5 = equiposCriticos.length > 0 || otrosEquipos.length > 0;
 
   const puedeAvanzar =
     pasoActual === 1 ? puedeAvanzarPaso1
     : pasoActual === 2 ? puedeAvanzarPaso2
     : pasoActual === 3 ? puedeAvanzarPaso3
     : pasoActual === 4 ? puedeAvanzarPaso4
+    : pasoActual === 5 ? puedeAvanzarPaso5
     : true;
 
   const toggleProceso = (proceso) => {
@@ -243,6 +275,23 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
     setAlergenos((prev) => prev.filter((a) => a !== valor));
   };
 
+  const toggleEquipo = (equipo) => {
+    setEquiposCriticos((prev) =>
+      prev.includes(equipo) ? prev.filter((e) => e !== equipo) : [...prev, equipo]
+    );
+  };
+
+  const anadirOtroEquipo = () => {
+    const valor = nuevoEquipo.trim();
+    if (!valor) return;
+    setOtrosEquipos((prev) => (prev.includes(valor) ? prev : [...prev, valor]));
+    setNuevoEquipo("");
+  };
+
+  const eliminarOtroEquipo = (valor) => {
+    setOtrosEquipos((prev) => prev.filter((e) => e !== valor));
+  };
+
   const handleSiguiente = async () => {
     if (pasoActual === 1) {
       if (!responsableNombre.trim()) {
@@ -266,6 +315,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       casos_especiales: casosEspeciales,
       alergenos: alergenos,
       categorias_proceso: categoriasProceso,
+      equipos_criticos: [...equiposCriticos, ...otrosEquipos],
     };
     try {
       if (configId) {
@@ -779,6 +829,96 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                     </button>
                   );
                 })}
+              </div>
+            </section>
+              </>
+            )}
+
+            {pasoActual === 5 && (
+              <>
+            {/* Sección: Equipos críticos */}
+            <section>
+              <p className="text-[12px] text-[#6B6B6B] mb-4">
+                Hemos marcado los equipos ya detectados en tus Registros — revisa y ajusta.
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {EQUIPOS_OPCIONES.map((equipo) => {
+                  const activo = equiposCriticos.includes(equipo);
+                  return (
+                    <button
+                      key={equipo}
+                      type="button"
+                      onClick={() => toggleEquipo(equipo)}
+                      className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 ${
+                        activo
+                          ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                          : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                      }`}
+                    >
+                      {activo && <Check className="w-3.5 h-3.5" />}
+                      {equipo}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Sección: Otros equipos críticos */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-1">
+                Otro equipo crítico
+              </p>
+              <p className="text-[12px] text-[#6B6B6B] mb-4">
+                Añade cualquier equipo no listado arriba.
+              </p>
+
+              {otrosEquipos.length > 0 && (
+                <div className="space-y-2 mb-3">
+                  {otrosEquipos.map((equipo) => (
+                    <div
+                      key={equipo}
+                      className="flex items-center justify-between gap-2 rounded-lg border border-[#6BB68A]/30 bg-[#6BB68A]/10 px-3.5 py-2.5 animate-in fade-in-0 slide-in-from-top-1 duration-200"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <CheckCircle2 className="w-4 h-4 text-[#0A3E47] shrink-0" />
+                        <span className="text-[13px] font-medium text-[#0A3E47] truncate">
+                          {equipo}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => eliminarOtroEquipo(equipo)}
+                        className="shrink-0 p-1 rounded-md text-[#9A9A9A] hover:text-[#c0392b] hover:bg-[#c0392b]/8 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <Input
+                  value={nuevoEquipo}
+                  onChange={(e) => setNuevoEquipo(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      anadirOtroEquipo();
+                    }
+                  }}
+                  placeholder="Ej. Marmita, Cocedor de vapor…"
+                  className="border-[#EDE6DA] focus-visible:ring-[#0A3E47]"
+                />
+                <button
+                  type="button"
+                  onClick={anadirOtroEquipo}
+                  disabled={!nuevoEquipo.trim()}
+                  className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0A3E47] text-white text-[13px] font-semibold hover:bg-[#0A3E47] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Añadir
+                </button>
               </div>
             </section>
               </>
