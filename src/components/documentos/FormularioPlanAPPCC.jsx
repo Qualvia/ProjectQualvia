@@ -9,7 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, ChevronLeft, Check, X, Plus, Trash2, Loader2 } from "lucide-react";
+import { ShieldCheck, UserCog, CheckCircle2, ChevronRight, ChevronLeft, Check, X, Plus, Trash2, Loader2, Info } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -40,9 +41,9 @@ const PROCESOS_HABITUALES_OPCIONES = [
 ];
 
 const SEPARACION_OPCIONES = [
-  { value: "si", label: "Sí" },
-  { value: "no", label: "No" },
-  { value: "parcial", label: "Parcialmente" },
+  { value: "si", label: "Sí", ejemplo: "Circuitos limpio y sucio totalmente separados físicamente" },
+  { value: "no", label: "No", ejemplo: "No hay separación física: comparten zonas y equipos" },
+  { value: "parcial", label: "Parcialmente", ejemplo: "Separación parcial por horarios o zonas compartidas" },
 ];
 
 const RANGO_OPCIONES = [
@@ -503,20 +504,40 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                 ¿Existe separación de circuitos (limpio/sucio)?
               </p>
               <div className="grid grid-cols-3 gap-3">
-                {SEPARACION_OPCIONES.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSeparacionCircuitos(opt.value)}
-                    className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                      separacionCircuitos === opt.value
-                        ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
-                        : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+                {SEPARACION_OPCIONES.map((opt) => {
+                  const activo = separacionCircuitos === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setSeparacionCircuitos(opt.value)}
+                      className={`flex items-center justify-center gap-1.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        activo
+                          ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                          : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                      }`}
+                    >
+                      {opt.label}
+                      {opt.ejemplo && (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={(e) => e.stopPropagation()}
+                              onPointerDown={(e) => e.stopPropagation()}
+                              className="shrink-0"
+                            >
+                              <Info className={`w-4 h-4 ${activo ? "text-white/70" : "text-[#9A9A9A]"}`} />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto max-w-56 text-sm bg-white">
+                            {opt.ejemplo}
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </section>
 
@@ -563,20 +584,30 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                       key={opt.label}
                       type="button"
                       onClick={() => toggleCasoEspecial(opt.label)}
-                      className={`flex flex-col items-center justify-center gap-1 py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 text-center ${
+                      className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 text-center ${
                         activo
                           ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
                           : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
                       }`}
                     >
-                      <span className="flex items-center gap-1.5">
-                        {activo && <Check className="w-3.5 h-3.5" />}
-                        {opt.label}
-                      </span>
+                      {activo && <Check className="w-3.5 h-3.5" />}
+                      {opt.label}
                       {opt.ejemplo && (
-                        <span className={`text-[11px] font-normal leading-snug ${activo ? "text-white/75" : "text-[#9A9A9A]"}`}>
-                          {opt.ejemplo}
-                        </span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={(e) => e.stopPropagation()}
+                              onPointerDown={(e) => e.stopPropagation()}
+                              className="shrink-0"
+                            >
+                              <Info className={`w-4 h-4 ${activo ? "text-white/70" : "text-[#9A9A9A]"}`} />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto max-w-56 text-sm bg-white">
+                            {opt.ejemplo}
+                          </PopoverContent>
+                        </Popover>
                       )}
                     </button>
                   );
