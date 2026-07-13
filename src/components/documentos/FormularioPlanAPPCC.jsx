@@ -183,7 +183,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           } catch (e) {}
         }
         // Si NO hay config guardada, precargar equipos críticos desde EquipoTemperatura
-        if (!config) {
+        if (!config || !config.equipos_criticos || config.equipos_criticos.length === 0) {
           try {
             const equipos = await base44.entities.EquipoTemperatura.filter({ business_id: currentBusiness.id });
             const tipos = Array.from(new Set((equipos || []).map((e) => e.tipo).filter(Boolean)));
