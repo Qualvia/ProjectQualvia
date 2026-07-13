@@ -1187,7 +1187,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                 Guardando…
               </>
             ) : pasoActual === TOTAL_PASOS ? (
-              "Finalizar"
+              "Generar Plan APPCC"
             ) : (
               <>
                 Siguiente
