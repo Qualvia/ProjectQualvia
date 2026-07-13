@@ -1,0 +1,579 @@
+{
+  "version": "1.0",
+  "descripcion": "Librería curada de diagramas de flujo genéricos para la generación del Plan APPCC de Qualvia. Este JSON es leído directamente por la función backend (Capa 1, determinista, sin IA) que selecciona qué diagramas activar según el campo categorias_proceso de ConfiguracionAPPCC. La IA (Capa 2) solo personaliza y redacta dentro de la estructura ya resuelta aquí — nunca inventa peligros, PCC o límites que no estén en este archivo.",
+  "activacion": "Cada clave dentro de 'diagramas' coincide exactamente con los valores posibles del campo categorias_proceso en ConfiguracionAPPCC (ver CATEGORIAS_PROCESO_OPCIONES en FormularioPlanAPPCC.jsx). Un negocio puede activar varios diagramas a la vez.",
+  "reglas_generales": {
+    "prerrequisitos_no_incluidos_aqui": [
+      "Limpieza y desinfección general (cubierto por Plan de Limpieza y Registros/Limpieza)",
+      "Control de plagas (cubierto por Plan de Control de Plagas)",
+      "Potabilidad del agua (depende de origen_agua en ConfiguracionAPPCC)",
+      "Salud e higiene del personal (cubierto por módulo Formación)",
+      "Mantenimiento de instalaciones y equipos (cubierto por módulo Mantenimiento)"
+    ],
+    "notas_implementacion_ia": [
+      "Nunca modificar los límites críticos de este archivo salvo que el negocio aporte una validación técnica propia; en ese caso señalarlo como 'límite validado por el establecimiento', no como valor por defecto de Qualvia.",
+      "Filtrar etapas y peligros según las respuestas reales del formulario (procesos_habituales, separacion_circuitos, etc.); no incluir un PCC si el negocio ha indicado explícitamente que no realiza esa etapa.",
+      "Cruzar con equipos_criticos: si un diagrama requiere un equipo (ej. abatidor para produccion_anticipada) y el negocio no lo tiene registrado, generar una alerta en el anexo de huecos en vez de asumir que el límite crítico se cumple.",
+      "Sustituir las frecuencias de vigilancia por defecto por la frecuencia real observada en Registros cuando sea igual o más exigente que la mínima aquí indicada; si es menos exigente, mantener la mínima de este archivo y recomendar aumentarla.",
+      "Sustituir 'responsable de cocina/obrador' por responsable_nombre de ConfiguracionAPPCC.",
+      "Nunca combinar los límites críticos de dos diagramas distintos en una sola etapa: si hay varios diagramas activos, cada uno aparece como sección independiente en el documento final con su propia tabla."
+    ]
+  },
+  "diagramas": {
+    "caliente_inmediato": {
+      "nombre": "Elaboración en caliente, servicio inmediato",
+      "ejemplos": "Guisos, sopas, platos de cuchara, salteados, platos servidos recién hechos",
+      "etapas": [
+        {
+          "nombre": "Recepción",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación por rotura de cadena de frío en transporte",
+              "es_pcc": true,
+              "medida_preventiva": "Control de temperatura a la recepción; rechazo si fuera de rango",
+              "limite_critico": "Producto refrigerado ≤4°C / congelado ≤-18°C a la recepción",
+              "vigilancia": { "que": "Temperatura del producto", "como": "Termómetro sonda", "frecuencia": "Cada recepción", "responsable": "Encargado de recepción" },
+              "medida_correctora": "Rechazar el lote; si ya se ha aceptado, evaluar destino según desviación y tiempo fuera de rango"
+            }
+          ]
+        },
+        {
+          "nombre": "Almacenamiento",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación por temperatura inadecuada de cámara",
+              "es_pcc": true,
+              "medida_preventiva": "Cámara ≤4°C, rotación FIFO",
+              "limite_critico": "Temperatura de cámara ≤4°C",
+              "vigilancia": { "que": "Temperatura de cámara", "como": "Termómetro/sonda digital", "frecuencia": "2 veces al día", "responsable": "Encargado de cocina" },
+              "medida_correctora": "Reajustar termostato; avisar a mantenimiento; si la avería persiste, trasladar producto y evaluar destino"
+            }
+          ]
+        },
+        {
+          "nombre": "Cocinado",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Supervivencia de patógenos (Salmonella, Listeria) por tratamiento térmico insuficiente",
+              "es_pcc": true,
+              "medida_preventiva": "Cocción a temperatura y tiempo suficientes",
+              "limite_critico": "Temperatura en el centro del producto ≥70°C durante al menos 2 minutos, o equivalente tiempo/temperatura validado",
+              "vigilancia": { "que": "Temperatura en el centro del producto", "como": "Termómetro sonda calibrado", "frecuencia": "Cada elaboración o por lote", "responsable": "Cocinero/responsable de partida" },
+              "medida_correctora": "Continuar cocción hasta alcanzar el límite; si no es posible, desechar la partida"
+            }
+          ]
+        },
+        {
+          "nombre": "Emplatado y espera previa a servicio",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación si el producto permanece en zona de riesgo de temperatura (8-65°C) más de 2 horas",
+              "es_pcc": true,
+              "medida_preventiva": "Servir de inmediato o mantener en caliente ≥65°C",
+              "limite_critico": "Temperatura de mantenimiento ≥65°C; tiempo máximo en zona de riesgo 2 horas",
+              "vigilancia": { "que": "Temperatura de mantenimiento / tiempo de espera", "como": "Termómetro y control visual de hora", "frecuencia": "Continua durante el servicio", "responsable": "Encargado de sala/cocina" },
+              "medida_correctora": "Recalentar hasta ≥70°C si aún es seguro por tiempo transcurrido; si excede el límite de tiempo, desechar"
+            }
+          ]
+        }
+      ],
+      "verificacion": "Revisión semanal de registros de temperatura de cocción y cámara; calibración mensual de termómetros; revisión anual del diagrama si cambia la carta o el proceso."
+    },
+    "frio_sin_coccion": {
+      "nombre": "Elaboración en frío, sin cocción",
+      "ejemplos": "Ensaladas, sándwiches, aperitivos fríos, platos con vegetales crudos listos para consumo",
+      "etapas": [
+        {
+          "nombre": "Recepción",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Contaminación de vegetales de origen (tierra, materia fecal, pesticidas)",
+              "es_pcc": false,
+              "medida_preventiva": "Proveedor homologado; inspección visual (se controla realmente en la etapa de lavado y desinfección)"
+            }
+          ]
+        },
+        {
+          "nombre": "Lavado y desinfección",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Persistencia de patógenos por desinfección insuficiente de vegetales crudos",
+              "es_pcc": true,
+              "medida_preventiva": "Protocolo de desinfección con producto apto para agua de consumo, tiempo de contacto definido",
+              "limite_critico": "Inmersión en solución desinfectante 5-10 minutos según producto, con aclarado posterior",
+              "vigilancia": { "que": "Cumplimiento del protocolo", "como": "Comprobación visual/checklist", "frecuencia": "Cada preparación", "responsable": "Responsable de cocina" },
+              "medida_correctora": "Repetir el proceso de desinfección completo antes de usar el producto"
+            }
+          ]
+        },
+        {
+          "nombre": "Corte, preparación y montaje",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Contaminación cruzada por manos, superficies o utensilios",
+              "es_pcc": true,
+              "medida_preventiva": "Higiene de manos; superficies y tablas exclusivas para producto listo para consumo, separadas de crudo",
+              "limite_critico": "Cumplimiento de separación de utensilios/superficies crudo-cocinado y de higiene de manos según protocolo",
+              "vigilancia": { "que": "Cumplimiento visual", "como": "Checklist de apertura/cierre", "frecuencia": "Continua / inicio de turno", "responsable": "Encargado de cocina" },
+              "medida_correctora": "Repetir limpieza y desinfección de superficie/utensilio antes de continuar"
+            }
+          ]
+        },
+        {
+          "nombre": "Conservación hasta servicio",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación por temperatura inadecuada o tiempo excesivo fuera de frío",
+              "es_pcc": true,
+              "medida_preventiva": "Mantener en frío ≤4°C, minimizar tiempo fuera de cámara",
+              "limite_critico": "Temperatura ≤4°C; tiempo fuera de frío ≤2 horas",
+              "vigilancia": { "que": "Temperatura y tiempo", "como": "Termómetro y control de hora", "frecuencia": "Continua durante servicio", "responsable": "Encargado de sala" },
+              "medida_correctora": "Devolver a frío si dentro del límite de tiempo; desechar si se supera"
+            }
+          ]
+        }
+      ],
+      "verificacion": "Análisis microbiológico orientativo periódico si el negocio lo realiza externamente; revisión semanal de registros de desinfección de vegetales."
+    },
+    "crudo_alto_riesgo": {
+      "nombre": "Producto crudo de alto riesgo",
+      "ejemplos": "Pescado crudo/sushi, carpaccios, tartares, carnes poco hechas",
+      "etapas": [
+        {
+          "nombre": "Recepción",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Anisakis y otros parásitos en pescado destinado a consumo crudo o poco hecho",
+              "es_pcc": true,
+              "medida_preventiva": "Exigir al proveedor certificado de congelación previa, o congelar en el propio establecimiento",
+              "limite_critico": "Certificado de congelación del proveedor a ≤-20°C durante ≥24h, o congelación propia equivalente (Reglamento CE 853/2004)",
+              "vigilancia": { "que": "Certificado o registro de congelación propia", "como": "Revisión documental / registro de congelador", "frecuencia": "Cada lote", "responsable": "Responsable de cocina" },
+              "medida_correctora": "Rechazar el lote sin certificado; si no se puede verificar, no destinarlo a consumo crudo"
+            }
+          ]
+        },
+        {
+          "nombre": "Congelación de seguridad (si se hace en el propio local)",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Parásitos no eliminados por tiempo/temperatura insuficiente",
+              "es_pcc": true,
+              "medida_preventiva": "Congelación a ≤-20°C durante mínimo 24 horas",
+              "limite_critico": "Temperatura ≤-20°C durante ≥24 horas continuas",
+              "vigilancia": { "que": "Temperatura y tiempo", "como": "Termómetro/registrador de congelador", "frecuencia": "Cada lote", "responsable": "Responsable de cocina" },
+              "medida_correctora": "Prolongar congelación hasta cumplir el límite; si no es posible, destinar a consumo cocinado, no crudo"
+            }
+          ]
+        },
+        {
+          "nombre": "Preparación y corte",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Contaminación cruzada por utensilios o superficies compartidos con producto cocinado",
+              "es_pcc": true,
+              "medida_preventiva": "Tabla, cuchillo y zona exclusivos para producto crudo de alto riesgo",
+              "limite_critico": "Cumplimiento de separación de utensilios",
+              "vigilancia": { "que": "Cumplimiento visual", "como": "Checklist", "frecuencia": "Cada preparación", "responsable": "Encargado de cocina" },
+              "medida_correctora": "Repetir limpieza/desinfección; detener preparación hasta corregir"
+            }
+          ]
+        },
+        {
+          "nombre": "Montaje y servicio",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación por tiempo o temperatura de exposición antes de servir",
+              "es_pcc": true,
+              "medida_preventiva": "Mantener en frío hasta el momento de servir, minimizar exposición",
+              "limite_critico": "Temperatura ≤4°C hasta el momento de servicio; tiempo fuera de frío ≤30 minutos",
+              "vigilancia": { "que": "Temperatura y tiempo", "como": "Termómetro y control de hora", "frecuencia": "Continua", "responsable": "Encargado de sala" },
+              "medida_correctora": "Retirar de venta si se excede el tiempo o la temperatura"
+            }
+          ]
+        }
+      ],
+      "verificacion": "Revisión documental mensual de certificados de proveedor; comprobación de registros de congelación propia si aplica."
+    },
+    "produccion_anticipada": {
+      "nombre": "Producción anticipada con conservación",
+      "ejemplos": "Cocinar hoy para servir en días posteriores, producción en lote",
+      "etapas": [
+        {
+          "nombre": "Cocinado",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Supervivencia de patógenos por tratamiento térmico insuficiente",
+              "es_pcc": true,
+              "medida_preventiva": "Cocción adecuada (ver diagrama caliente_inmediato)",
+              "limite_critico": "Temperatura en el centro ≥70°C durante 2 minutos",
+              "vigilancia": { "que": "Temperatura en el centro del producto", "como": "Termómetro sonda calibrado", "frecuencia": "Cada elaboración o por lote", "responsable": "Responsable de cocina" },
+              "medida_correctora": "Continuar cocción hasta alcanzar el límite; si no es posible, desechar"
+            }
+          ]
+        },
+        {
+          "nombre": "Enfriamiento rápido (abatimiento)",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación de esporas (Clostridium perfringens, Bacillus cereus) por enfriamiento lento a través de la zona de riesgo (65°C a 10°C)",
+              "es_pcc": true,
+              "medida_preventiva": "Abatidor de temperatura; enfriar de 65°C a 10°C en menos de 2 horas",
+              "limite_critico": "De 65°C a 10°C en ≤2 horas (verificar normativa autonómica aplicable)",
+              "vigilancia": { "que": "Tiempo y temperatura de abatimiento", "como": "Sonda de abatidor / termómetro", "frecuencia": "Cada lote", "responsable": "Responsable de cocina" },
+              "medida_correctora": "Si se supera el tiempo, evaluar destino del producto (posible desecho); no continuar el proceso de conservación",
+              "requiere_equipo": "Abatidor"
+            }
+          ]
+        },
+        {
+          "nombre": "Envasado y etiquetado",
+          "peligros": [
+            {
+              "tipo": "fisico",
+              "descripcion": "Falta de trazabilidad, confusión de fechas o lotes",
+              "es_pcc": true,
+              "medida_preventiva": "Etiquetado con fecha de elaboración y caducidad, número de lote",
+              "limite_critico": "Cumplimiento de etiquetado completo (fecha, lote)",
+              "vigilancia": { "que": "Presencia de etiqueta completa", "como": "Comprobación visual", "frecuencia": "Cada lote", "responsable": "Responsable de cocina" },
+              "medida_correctora": "Etiquetar antes de almacenar; si no se puede identificar el lote, no se conserva"
+            }
+          ]
+        },
+        {
+          "nombre": "Almacenamiento en frío",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación por temperatura inadecuada o vida útil excedida",
+              "es_pcc": true,
+              "medida_preventiva": "Cámara ≤4°C; respetar vida útil definida",
+              "limite_critico": "Temperatura ≤4°C; vida útil máxima según validación propia (recomendado ≤3 días si no hay estudio de vida útil)",
+              "vigilancia": { "que": "Temperatura y fecha de caducidad", "como": "Termómetro y revisión de etiquetas", "frecuencia": "Diaria", "responsable": "Encargado de cocina" },
+              "medida_correctora": "Retirar producto caducado; ajustar temperatura de cámara"
+            }
+          ]
+        },
+        {
+          "nombre": "Regeneración",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Supervivencia de patógenos por recalentamiento insuficiente",
+              "es_pcc": true,
+              "medida_preventiva": "Recalentar hasta temperatura en el centro ≥70°C",
+              "limite_critico": "Temperatura en el centro ≥70°C",
+              "vigilancia": { "que": "Temperatura de regeneración", "como": "Termómetro sonda", "frecuencia": "Cada regeneración", "responsable": "Cocinero" },
+              "medida_correctora": "Continuar calentamiento hasta el límite; desechar si no se alcanza"
+            }
+          ]
+        }
+      ],
+      "verificacion": "Revisión semanal de registros de abatimiento y regeneración; validación de vida útil mediante análisis si el negocio amplía el plazo de conservación más allá del valor por defecto."
+    },
+    "congelacion_descongelacion": {
+      "nombre": "Congelación y descongelación habitual",
+      "ejemplos": "Uso de producto congelado como parte habitual del proceso",
+      "etapas": [
+        {
+          "nombre": "Recepción",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Rotura de cadena de frío",
+              "es_pcc": true,
+              "medida_preventiva": "Control de temperatura a la recepción",
+              "limite_critico": "Temperatura ≤-18°C",
+              "vigilancia": { "que": "Temperatura", "como": "Termómetro sonda", "frecuencia": "Cada recepción", "responsable": "Encargado de recepción" },
+              "medida_correctora": "Rechazar lote fuera de rango"
+            }
+          ]
+        },
+        {
+          "nombre": "Almacenamiento en congelación",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Descongelación parcial por avería o mala gestión de congelador",
+              "es_pcc": true,
+              "medida_preventiva": "Temperatura de congelador ≤-18°C constante",
+              "limite_critico": "Temperatura ≤-18°C",
+              "vigilancia": { "que": "Temperatura", "como": "Termómetro/registrador", "frecuencia": "2 veces al día", "responsable": "Encargado de cocina" },
+              "medida_correctora": "Trasladar producto a otro congelador; evaluar destino si hubo descongelación parcial"
+            }
+          ]
+        },
+        {
+          "nombre": "Descongelación",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación por descongelación a temperatura ambiente o tiempo excesivo en zona de riesgo",
+              "es_pcc": true,
+              "medida_preventiva": "Descongelar en frigorífico (≤4°C) o bajo agua corriente fría controlada, nunca a temperatura ambiente",
+              "limite_critico": "Descongelación en cámara ≤4°C; si es en agua corriente, ≤21°C y proceso continuo",
+              "vigilancia": { "que": "Método y temperatura de descongelación", "como": "Comprobación visual y termómetro", "frecuencia": "Cada lote", "responsable": "Responsable de cocina" },
+              "medida_correctora": "Desechar producto descongelado a temperatura ambiente más de 2 horas"
+            }
+          ]
+        },
+        {
+          "nombre": "Preparación y cocinado",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Supervivencia de patógenos",
+              "es_pcc": true,
+              "medida_preventiva": "Cocción adecuada (ver diagrama caliente_inmediato)",
+              "limite_critico": "Temperatura en el centro ≥70°C",
+              "vigilancia": { "que": "Temperatura en el centro del producto", "como": "Termómetro sonda calibrado", "frecuencia": "Cada elaboración", "responsable": "Cocinero" },
+              "medida_correctora": "Continuar cocción hasta el límite; desechar si no se alcanza"
+            }
+          ]
+        }
+      ],
+      "verificacion": "Revisión semanal de registros de temperatura de congeladores; comprobación de que no se recongela producto ya descongelado."
+    },
+    "panaderia_pasteleria": {
+      "nombre": "Panadería/pastelería",
+      "ejemplos": "Pan, bollería, pasteles, productos con huevo/lácteos no pasteurizados en crema o relleno",
+      "etapas": [
+        {
+          "nombre": "Recepción de huevo/lácteos",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Salmonella en huevo fresco o lácteos no pasteurizados",
+              "es_pcc": true,
+              "medida_preventiva": "Uso preferente de ovoproducto pasteurizado para rellenos sin cocción posterior; control de proveedor",
+              "limite_critico": "Uso de ovoproducto pasteurizado certificado, o cocción posterior que alcance ≥70°C",
+              "vigilancia": { "que": "Tipo de producto usado / certificado", "como": "Revisión documental", "frecuencia": "Cada lote", "responsable": "Responsable de obrador" },
+              "medida_correctora": "No usar huevo fresco crudo en productos sin cocción posterior; sustituir por pasteurizado"
+            }
+          ]
+        },
+        {
+          "nombre": "Horneado",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Supervivencia de patógenos por horneado insuficiente",
+              "es_pcc": true,
+              "medida_preventiva": "Tiempo/temperatura de horneado validados por producto",
+              "limite_critico": "Temperatura en el centro del producto según receta validada (orientativo ≥90°C en el centro de masas con relleno húmedo)",
+              "vigilancia": { "que": "Temperatura/tiempo de horneado", "como": "Termómetro sonda o control de horno", "frecuencia": "Por hornada", "responsable": "Obrador" },
+              "medida_correctora": "Prolongar horneado; retirar de venta si no se puede verificar cocción completa"
+            }
+          ]
+        },
+        {
+          "nombre": "Enfriamiento y relleno",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación en relleno si permanece fuera de frío tiempo excesivo",
+              "es_pcc": true,
+              "medida_preventiva": "Enfriar el producto antes de rellenar; conservar relleno en frío hasta el uso",
+              "limite_critico": "Relleno mantenido ≤4°C hasta su uso; producto rellenado a la venta conservado ≤4°C",
+              "vigilancia": { "que": "Temperatura de conservación", "como": "Termómetro", "frecuencia": "Diaria / continua en vitrina", "responsable": "Encargado de obrador o venta" },
+              "medida_correctora": "Retirar de vitrina si supera temperatura; ajustar vitrina refrigerada"
+            }
+          ]
+        },
+        {
+          "nombre": "Conservación y venta",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación en vitrina no refrigerada para productos con relleno perecedero",
+              "es_pcc": true,
+              "medida_preventiva": "Vitrina refrigerada para productos con nata, crema o relleno lácteo",
+              "limite_critico": "Temperatura de vitrina ≤4°C (solo para productos con relleno perecedero)",
+              "vigilancia": { "que": "Temperatura de vitrina", "como": "Termómetro", "frecuencia": "2 veces al día", "responsable": "Encargado de venta" },
+              "medida_correctora": "Retirar producto afectado; reparar o ajustar vitrina"
+            }
+          ]
+        }
+      ],
+      "verificacion": "Revisión semanal de registros de horneado y vitrina; revisión de fichas técnicas de proveedor de ovoproducto."
+    },
+    "fabricacion_distribucion": {
+      "nombre": "Fabricación y envasado para distribución a terceros",
+      "ejemplos": "Producto final envasado y etiquetado, sin servicio directo al consumidor; venta a otros negocios (B2B/mayorista)",
+      "etapas": [
+        {
+          "nombre": "Recepción de materias primas",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Rotura de cadena de frío o materia prima no conforme",
+              "es_pcc": true,
+              "medida_preventiva": "Control de temperatura y documentación a la recepción; proveedor homologado",
+              "limite_critico": "Producto refrigerado ≤4°C / congelado ≤-18°C a la recepción, según corresponda",
+              "vigilancia": { "que": "Temperatura y documentación del lote", "como": "Termómetro sonda y revisión documental", "frecuencia": "Cada recepción", "responsable": "Encargado de recepción" },
+              "medida_correctora": "Rechazar el lote no conforme"
+            }
+          ]
+        },
+        {
+          "nombre": "Fabricación/elaboración",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Contaminación o supervivencia de patógenos por incumplimiento de los parámetros de proceso validados",
+              "es_pcc": true,
+              "medida_preventiva": "Cumplimiento de los parámetros de proceso validados para el producto (tiempo, temperatura, mezcla, tratamiento térmico si aplica)",
+              "limite_critico": "Depende del producto concreto; si el negocio también tiene activo otro diagrama (ej. caliente_inmediato, panaderia_pasteleria), aplicar sus límites críticos en esta etapa en vez de uno genérico",
+              "vigilancia": { "que": "Parámetros de proceso", "como": "Según el diagrama de producto específico activo", "frecuencia": "Por lote de producción", "responsable": "Responsable de fabricación" },
+              "medida_correctora": "Detener el lote y corregir el parámetro desviado antes de continuar"
+            }
+          ]
+        },
+        {
+          "nombre": "Envasado",
+          "peligros": [
+            {
+              "tipo": "fisico",
+              "descripcion": "Incorporación de cuerpos extraños o contaminación por manipulación en la línea de envasado",
+              "es_pcc": true,
+              "medida_preventiva": "Higiene de línea de envasado; detección de cuerpos extraños si el equipo lo permite",
+              "limite_critico": "Cumplimiento de protocolo de higiene de envasado; ausencia de cuerpos extraños detectables",
+              "vigilancia": { "que": "Cumplimiento del protocolo de envasado", "como": "Comprobación visual / checklist", "frecuencia": "Cada lote", "responsable": "Encargado de envasado" },
+              "medida_correctora": "Detener línea, revisar y corregir; retener el lote afectado"
+            }
+          ]
+        },
+        {
+          "nombre": "Etiquetado legal",
+          "peligros": [
+            {
+              "tipo": "fisico",
+              "descripcion": "Etiquetado incompleto o incorrecto (ingredientes, alérgenos, lote, fecha), incumpliendo el Reglamento (UE) 1169/2011",
+              "es_pcc": true,
+              "medida_preventiva": "Checklist de etiquetado obligatorio: lista de ingredientes, alérgenos destacados, lote, fecha de caducidad o consumo preferente, condiciones de conservación, cantidad neta",
+              "limite_critico": "Cumplimiento del 100% del checklist de etiquetado antes de la expedición",
+              "vigilancia": { "que": "Checklist de etiquetado por lote", "como": "Revisión visual/documental antes de expedir", "frecuencia": "Cada lote antes de expedición", "responsable": "Responsable de calidad o fabricación" },
+              "medida_correctora": "Retener el lote hasta corregir el etiquetado; no expedir mercancía mal etiquetada"
+            }
+          ]
+        },
+        {
+          "nombre": "Almacenamiento previo a expedición",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación por temperatura inadecuada mientras se espera la expedición",
+              "es_pcc": true,
+              "medida_preventiva": "Cámara a temperatura adecuada según el producto",
+              "limite_critico": "Según tipo de producto (≤4°C refrigerado, ≤-18°C congelado)",
+              "vigilancia": { "que": "Temperatura de cámara", "como": "Termómetro", "frecuencia": "Diaria", "responsable": "Encargado de almacén" },
+              "medida_correctora": "Ajustar cámara; retirar producto si se supera el límite de forma prolongada"
+            }
+          ]
+        },
+        {
+          "nombre": "Carga y transporte a cliente",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Rotura de cadena de frío durante el transporte a otros negocios",
+              "es_pcc": true,
+              "medida_preventiva": "Transporte en vehículo o contenedor isotermo con temperatura controlada",
+              "limite_critico": "Temperatura del vehículo dentro del rango validado para el producto durante todo el trayecto",
+              "vigilancia": { "que": "Temperatura durante el transporte", "como": "Termógrafo o registro manual en cada envío", "frecuencia": "Cada envío", "responsable": "Responsable de expediciones" },
+              "medida_correctora": "Rechazar o no descargar si se ha roto la cadena de frío; informar al cliente"
+            }
+          ]
+        }
+      ],
+      "verificacion": "Auditoría periódica de la línea de fabricación y envasado; revisión de reclamaciones de clientes por etiquetado o temperatura; verificación de trazabilidad lote-cliente."
+    },
+    "envasado_vacio": {
+      "nombre": "Envasado al vacío / atmósfera modificada",
+      "ejemplos": "Productos envasados al vacío o en atmósfera modificada para ampliar su vida útil",
+      "etapas": [
+        {
+          "nombre": "Preparación del producto",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Contaminación por manipulación antes del envasado",
+              "es_pcc": false,
+              "medida_preventiva": "Higiene de manos y superficies (se controla realmente en la etapa de envasado y en los prerrequisitos generales)"
+            }
+          ]
+        },
+        {
+          "nombre": "Envasado al vacío / atmósfera modificada",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación de Clostridium botulinum (anaerobio) si la combinación de ausencia de oxígeno y temperatura de conservación no impide su crecimiento",
+              "es_pcc": true,
+              "medida_preventiva": "Conservación en frío estricto tras el envasado; validación de vida útil específica para este método de envasado antes de ampliar la fecha de caducidad respecto al producto sin envasar",
+              "limite_critico": "Temperatura de conservación ≤3°C para producto envasado al vacío sin tratamiento térmico posterior validado (más estricta que la refrigeración estándar de 4°C)",
+              "vigilancia": { "que": "Temperatura de conservación específica para producto envasado al vacío", "como": "Termómetro", "frecuencia": "Cada turno", "responsable": "Responsable de cocina/obrador" },
+              "medida_correctora": "Retirar producto si se supera el límite de temperatura; no vender ni servir"
+            }
+          ]
+        },
+        {
+          "nombre": "Etiquetado",
+          "peligros": [
+            {
+              "tipo": "fisico",
+              "descripcion": "Fecha de caducidad o consumo preferente incorrecta, dado que la vida útil cambia respecto al producto sin envasar",
+              "es_pcc": true,
+              "medida_preventiva": "Aplicar la vida útil validada específicamente para el método de envasado al vacío/atmósfera modificada usado",
+              "limite_critico": "Cumplimiento de etiquetado con fecha correcta según la validación de vida útil",
+              "vigilancia": { "que": "Fecha en la etiqueta de cada lote", "como": "Comprobación visual", "frecuencia": "Cada lote etiquetado", "responsable": "Responsable de cocina/obrador" },
+              "medida_correctora": "Reetiquetar o retirar el lote con fecha incorrecta"
+            }
+          ]
+        },
+        {
+          "nombre": "Almacenamiento",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Proliferación por interrupción de la cadena de frío durante la conservación",
+              "es_pcc": true,
+              "medida_preventiva": "Cámara dedicada o controlada a ≤3°C para producto envasado al vacío",
+              "limite_critico": "Temperatura ≤3°C de forma continua",
+              "vigilancia": { "que": "Temperatura de cámara", "como": "Termómetro/registrador", "frecuencia": "Diaria", "responsable": "Encargado de cocina/obrador" },
+              "medida_correctora": "Retirar producto si se supera el límite de forma prolongada"
+            }
+          ]
+        },
+        {
+          "nombre": "Distribución o venta",
+          "peligros": [
+            {
+              "tipo": "biologico",
+              "descripcion": "Rotura de cadena de frío en el transporte a terceros, si aplica reparto o venta B2B",
+              "es_pcc": true,
+              "medida_preventiva": "Transporte en frío controlado si el producto sale del establecimiento",
+              "limite_critico": "Temperatura ≤4°C durante el transporte",
+              "vigilancia": { "que": "Temperatura durante el transporte", "como": "Registro de temperatura del vehículo o contenedor isotermo", "frecuencia": "Cada envío", "responsable": "Responsable de expediciones o reparto" },
+              "medida_correctora": "Rechazar producto si se rompe la cadena de frío de forma prolongada"
+            }
+          ]
+        }
+      ],
+      "verificacion": "Validación inicial de vida útil mediante análisis microbiológico (Clostridium botulinum, Listeria) antes de comercializar cualquier producto envasado al vacío con vida útil ampliada; revisión periódica de registros de temperatura de conservación y transporte."
+    }
+  }
+}
