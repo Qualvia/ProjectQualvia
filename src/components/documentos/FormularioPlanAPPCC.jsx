@@ -954,7 +954,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                 <div className="flex items-center gap-3 rounded-xl border border-[#6BB68A]/30 bg-[#6BB68A]/10 px-4 py-3.5 mb-4">
                   <CheckCircle2 className="w-5 h-5 text-[#0A3E47] shrink-0" />
                   <p className="text-[13px] font-medium text-[#0A3E47] leading-snug">
-                    Tienes {proveedoresInfo.total} proveedores registrados, {proveedoresInfo.conCertificacion} con registro sanitario o certificación indicada.
+                    Tienes {proveedoresInfo.total} proveedor{proveedoresInfo.total === 1 ? "" : "es"} registrado{proveedoresInfo.total === 1 ? "" : "s"}, {proveedoresInfo.conCertificacion} con registro sanitario o certificación indicada.
                   </p>
                 </div>
               )}
