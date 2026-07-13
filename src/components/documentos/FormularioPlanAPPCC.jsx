@@ -49,6 +49,7 @@ const PROCESOS_HABITUALES_OPCIONES = [
   "Enfriado",
   "Regeneración",
   "Mantenimiento en caliente",
+  "Reparto a domicilio (delivery)",
   "Distribución/servicio",
   "Envasado",
   "Venta directa al consumidor en el mismo local",
@@ -647,14 +648,15 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                       {opt.ejemplo && (
                         <Popover>
                           <PopoverTrigger asChild>
-                            <button
-                              type="button"
+                            <span
+                              role="button"
+                              tabIndex={0}
                               onClick={(e) => e.stopPropagation()}
                               onPointerDown={(e) => e.stopPropagation()}
                               className="inline-flex align-middle ml-1"
                             >
                               <Info className={`w-4 h-4 ${activo ? "text-white/70" : "text-[#9A9A9A]"}`} />
-                            </button>
+                            </span>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto max-w-56 text-sm bg-white">
                             {opt.ejemplo}
@@ -746,20 +748,31 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                       key={opt.key}
                       type="button"
                       onClick={() => toggleCategoria(opt.key)}
-                      className={`flex flex-col items-center text-center gap-1 py-3 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 ${
+                      className={`py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 text-center ${
                         activo
                           ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
                           : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
                       }`}
                     >
-                      <span className="flex items-center gap-1.5">
-                        {activo && <Check className="w-3.5 h-3.5" />}
-                        {opt.label}
-                      </span>
+                      {activo && <Check className="w-3.5 h-3.5 inline align-middle mr-1" />}
+                      {opt.label}
                       {opt.ejemplo && (
-                        <span className={`text-[11px] font-normal ${activo ? "text-white/70" : "text-[#9A9A9A]"}`}>
-                          {opt.ejemplo}
-                        </span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={(e) => e.stopPropagation()}
+                              onPointerDown={(e) => e.stopPropagation()}
+                              className="inline-flex align-middle ml-1"
+                            >
+                              <Info className={`w-4 h-4 ${activo ? "text-white/70" : "text-[#9A9A9A]"}`} />
+                            </span>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto max-w-56 text-sm bg-white">
+                            {opt.ejemplo}
+                          </PopoverContent>
+                        </Popover>
                       )}
                     </button>
                   );
