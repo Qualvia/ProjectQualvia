@@ -52,6 +52,14 @@ const RANGO_OPCIONES = [
   { value: "50+", label: "Más de 50" },
 ];
 
+const CASOS_ESPECIALES_OPCIONES = [
+  "Comidas listas para consumo",
+  "Productos de alto riesgo (carnes/pescados crudos, cremas, salsas)",
+  "Población vulnerable (niños, ancianos, hospitales)",
+  "Uso intensivo de alérgenos",
+  "Ninguno de los anteriores",
+];
+
 export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const { user, currentBusiness } = useBusiness();
   const { usuarioActivo } = useUsuarioInterno();
@@ -73,6 +81,11 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const [separacionCircuitos, setSeparacionCircuitos] = useState(null); // "si" | "no" | "parcial" | null
   const [rangoReferencias, setRangoReferencias] = useState(null); // "1-10" | "11-25" | "26-50" | "50+" | null
 
+  // --- Paso 3: Productos y consumidor ---
+  const [casosEspeciales, setCasosEspeciales] = useState([]);
+  const [alergenos, setAlergenos] = useState([]);
+  const [nuevoAlergeno, setNuevoAlergeno] = useState("");
+
   // --- Responsable ---
   // Prioridad: config guardada → usuario interno activo → persona_contacto del BusinessProfile → propietario
   const [contactoNegocio, setContactoNegocio] = useState("");
@@ -91,7 +104,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
     if (!open || !currentBusiness) return;
     setConfigCargada(false);
     base44.entities.ConfiguracionAPPCC.filter({ business_id: currentBusiness.id })
-      .then((data) => {
+      .then(async (data) => {
         const config = data[0];
         if (config) {
           setConfigId(config.id);
@@ -104,6 +117,16 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           setProcesosHabituales(config.procesos_habituales || []);
           setSeparacionCircuitos(config.separacion_circuitos || null);
           setRangoReferencias(config.rango_referencias || null);
+          setCasosEspeciales(config.casos_especiales || []);
+          setAlergenos(config.alergenos || []);
+        }
+        // Si NO hay config guardada con alérgenos, precargar desde los registros de alérgenos
+        if (!config || !config.alergenos || config.alergenos.length === 0) {
+          try {
+            const registros = await base44.entities.RegistroAlergeno.filter({ business_id: currentBusiness.id });
+            const todos = (registros || []).flatMap((r) => r.alergenos || []);
+            setAlergenos(Array.from(new Set(todos)));
+          } catch (e) {}
         }
       })
       .catch(() => {})
@@ -141,13 +164,35 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const puedeAvanzarPaso1 = responsableNombre.trim() !== "" && tieneFormacion !== null;
   const puedeAvanzarPaso2 =
     procesosHabituales.length > 0 && separacionCircuitos !== null && rangoReferencias !== null;
+  const puedeAvanzarPaso3 = casosEspeciales.length > 0;
 
-  const puedeAvanzar = pasoActual === 1 ? puedeAvanzarPaso1 : pasoActual === 2 ? puedeAvanzarPaso2 : true;
+  const puedeAvanzar =
+    pasoActual === 1 ? puedeAvanzarPaso1
+    : pasoActual === 2 ? puedeAvanzarPaso2
+    : pasoActual === 3 ? puedeAvanzarPaso3
+    : true;
 
   const toggleProceso = (proceso) => {
     setProcesosHabituales((prev) =>
       prev.includes(proceso) ? prev.filter((p) => p !== proceso) : [...prev, proceso]
     );
+  };
+
+  const toggleCasoEspecial = (caso) => {
+    setCasosEspeciales((prev) =>
+      prev.includes(caso) ? prev.filter((c) => c !== caso) : [...prev, caso]
+    );
+  };
+
+  const anadirAlergeno = () => {
+    const valor = nuevoAlergeno.trim();
+    if (!valor) return;
+    setAlergenos((prev) => (prev.includes(valor) ? prev : [...prev, valor]));
+    setNuevoAlergeno("");
+  };
+
+  const eliminarAlergeno = (valor) => {
+    setAlergenos((prev) => prev.filter((a) => a !== valor));
   };
 
   const handleSiguiente = async () => {
@@ -170,6 +215,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       procesos_habituales: procesosHabituales,
       separacion_circuitos: separacionCircuitos,
       rango_referencias: rangoReferencias,
+      casos_especiales: casosEspeciales,
+      alergenos: alergenos,
     };
     try {
       if (configId) {
@@ -492,6 +539,99 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                     {opt.label}
                   </button>
                 ))}
+              </div>
+            </section>
+              </>
+            )}
+
+            {pasoActual === 3 && (
+              <>
+            {/* Sección: Productos y consumidor — casos especiales */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
+                ¿Se da alguno de estos casos especiales en tu negocio?
+              </p>
+              <p className="text-[12px] text-[#6B6B6B] mb-4">
+                Selecciona todos los que apliquen.
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {CASOS_ESPECIALES_OPCIONES.map((caso) => {
+                  const activo = casosEspeciales.includes(caso);
+                  return (
+                    <button
+                      key={caso}
+                      type="button"
+                      onClick={() => toggleCasoEspecial(caso)}
+                      className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 ${
+                        activo
+                          ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                          : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                      }`}
+                    >
+                      {activo && <Check className="w-3.5 h-3.5" />}
+                      {caso}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Sección: Alérgenos */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-1">
+                Alérgenos presentes en tu negocio
+              </p>
+              <p className="text-[12px] text-[#6B6B6B] mb-4">
+                Detectados desde tus registros — puedes añadir o quitar.
+              </p>
+
+              {alergenos.length > 0 && (
+                <div className="space-y-2 mb-3">
+                  {alergenos.map((alergeno) => (
+                    <div
+                      key={alergeno}
+                      className="flex items-center justify-between gap-2 rounded-lg border border-[#6BB68A]/30 bg-[#6BB68A]/10 px-3.5 py-2.5 animate-in fade-in-0 slide-in-from-top-1 duration-200"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <CheckCircle2 className="w-4 h-4 text-[#0A3E47] shrink-0" />
+                        <span className="text-[13px] font-medium text-[#0A3E47] truncate">
+                          {alergeno}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => eliminarAlergeno(alergeno)}
+                        className="shrink-0 p-1 rounded-md text-[#9A9A9A] hover:text-[#c0392b] hover:bg-[#c0392b]/8 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <Input
+                  value={nuevoAlergeno}
+                  onChange={(e) => setNuevoAlergeno(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      anadirAlergeno();
+                    }
+                  }}
+                  placeholder="Ej. Gluten, Lácteos, Frutos secos…"
+                  className="border-[#EDE6DA] focus-visible:ring-[#0A3E47]"
+                />
+                <button
+                  type="button"
+                  onClick={anadirAlergeno}
+                  disabled={!nuevoAlergeno.trim()}
+                  className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0A3E47] text-white text-[13px] font-semibold hover:bg-[#0A3E47] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Añadir
+                </button>
               </div>
             </section>
               </>

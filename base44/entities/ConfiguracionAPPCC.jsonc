@@ -51,6 +51,18 @@
         "26-50",
         "50+"
       ]
+    },
+    "casos_especiales": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "alergenos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [
