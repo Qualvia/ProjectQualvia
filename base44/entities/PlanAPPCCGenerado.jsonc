@@ -1,0 +1,90 @@
+{
+  "name": "PlanAPPCCGenerado",
+  "type": "object",
+  "properties": {
+    "business_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "config_id": {
+      "type": "string"
+    },
+    "libreria_version": {
+      "type": "string"
+    },
+    "contenido": {
+      "type": "object"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "borrador",
+        "confirmado"
+      ],
+      "default": "borrador"
+    },
+    "fecha_generacion": {
+      "type": "string"
+    },
+    "fecha_confirmacion": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "business_id",
+    "user_id",
+    "config_id"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
