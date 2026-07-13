@@ -63,6 +63,12 @@
       "items": {
         "type": "string"
       }
+    },
+    "categorias_proceso": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [

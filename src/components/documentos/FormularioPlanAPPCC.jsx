@@ -72,6 +72,15 @@ const CASOS_ESPECIALES_OPCIONES = [
   { label: "Ninguno de los anteriores", ejemplo: null },
 ];
 
+const CATEGORIAS_PROCESO_OPCIONES = [
+  { key: "caliente_inmediato", label: "Elaborados en caliente, servidos al momento", ejemplo: "Guisos, salteados, platos de cuchara" },
+  { key: "frio_sin_coccion", label: "Elaborados en frío, sin cocción", ejemplo: "Ensaladas, sándwiches, aperitivos fríos" },
+  { key: "crudo_alto_riesgo", label: "Producto crudo de alto riesgo", ejemplo: "Pescado crudo/sushi, carpaccios, carne poco hecha" },
+  { key: "produccion_anticipada", label: "Producción anticipada con conservación", ejemplo: "Cocinar hoy para servir en días posteriores" },
+  { key: "congelacion_descongelacion", label: "Congelación/descongelación habitual", ejemplo: "Uso de producto congelado como parte del proceso" },
+  { key: "panaderia_pasteleria", label: "Panadería/pastelería", ejemplo: "Masas, horneado, rellenos con huevo o lácteos" },
+];
+
 export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const { user, currentBusiness } = useBusiness();
   const { usuarioActivo } = useUsuarioInterno();
@@ -97,6 +106,9 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const [casosEspeciales, setCasosEspeciales] = useState([]);
   const [alergenos, setAlergenos] = useState([]);
   const [nuevoAlergeno, setNuevoAlergeno] = useState("");
+
+  // --- Paso 4: Categorías de proceso ---
+  const [categoriasProceso, setCategoriasProceso] = useState([]);
 
   // --- Responsable ---
   // Prioridad: config guardada → usuario interno activo → persona_contacto del BusinessProfile → propietario
@@ -131,6 +143,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           setRangoReferencias(config.rango_referencias || null);
           setCasosEspeciales(config.casos_especiales || []);
           setAlergenos(config.alergenos || []);
+          setCategoriasProceso(config.categorias_proceso || []);
         }
         // Si NO hay config guardada con alérgenos, precargar desde los registros de alérgenos
         if (!config || !config.alergenos || config.alergenos.length === 0) {
@@ -177,11 +190,13 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const puedeAvanzarPaso2 =
     procesosHabituales.length > 0 && separacionCircuitos !== null && rangoReferencias !== null;
   const puedeAvanzarPaso3 = casosEspeciales.length > 0;
+  const puedeAvanzarPaso4 = categoriasProceso.length > 0;
 
   const puedeAvanzar =
     pasoActual === 1 ? puedeAvanzarPaso1
     : pasoActual === 2 ? puedeAvanzarPaso2
     : pasoActual === 3 ? puedeAvanzarPaso3
+    : pasoActual === 4 ? puedeAvanzarPaso4
     : true;
 
   const toggleProceso = (proceso) => {
@@ -201,6 +216,12 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       }
       return [...prev.filter((c) => c !== NINGUNO), caso];
     });
+  };
+
+  const toggleCategoria = (key) => {
+    setCategoriasProceso((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
   };
 
   const anadirAlergeno = () => {
@@ -236,6 +257,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       rango_referencias: rangoReferencias,
       casos_especiales: casosEspeciales,
       alergenos: alergenos,
+      categorias_proceso: categoriasProceso,
     };
     try {
       if (configId) {
@@ -696,6 +718,47 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                   <Plus className="w-4 h-4" />
                   Añadir
                 </button>
+              </div>
+            </section>
+              </>
+            )}
+
+            {pasoActual === 4 && (
+              <>
+            {/* Sección: Categorías de proceso */}
+            <section>
+              <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-1">
+                ¿Qué tipo de alimentos elaboras o sirves habitualmente?
+              </p>
+              <p className="text-[12px] text-[#6B6B6B] mb-4">
+                Selecciona todos los que apliquen.
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {CATEGORIAS_PROCESO_OPCIONES.map((opt) => {
+                  const activo = categoriasProceso.includes(opt.key);
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => toggleCategoria(opt.key)}
+                      className={`flex flex-col items-center text-center gap-1 py-3 px-3 rounded-xl text-[13px] font-semibold transition-all duration-200 ${
+                        activo
+                          ? "bg-[#0A3E47] text-white border-2 border-[#0A3E47]"
+                          : "bg-white text-[#0A3E47] border-2 border-[#0A3E47] hover:bg-[#0A3E47]/5"
+                      }`}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        {activo && <Check className="w-3.5 h-3.5" />}
+                        {opt.label}
+                      </span>
+                      {opt.ejemplo && (
+                        <span className={`text-[11px] font-normal ${activo ? "text-white/70" : "text-[#9A9A9A]"}`}>
+                          {opt.ejemplo}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </section>
               </>
