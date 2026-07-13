@@ -201,13 +201,15 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
         // Siempre: resumir proveedores (total y con registro sanitario o certificación indicada)
         try {
           const proveedores = await base44.entities.Proveedor.filter({ business_id: currentBusiness.id });
-          const total = (proveedores || []).length;
-          const conCertificacion = (proveedores || []).filter((p) => {
+          const lista = (proveedores || []).map((p) => {
             const rs = (p.registro_sanitario || "").trim();
             const cert = (p.certificaciones || "").trim();
-            return rs !== "" || cert !== "";
-          }).length;
-          setProveedoresInfo({ total, conCertificacion });
+            const homologado = rs !== "" || cert !== "";
+            return { nombre: p.nombre || "Sin nombre", homologado };
+          });
+          const total = lista.length;
+          const conCertificacion = lista.filter((p) => p.homologado).length;
+          setProveedoresInfo({ total, conCertificacion, lista });
         } catch (e) {}
       })
       .catch(() => {})
@@ -956,6 +958,22 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
                   <p className="text-[13px] font-medium text-[#0A3E47] leading-snug">
                     Tienes {proveedoresInfo.total} proveedor{proveedoresInfo.total === 1 ? "" : "es"} registrado{proveedoresInfo.total === 1 ? "" : "s"}, {proveedoresInfo.conCertificacion} con registro sanitario o certificación indicada.
                   </p>
+                </div>
+              )}
+              {proveedoresInfo && proveedoresInfo.lista && proveedoresInfo.lista.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {proveedoresInfo.lista.map((prov, idx) => (
+                    <span
+                      key={idx}
+                      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                        prov.homologado
+                          ? "bg-[#6BB68A]/10 text-[#0A3E47]"
+                          : "bg-[#EDE6DA]/60 text-[#6B6B6B]"
+                      }`}
+                    >
+                      {prov.nombre}
+                    </span>
+                  ))}
                 </div>
               )}
               <p className="text-[14px] font-bold text-[#1A1A1A] leading-snug mb-4">
