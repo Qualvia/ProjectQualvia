@@ -1,29 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-import { PDFDocument, StandardFonts, rgb } from 'npm:pdf-lib@1.17.1';
-
-// A4 en puntos
-const PAGE_W = 595.28;
-const PAGE_H = 841.89;
-const MARGIN = 50;
-const CONTENT_W = PAGE_W - MARGIN * 2;
-
-const PETROLEO = rgb(10 / 255, 62 / 255, 71 / 255);
-const GRIS = rgb(74 / 255, 74 / 255, 74 / 255);
-const TEXTO = rgb(30 / 255, 30 / 255, 30 / 255);
-const TEXTO_SUAVE = rgb(60 / 255, 60 / 255, 60 / 255);
-
-// Las fuentes estándar de pdf-lib usan WinAnsi: hay símbolos que no soporta (≤, ≥, →…)
-const sanitize = (s) =>
-  String(s ?? "")
-    .replace(/≤/g, "<=")
-    .replace(/≥/g, ">=")
-    .replace(/→/g, "->")
-    .replace(/←/g, "<-")
-    .replace(/↔/g, "<->")
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/…/g, "...")
-    .replace(/\u00A0/g, " ");
+import { PDFDocument, StandardFonts } from 'npm:pdf-lib@1.17.1';
+import {
+  PAGE_W, PAGE_H, MARGIN,
+  PETROLEO, GRIS, TEXTO, TEXTO_SUAVE,
+  drawBlock, moveDown, heading, para, field, pintarTabla, anadirCabeceraYPie,
+} from '../../shared/pdfKit.ts';
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -73,170 +54,114 @@ Deno.serve(async (req) => {
     const helvBold = await doc.embedFont(StandardFonts.HelveticaBold);
     const helvOblique = await doc.embedFont(StandardFonts.HelveticaOblique);
 
-    let page = doc.addPage([PAGE_W, PAGE_H]);
-    let y = PAGE_H - MARGIN;
-
-    const newPage = () => {
-      page = doc.addPage([PAGE_W, PAGE_H]);
-      y = PAGE_H - MARGIN;
-    };
-
-    const wrap = (str, font, size, maxWidth) => {
-      const text = sanitize(str);
-      if (text === "") return [""];
-      const words = text.split(/\s+/);
-      const lines = [];
-      let line = "";
-      for (const w of words) {
-        const test = line ? line + " " + w : w;
-        if (font.widthOfTextAtSize(test, size) <= maxWidth) {
-          line = test;
-        } else {
-          if (line) lines.push(line);
-          line = w;
-          while (font.widthOfTextAtSize(line, size) > maxWidth && line.length > 1) {
-            const cut = Math.max(1, line.length - 1);
-            lines.push(line.slice(0, cut));
-            line = line.slice(cut);
-          }
-        }
-      }
-      if (line) lines.push(line);
-      return lines;
-    };
-
-    const drawBlock = (
-      str,
-      { font = helv, size = 10, color = TEXTO, align = "left", lineGap = 2 } = {}
-    ) => {
-      const lines = wrap(str, font, size, CONTENT_W);
-      const lineHeight = size + lineGap;
-      for (const line of lines) {
-        if (y - lineHeight < MARGIN) newPage();
-        let x = MARGIN;
-        const w = font.widthOfTextAtSize(line, size);
-        if (align === "center") x = (PAGE_W - w) / 2;
-        else if (align === "right") x = PAGE_W - MARGIN - w;
-        page.drawText(line, { x, y: y - size, size, font, color });
-        y -= lineHeight;
-      }
-    };
-
-    const moveDown = (pts) => {
-      y -= pts;
-    };
-    const gap = () => moveDown(8);
-
-    const heading = (text, size = 14) => {
-      gap();
-      drawBlock(text, { font: helvBold, size, color: PETROLEO });
-      gap();
-    };
-    const para = (text) => {
-      drawBlock(text, { font: helv, size: 10, color: TEXTO_SUAVE });
-      gap();
-    };
-    const field = (label, value) => {
-      drawBlock(label + ":", { font: helvBold, size: 10, color: TEXTO });
-      drawBlock(value || "—", { font: helv, size: 10, color: TEXTO_SUAVE });
-      moveDown(4);
+    const ctx = {
+      doc,
+      page: doc.addPage([PAGE_W, PAGE_H]),
+      y: PAGE_H - MARGIN,
+      helv,
+      helvBold,
+      helvOblique,
+      newPage() {
+        ctx.page = doc.addPage([PAGE_W, PAGE_H]);
+        ctx.y = PAGE_H - MARGIN;
+      },
     };
 
     // --- Portada ---
-    moveDown(60);
-    drawBlock("Plan APPCC", { font: helvBold, size: 28, color: PETROLEO, align: "center" });
-    moveDown(30);
-    drawBlock(business.name || "", {
+    moveDown(ctx, 60);
+    drawBlock(ctx, "Plan APPCC", { font: helvBold, size: 28, color: PETROLEO, align: "center" });
+    moveDown(ctx, 30);
+    drawBlock(ctx, business.name || "", {
       font: helv,
       size: 16,
       color: TEXTO,
       align: "center"
     });
-    moveDown(20);
-    drawBlock("Equipo responsable: " + (contenido.equipo_responsable || "—"), {
+    moveDown(ctx, 20);
+    drawBlock(ctx, "Equipo responsable: " + (contenido.equipo_responsable || "—"), {
       font: helv,
       size: 11,
       color: GRIS,
       align: "center"
     });
-    moveDown(6);
-    drawBlock("Fecha de generación: " + (plan.fecha_generacion || new Date().toISOString()), {
+    moveDown(ctx, 6);
+    drawBlock(ctx, "Fecha de generación: " + (plan.fecha_generacion || new Date().toISOString()), {
       font: helv,
       size: 11,
       color: GRIS,
       align: "center"
     });
-    moveDown(40);
-    drawBlock(disclaimer, { font: helvOblique, size: 9, color: GRIS });
+    moveDown(ctx, 40);
+    drawBlock(ctx, disclaimer, { font: helvOblique, size: 9, color: GRIS });
 
     // --- Página de contenido ---
-    newPage();
+    ctx.newPage();
 
-    heading("Descripción de la actividad", 16);
-    para(contenido.descripcion_actividad);
+    heading(ctx, "Descripción de la actividad", 16);
+    para(ctx, contenido.descripcion_actividad);
 
     const diagramas = contenido.diagramas || {};
     for (const key of Object.keys(diagramas)) {
       const d = diagramas[key];
-      heading(d.nombre || key, 14);
-      if (d.introduccion) para(d.introduccion);
+      heading(ctx, d.nombre || key, 14);
+      if (d.introduccion) para(ctx, d.introduccion);
 
       const etapas = d.etapas || [];
       for (const etapa of etapas) {
-        drawBlock("Etapa: " + (etapa.nombre || ""), {
+        drawBlock(ctx, "Etapa: " + (etapa.nombre || ""), {
           font: helvBold,
           size: 11,
           color: TEXTO
         });
-        moveDown(3);
+        moveDown(ctx, 3);
         const peligros = etapa.peligros || [];
         for (const p of peligros) {
-          field("Tipo de peligro", p.tipo);
-          field("Descripción", p.descripcion);
+          field(ctx, "Tipo de peligro", p.tipo);
+          field(ctx, "Descripción", p.descripcion);
           if (p.es_pcc === true) {
-            field("Límite crítico", p.limite_critico);
             const v = p.vigilancia || {};
-            const vigil = [
-              v.que ? "Qué: " + v.que : null,
-              v.como ? "Cómo: " + v.como : null,
-              v.frecuencia ? "Frecuencia: " + v.frecuencia : null,
-              v.responsable ? "Responsable: " + v.responsable : null
-            ]
-              .filter(Boolean)
-              .join("  ·  ");
-            field("Vigilancia", vigil);
-            field("Medida correctora", p.medida_correctora);
+            pintarTabla(ctx, [
+              { label: "Límite crítico", value: p.limite_critico },
+              { label: "Qué", value: v.que },
+              { label: "Cómo", value: v.como },
+              { label: "Frecuencia", value: v.frecuencia },
+              { label: "Responsable", value: v.responsable },
+              { label: "Medida correctora", value: p.medida_correctora },
+            ]);
           }
-          moveDown(6);
+          moveDown(ctx, 6);
         }
       }
     }
 
-    heading("Verificación general", 14);
-    para(contenido.verificacion_general);
+    heading(ctx, "Verificación general", 14);
+    para(ctx, contenido.verificacion_general);
 
-    heading("Documentación y registros", 14);
+    heading(ctx, "Documentación y registros", 14);
     const docs = contenido.documentacion_registro || [];
     if (docs.length === 0) {
-      para("No se han definido registros asociados.");
+      para(ctx, "No se han definido registros asociados.");
     } else {
       for (const item of docs) {
-        drawBlock("•  " + item, { font: helv, size: 10, color: TEXTO_SUAVE });
+        drawBlock(ctx, "•  " + item, { font: helv, size: 10, color: TEXTO_SUAVE });
       }
-      gap();
+      moveDown(ctx, 8);
     }
 
-    heading("Anexo — Carencias detectadas", 14);
+    heading(ctx, "Anexo — Carencias detectadas", 14);
     const anexo = contenido.anexo_huecos || [];
     if (!anexo || anexo.length === 0) {
-      para("No se han detectado carencias relevantes.");
+      para(ctx, "No se han detectado carencias relevantes.");
     } else {
       for (const h of anexo) {
-        drawBlock(h.tipo || "", { font: helvBold, size: 10, color: TEXTO });
-        drawBlock(h.descripcion || "", { font: helv, size: 10, color: TEXTO_SUAVE });
-        moveDown(6);
+        drawBlock(ctx, h.tipo || "", { font: helvBold, size: 10, color: TEXTO });
+        drawBlock(ctx, h.descripcion || "", { font: helv, size: 10, color: TEXTO_SUAVE });
+        moveDown(ctx, 6);
       }
     }
+
+    // Cabecera y pie en todas las páginas (excepto portada)
+    await anadirCabeceraYPie(doc, "Plan APPCC");
 
     // 6. PDF a bytes
     const pdfBytes = await doc.save();
