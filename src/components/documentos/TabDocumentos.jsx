@@ -132,7 +132,11 @@ export default function TabDocumentos() {
                 </div>
               </div>
               <button
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors ${doc.btnColor}`}
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors ${
+                  doc.id === "appcc" && planAppcc?.estado === "confirmado"
+                    ? "bg-[#0A3E47] hover:bg-[#0A3E47]/90 !text-white"
+                    : doc.btnColor
+                }`}
                 onClick={() => {
                   if (doc.id === "appcc") {
                     if (!planAppcc) {
