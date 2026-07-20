@@ -245,8 +245,8 @@ Deno.serve(async (req) => {
     const fileObj = new File([pdfBytes], "plan-appcc-" + plan.id + ".pdf", {
       type: "application/pdf"
     });
-    const uploadRes = await base44.integrations.Core.UploadPrivateFile({ file: fileObj });
-    const pdf_url = uploadRes.file_uri;
+    const uploadRes = await base44.integrations.Core.UploadFile({ file: fileObj });
+    const pdf_url = uploadRes.file_url;
 
     // 8. Actualizar el registro
     await base44.asServiceRole.entities.PlanAPPCCGenerado.update(plan.id, {
