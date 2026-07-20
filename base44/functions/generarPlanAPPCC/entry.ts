@@ -23,7 +23,12 @@ Deno.serve(async (req) => {
   }
 
   // 2. Body
-  const { business_id } = await req.json();
+  let business_id;
+  try {
+    ({ business_id } = await req.json());
+  } catch (e) {
+    return Response.json({ error: "Body inválido" }, { status: 400 });
+  }
   if (!business_id) {
     return Response.json({ error: "business_id es requerido" }, { status: 400 });
   }
