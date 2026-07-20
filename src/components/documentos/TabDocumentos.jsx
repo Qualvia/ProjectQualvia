@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, ClipboardList, BookOpen, Award, Sparkles, BarChart3, Download, FileCheck } from "lucide-react";
+import { ShieldCheck, ClipboardList, BookOpen, Award, Sparkles, BarChart3, Download, FileCheck, Pencil } from "lucide-react";
 import FormularioPlanAPPCC from "./FormularioPlanAPPCC";
 import VistaPreviaPlanAPPCC from "./VistaPreviaPlanAPPCC";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -131,37 +131,52 @@ export default function TabDocumentos() {
                   <p className="text-sm text-muted-foreground leading-snug">{doc.desc}</p>
                 </div>
               </div>
-              <button
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors ${
-                  doc.id === "appcc" && planAppcc?.estado === "confirmado"
-                    ? "bg-[#0A3E47] hover:bg-[#0A3E47]/90 !text-white"
-                    : doc.btnColor
-                }`}
-                onClick={() => {
-                  if (doc.id === "appcc") {
-                    if (!planAppcc) {
-                      setModalAppccOpen(true);
-                    } else if (planAppcc.estado === "borrador") {
-                      setVistaPreviaOpen(true);
-                    } else if (planAppcc.estado === "confirmado" && planAppcc.pdf_url) {
-                      window.open(planAppcc.pdf_url, "_blank");
+              {doc.id === "appcc" && planAppcc?.estado === "confirmado" && planAppcc.pdf_url ? (
+                <div className="flex gap-2">
+                  <button
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors bg-[#0A3E47] hover:bg-[#0A3E47]/90 !text-white`}
+                    onClick={() => window.open(planAppcc.pdf_url, "_blank")}
+                  >
+                    <Download className="w-4 h-4" />
+                    Ver documento
+                  </button>
+                  <button
+                    className="w-12 shrink-0 flex items-center justify-center rounded-xl border-2 border-[#0A3E47] text-[#0A3E47] hover:bg-[#0A3E47]/5 transition-colors"
+                    onClick={() => setModalAppccOpen(true)}
+                    aria-label="Editar y regenerar"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors ${
+                    doc.id === "appcc" && planAppcc?.estado === "confirmado"
+                      ? "bg-[#0A3E47] hover:bg-[#0A3E47]/90 !text-white"
+                      : doc.btnColor
+                  }`}
+                  onClick={() => {
+                    if (doc.id === "appcc") {
+                      if (!planAppcc) {
+                        setModalAppccOpen(true);
+                      } else if (planAppcc.estado === "borrador") {
+                        setVistaPreviaOpen(true);
+                      }
                     }
-                  }
-                }}
-              >
-                {doc.id === "appcc" && planAppcc?.estado === "borrador" ? (
-                  <FileCheck className="w-4 h-4" />
-                ) : (
-                  <Download className="w-4 h-4" />
-                )}
-                {doc.id === "appcc" && !planAppcc
-                  ? "Generar PDF"
-                  : doc.id === "appcc" && planAppcc.estado === "borrador"
-                    ? "Revisar y confirmar"
-                    : doc.id === "appcc" && planAppcc.estado === "confirmado"
-                      ? "Ver documento"
+                  }}
+                >
+                  {doc.id === "appcc" && planAppcc?.estado === "borrador" ? (
+                    <FileCheck className="w-4 h-4" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  {doc.id === "appcc" && !planAppcc
+                    ? "Generar PDF"
+                    : doc.id === "appcc" && planAppcc.estado === "borrador"
+                      ? "Revisar y confirmar"
                       : "Generar PDF"}
-              </button>
+                </button>
+              )}
             </div>
           );
         })}
