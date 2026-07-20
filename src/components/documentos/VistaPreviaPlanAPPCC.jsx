@@ -19,6 +19,7 @@ export default function VistaPreviaPlanAPPCC({ open, onOpenChange, business, onC
   const [confirmado, setConfirmado] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [diagramaAbierto, setDiagramaAbierto] = useState(null);
+  const [pdfListo, setPdfListo] = useState(null);
 
   useEffect(() => {
     if (!open || !business) return;
@@ -47,10 +48,9 @@ export default function VistaPreviaPlanAPPCC({ open, onOpenChange, business, onC
     try {
       const res = await base44.functions.invoke("generarPdfPlanAPPCC", { plan_id: plan.id });
       if (res?.data?.success && res?.data?.pdf_url) {
-        window.open(res.data.pdf_url, "_blank");
-        toast({ title: "Plan APPCC confirmado. El PDF se ha abierto en una nueva ventana." });
+        setPdfListo(res.data.pdf_url);
+        toast({ title: "Plan APPCC confirmado." });
         onConfirmado?.();
-        onOpenChange(false);
       } else {
         toast({
           title: res?.data?.error || "No se pudo generar el PDF. Inténtalo de nuevo.",
@@ -312,28 +312,48 @@ export default function VistaPreviaPlanAPPCC({ open, onOpenChange, business, onC
 
         {/* --- Footer --- */}
         <div className="px-6 py-4 border-t border-[#EDE6DA] bg-[#FAFAF7] flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            disabled={confirmando}
-            className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#0A3E47] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Cancelar
-          </button>
-          <Button
-            onClick={handleConfirmar}
-            disabled={!confirmado || confirmando || !plan || cargando}
-            className="bg-[#6BB68A] hover:bg-[#5aa377] !text-white px-6 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {confirmando ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Generando PDF…
-              </>
-            ) : (
-              "Confirmar y generar PDF"
-            )}
-          </Button>
+          {pdfListo ? (
+            <>
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#0A3E47] transition-colors"
+              >
+                Cerrar
+              </button>
+              <Button
+                onClick={() => window.open(pdfListo, "_blank")}
+                className="bg-[#0A3E47] hover:bg-[#0A3E47] !text-white px-6"
+              >
+                Abrir PDF
+              </Button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                disabled={confirmando}
+                className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#0A3E47] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Cancelar
+              </button>
+              <Button
+                onClick={handleConfirmar}
+                disabled={!confirmado || confirmando || !plan || cargando}
+                className="bg-[#6BB68A] hover:bg-[#5aa377] !text-white px-6 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {confirmando ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Generando PDF…
+                  </>
+                ) : (
+                  "Confirmar y generar PDF"
+                )}
+              </Button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
