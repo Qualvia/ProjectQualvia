@@ -1,6 +1,9 @@
-import React, { useState } from "react";
-import { ShieldCheck, ClipboardList, BookOpen, Award, Sparkles, BarChart3, Download } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ShieldCheck, ClipboardList, BookOpen, Award, Sparkles, BarChart3, Download, FileCheck } from "lucide-react";
 import FormularioPlanAPPCC from "./FormularioPlanAPPCC";
+import VistaPreviaPlanAPPCC from "./VistaPreviaPlanAPPCC";
+import { useBusiness } from "@/contexts/BusinessContext";
+import { base44 } from "@/api/base44Client";
 
 const DOCUMENTOS = [
   {
@@ -61,6 +64,31 @@ const DOCUMENTOS = [
 
 export default function TabDocumentos() {
   const [modalAppccOpen, setModalAppccOpen] = useState(false);
+  const [vistaPreviaOpen, setVistaPreviaOpen] = useState(false);
+  const { currentBusiness } = useBusiness();
+  const [planAppcc, setPlanAppcc] = useState(null);
+
+  const cargarPlanAppcc = async () => {
+    if (!currentBusiness) {
+      setPlanAppcc(null);
+      return;
+    }
+    try {
+      const data = await base44.entities.PlanAPPCCGenerado.filter({ business_id: currentBusiness.id });
+      const ordenados = (data || []).slice().sort((a, b) => {
+        const fa = a.fecha_generacion || "";
+        const fb = b.fecha_generacion || "";
+        return fb.localeCompare(fa);
+      });
+      setPlanAppcc(ordenados[0] || null);
+    } catch (e) {
+      setPlanAppcc(null);
+    }
+  };
+
+  useEffect(() => {
+    cargarPlanAppcc();
+  }, [currentBusiness]);
 
   return (
     <div className="space-y-6">
@@ -106,18 +134,37 @@ export default function TabDocumentos() {
               <button
                 className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors ${doc.btnColor}`}
                 onClick={() => {
-                  if (doc.id === "appcc") setModalAppccOpen(true);
+                  if (doc.id === "appcc") {
+                    if (!planAppcc) {
+                      setModalAppccOpen(true);
+                    } else if (planAppcc.estado === "borrador") {
+                      setVistaPreviaOpen(true);
+                    } else if (planAppcc.estado === "confirmado" && planAppcc.pdf_url) {
+                      window.open(planAppcc.pdf_url, "_blank");
+                    }
+                  }
                 }}
               >
-                <Download className="w-4 h-4" />
-                Generar PDF
+                {doc.id === "appcc" && planAppcc?.estado === "borrador" ? (
+                  <FileCheck className="w-4 h-4" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                {doc.id === "appcc" && !planAppcc
+                  ? "Generar PDF"
+                  : doc.id === "appcc" && planAppcc.estado === "borrador"
+                    ? "Revisar y confirmar"
+                    : doc.id === "appcc" && planAppcc.estado === "confirmado"
+                      ? "Ver documento"
+                      : "Generar PDF"}
               </button>
             </div>
           );
         })}
       </div>
 
-      <FormularioPlanAPPCC open={modalAppccOpen} onOpenChange={setModalAppccOpen} />
+      <FormularioPlanAPPCC open={modalAppccOpen} onOpenChange={setModalAppccOpen} onGenerado={cargarPlanAppcc} />
+      <VistaPreviaPlanAPPCC open={vistaPreviaOpen} onOpenChange={setVistaPreviaOpen} business={currentBusiness} onConfirmado={cargarPlanAppcc} />
 
       {/* Aviso legal */}
       <div className="bg-secondary border border-border rounded-2xl px-5 py-4 flex items-start gap-3">

@@ -110,7 +110,7 @@ const EQUIPOS_OPCIONES = [
   "Amasadora/fermentadora",
 ];
 
-export default function FormularioPlanAPPCC({ open, onOpenChange }) {
+export default function FormularioPlanAPPCC({ open, onOpenChange, onGenerado }) {
   const { user, currentBusiness } = useBusiness();
   const { usuarioActivo } = useUsuarioInterno();
   const { toast } = useToast();
@@ -412,7 +412,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       try {
         const res = await base44.functions.invoke("generarPlanAPPCC", { business_id: currentBusiness.id });
         if (res?.data?.success) {
-          toast({ title: "Tu Plan APPCC se está generando. Podrás revisarlo en breve." });
+          toast({ title: "Tu Plan APPCC se ha generado. Ya puedes revisarlo y confirmarlo." });
+          onGenerado?.();
           onOpenChange(false);
         } else {
           toast({
