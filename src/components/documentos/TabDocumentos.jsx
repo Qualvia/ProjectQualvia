@@ -182,7 +182,10 @@ export default function TabDocumentos() {
         })}
       </div>
 
-      <FormularioPlanAPPCC open={modalAppccOpen} onOpenChange={setModalAppccOpen} onGenerado={cargarPlanAppcc} />
+      <FormularioPlanAPPCC open={modalAppccOpen} onOpenChange={setModalAppccOpen} onGenerado={async () => {
+            await cargarPlanAppcc();
+            setVistaPreviaOpen(true);
+          }} />
       <VistaPreviaPlanAPPCC open={vistaPreviaOpen} onOpenChange={setVistaPreviaOpen} business={currentBusiness} onConfirmado={cargarPlanAppcc} onEditar={() => setModalAppccOpen(true)} />
 
       {/* Aviso legal */}
