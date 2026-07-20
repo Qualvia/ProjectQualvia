@@ -18,6 +18,13 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { useUsuarioInterno } from "@/contexts/UsuarioInternoContext";
 
 const TOTAL_PASOS = 7;
+
+const MENSAJES_GENERANDO = [
+  "Analizando los datos de tu negocio…",
+  "Aplicando la normativa APPCC…",
+  "Personalizando tus puntos de control…",
+  "Casi listo…"
+];
 const PASOS = [
   "Equipo y responsable",
   "Actividad y circuito",
@@ -113,6 +120,8 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
   const [configId, setConfigId] = useState(null);
   const [configCargada, setConfigCargada] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [generando, setGenerando] = useState(false);
+  const [mensajeIndex, setMensajeIndex] = useState(0);
 
   // --- Formación APPCC ---
   const [tieneFormacion, setTieneFormacion] = useState(null); // "si" | "no" | null
@@ -259,6 +268,15 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
       .finally(() => setPerfilCargado(true));
   }, [open, currentBusiness, configId]);
 
+  // Ciclar mensajes de "generando" cada 2.5s mientras se genera el plan
+  useEffect(() => {
+    if (!generando) return;
+    const interval = setInterval(() => {
+      setMensajeIndex((prev) => (prev + 1) % MENSAJES_GENERANDO.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [generando]);
+
   const anadirPersona = () => {
     const valor = nuevaPersona.trim();
     if (!valor) return;
@@ -389,10 +407,27 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
     }
     setSaving(false);
     if (pasoActual === TOTAL_PASOS) {
-      toast({
-        title: "Configuración guardada. Ya puedes generar tu Plan APPCC.",
-      });
-      onOpenChange(false);
+      setGenerando(true);
+      setMensajeIndex(0);
+      try {
+        const res = await base44.functions.invoke("generarPlanAPPCC", { business_id: currentBusiness.id });
+        if (res?.data?.success) {
+          toast({ title: "Tu Plan APPCC se está generando. Podrás revisarlo en breve." });
+          onOpenChange(false);
+        } else {
+          toast({
+            title: res?.data?.error || "No se pudo generar el documento. Inténtalo de nuevo.",
+            variant: "destructive",
+          });
+        }
+      } catch (e) {
+        toast({
+          title: e?.response?.data?.error || e?.message || "No se pudo generar el documento. Inténtalo de nuevo.",
+          variant: "destructive",
+        });
+      } finally {
+        setGenerando(false);
+      }
     } else if (pasoActual < TOTAL_PASOS) {
       setPasoActual((prev) => prev + 1);
     }
@@ -465,6 +500,21 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
 
         {/* --- Cuerpo con slide --- */}
         <div className="px-6 py-5 space-y-6 max-h-[52vh] overflow-y-auto">
+          {generando ? (
+            <div className="flex flex-col items-center justify-center text-center py-16 animate-in fade-in-0 duration-500">
+              <div className="w-16 h-16 rounded-full bg-[#0A3E47] flex items-center justify-center mb-5 animate-pulse">
+                <ShieldCheck className="w-8 h-8 text-white" />
+              </div>
+              <p key={mensajeIndex} className="text-[15px] font-bold text-[#0A3E47] mb-4 animate-in fade-in-0 duration-300">
+                {MENSAJES_GENERANDO[mensajeIndex]}
+              </p>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#6BB68A] animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-2 h-2 rounded-full bg-[#6BB68A] animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-2 h-2 rounded-full bg-[#6BB68A] animate-bounce" style={{ animationDelay: "300ms" }} />
+              </div>
+            </div>
+          ) : (
           <div key={pasoActual} className="animate-in fade-in-0 slide-in-from-right-4 duration-500 space-y-6">
             {pasoActual === 1 && (
               <>
@@ -1152,6 +1202,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
               </>
             )}
           </div>
+          )}
         </div>
 
         {/* --- Footer --- */}
@@ -1160,11 +1211,12 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#0A3E47] transition-colors"
+              disabled={generando}
+              className="text-[14px] font-medium text-[#6B6B6B] hover:text-[#0A3E47] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Cancelar
             </button>
-            {pasoActual > 1 && (
+            {pasoActual > 1 && !generando && (
               <button
                 type="button"
                 onClick={handleAtras}
@@ -1178,13 +1230,18 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
           </div>
           <Button
             onClick={handleSiguiente}
-            disabled={!puedeAvanzar || saving}
+            disabled={!puedeAvanzar || saving || generando}
             className="bg-[#6BB68A] hover:bg-[#5aa377] !text-white px-6 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Guardando…
+              </>
+            ) : generando ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generando…
               </>
             ) : pasoActual === TOTAL_PASOS ? (
               "Generar Plan APPCC"
