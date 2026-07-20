@@ -41,6 +41,9 @@ Deno.serve(async (req) => {
     }
     const business = businesses[0];
 
+    const perfiles = await base44.asServiceRole.entities.BusinessProfile.filter({ business_id });
+    const perfil = perfiles[0] || {};
+
     // 4. Config
     const configs = await base44.asServiceRole.entities.ConfiguracionAPPCC.filter({ business_id });
     if (!configs || configs.length === 0) {
@@ -78,7 +81,7 @@ Deno.serve(async (req) => {
       system: "Eres un experto en seguridad alimentaria redactando la personalización de un Plan APPCC. Los peligros, puntos de control crítico y límites críticos YA ESTÁN DEFINIDOS y no debes modificarlos ni repetirlos — tu única tarea es redactar los campos narrativos que se te piden, usando los datos reales del negocio que se te dan. No inventes datos que no se te han dado. No uses markdown ni asteriscos, texto plano natural. El campo anexo_huecos debe contener EXCLUSIVAMENTE carencias, riesgos o datos no confirmados detectados a partir de la información del negocio (por ejemplo: equipo necesario no registrado, formación en APPCC no confirmada, proveedores no homologados, separación de circuitos parcial). NUNCA debe listar plantillas de registros a implementar — eso ya está cubierto por otra parte del documento. Si no se detecta ninguna carencia real, devuelve un array vacío.",
       messages: [{
         role: "user",
-        content: `Datos del negocio:\n${JSON.stringify({ nombre: business.nombre, tipo_negocio: business.tipo_negocio, ciudad: business.ciudad, comunidad_autonoma: business.comunidad_autonoma })}\n\nConfiguración APPCC:\n${JSON.stringify(config)}\n\nDiagramas de flujo activos:\n${JSON.stringify(diagramasActivos)}`
+        content: `Datos del negocio:\n${JSON.stringify({ nombre: business.name, tipo_negocio: perfil.tipo_negocio, ciudad: perfil.ciudad, comunidad_autonoma: perfil.comunidad_autonoma || perfil.provincia })}\n\nConfiguración APPCC:\n${JSON.stringify(config)}\n\nDiagramas de flujo activos:\n${JSON.stringify(diagramasActivos)}`
       }],
       tools: [{
         name: "generar_personalizacion_appcc",
