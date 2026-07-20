@@ -164,7 +164,7 @@ export default function TabDocumentos() {
       </div>
 
       <FormularioPlanAPPCC open={modalAppccOpen} onOpenChange={setModalAppccOpen} onGenerado={cargarPlanAppcc} />
-      <VistaPreviaPlanAPPCC open={vistaPreviaOpen} onOpenChange={setVistaPreviaOpen} business={currentBusiness} onConfirmado={cargarPlanAppcc} />
+      <VistaPreviaPlanAPPCC open={vistaPreviaOpen} onOpenChange={setVistaPreviaOpen} business={currentBusiness} onConfirmado={cargarPlanAppcc} onEditar={() => setModalAppccOpen(true)} />
 
       {/* Aviso legal */}
       <div className="bg-secondary border border-border rounded-2xl px-5 py-4 flex items-start gap-3">

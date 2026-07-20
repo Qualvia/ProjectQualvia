@@ -11,7 +11,7 @@ import { Loader2, ChevronDown, ShieldCheck, CheckCircle2, AlertTriangle } from "
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
 
-export default function VistaPreviaPlanAPPCC({ open, onOpenChange, business, onConfirmado }) {
+export default function VistaPreviaPlanAPPCC({ open, onOpenChange, business, onConfirmado, onEditar }) {
   const { toast } = useToast();
 
   const [plan, setPlan] = useState(null);
@@ -94,6 +94,21 @@ export default function VistaPreviaPlanAPPCC({ open, onOpenChange, business, onC
             </div>
           </div>
         </div>
+
+        {!pdfListo && onEditar && (
+          <div className="px-6 pt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                onEditar?.();
+                onOpenChange(false);
+              }}
+              className="text-[12px] text-[#0A3E47] underline hover:text-[#0A3E47]/70 transition-colors"
+            >
+              ¿Algo no es correcto? Editar datos y regenerar
+            </button>
+          </div>
+        )}
 
         {/* --- Cuerpo --- */}
         <div className="px-6 py-5 space-y-7 max-h-[58vh] overflow-y-auto">
