@@ -30,6 +30,9 @@
     },
     "fecha_confirmacion": {
       "type": "string"
+    },
+    "pdf_url": {
+      "type": "string"
     }
   },
   "required": [
