@@ -470,6 +470,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
         </div>
 
         {/* --- Cabecera del documento --- */}
+        {!generando && (
         <div className="px-6 pt-6 pb-2">
           {pasoActual === 1 ? (
             <>
@@ -497,6 +498,7 @@ export default function FormularioPlanAPPCC({ open, onOpenChange }) {
             </>
           )}
         </div>
+        )}
 
         {/* --- Cuerpo con slide --- */}
         <div className="px-6 py-5 space-y-6 max-h-[52vh] overflow-y-auto">
